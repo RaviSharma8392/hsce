@@ -1,0 +1,15 @@
+{
+  "name": "hsce-college",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Haryana Shakti College of Education multi-app project",
+  "scripts": {
+    "install:all": "npm install --prefix user && npm install --prefix admin",
+    "dev:user": "npm --prefix user run dev",
+    "dev:admin": "npm --prefix admin run dev",
+    "build:user": "npm --prefix user run build",
+    "build:admin": "npm --prefix admin run build",
+    "lint:user": "npm --prefix user run lint",
+    "lint:admin": "npm --prefix admin run lint"
+  }
+}
