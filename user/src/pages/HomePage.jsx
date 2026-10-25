@@ -14,6 +14,7 @@ import ProgrammeHighlights from "../components/common/ProgrammeHighlights";
 import CampusLifeSection from "../components/home/geu/CampusLifeSection";
 import { WhyChooseSection } from "../components/home/HomepageFeatureSections";
 import { AffiliationTrustBarWidget } from "../components/home/AffiliationTrustBarWidget";
+import { UniversityAffiliationSection } from "../components/home/UniversityAffiliationSection";
 import HomepagePopup from "../components/home/HomepagePopup";
 
 export default function HomePage() {
@@ -91,7 +92,10 @@ export default function HomePage() {
         {/* 3. Leadership & Institution: Chairman's Desk (Left), Principal's Desk (Right) & About HSCE (Below) */}
         <PrincipalMessageSection />
 
-        {/* 4. Campus Notices & Events Highlights */}
+        {/* 4. Affiliating University (GGSIPU): Campus, Statutory Profile, Vision, Mission & Quality Policy */}
+        <UniversityAffiliationSection />
+
+        {/* 5. Campus Notices & Events Highlights */}
         <NoticeEventsSection />
 
         {/* 5. B.Ed. Programme Overview & Highlights */}
