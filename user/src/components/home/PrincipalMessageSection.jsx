@@ -143,8 +143,7 @@ export function PrincipalMessageSection() {
     collegeInfo.chairmanMessage.trim().length > 0
       ? collegeInfo.chairmanMessage.trim()
       : content.chairmanQuote;
-  const chairmanImage =
-    collegeInfo.chairmanImage || imageData.chairmanPortrait;
+  const chairmanImage = collegeInfo.chairmanImage || imageData.chairmanPortrait;
 
   // Principal Details
   const principalName = isHindi
@@ -165,10 +164,12 @@ export function PrincipalMessageSection() {
   const factIcons = [Calendar, GraduationCap, MapPin];
 
   return (
-    <section className="overflow-hidden bg-[#fafcff] py-12 font-sans sm:py-16 lg:py-20">
+    <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(247,201,72,0.13),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f3f6fb_100%)] py-12 font-sans sm:py-16 lg:py-20">
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,75,140,0.02),transparent_18%,transparent_82%,rgba(200,16,46,0.02))]" />
+
       <Container>
         {/* Top Grid: Left Side Chairman's Desk, Right Side Principal's Desk */}
-        <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2 lg:gap-8 xl:gap-10">
+        <div className="relative grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2 lg:gap-8 xl:gap-10">
           {/* LEFT SIDE: Chairman's Desk */}
           <div className="flex min-w-0 flex-col">
             <SectionHeading
@@ -179,7 +180,7 @@ export function PrincipalMessageSection() {
               linkLabel={content.chairmanCTA}
             />
 
-            <article className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:shadow-lg hover:border-slate-300">
+            <article className="flex flex-1 flex-col overflow-hidden rounded-[26px] border border-slate-200/90 bg-white shadow-[0_18px_38px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(15,23,42,0.12)]">
               {/* Message Header */}
               <div className="flex min-h-12 items-center justify-between bg-gradient-to-r from-[#0a4b8c] to-[#083a6f] px-6 py-3.5">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-white">
@@ -199,8 +200,7 @@ export function PrincipalMessageSection() {
                     className="h-full w-full object-cover object-top transition-transform duration-500 hover:scale-105"
                     onError={(event) => {
                       event.currentTarget.onerror = null;
-                      event.currentTarget.src =
-                        imageFallbacks.chairmanPortrait;
+                      event.currentTarget.src = imageFallbacks.chairmanPortrait;
                     }}
                   />
                 </div>
@@ -260,7 +260,7 @@ export function PrincipalMessageSection() {
               linkLabel={content.principalCTA}
             />
 
-            <article className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:shadow-lg hover:border-slate-300">
+            <article className="flex flex-1 flex-col overflow-hidden rounded-[26px] border border-slate-200/90 bg-white shadow-[0_18px_38px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(15,23,42,0.12)]">
               {/* Message Header */}
               <div className="flex min-h-12 items-center justify-between bg-gradient-to-r from-[#0a4b8c] to-[#083a6f] px-6 py-3.5">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-white">
@@ -373,14 +373,18 @@ export function PrincipalMessageSection() {
                       to="/course/bed"
                       className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#0a4b8c]">
                       <GraduationCap size={16} className="text-[#0a4b8c]" />
-                      <span>{isHindi ? "बी.एड. पाठ्यक्रम" : "B.Ed. Curriculum"}</span>
+                      <span>
+                        {isHindi ? "बी.एड. पाठ्यक्रम" : "B.Ed. Curriculum"}
+                      </span>
                     </Link>
 
                     <Link
                       to="/admissions"
                       className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#0a4b8c]">
                       <Award size={16} className="text-[#0a4b8c]" />
-                      <span>{isHindi ? "प्रवेश विवरण" : "Admissions Guide"}</span>
+                      <span>
+                        {isHindi ? "प्रवेश विवरण" : "Admissions Guide"}
+                      </span>
                     </Link>
                   </div>
                 </div>
@@ -389,7 +393,8 @@ export function PrincipalMessageSection() {
                 <div className="lg:col-span-5">
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     {content.facts.map((fact, index) => {
-                      const Icon = factIcons[index % factIcons.length] || Sparkles;
+                      const Icon =
+                        factIcons[index % factIcons.length] || Sparkles;
 
                       return (
                         <div

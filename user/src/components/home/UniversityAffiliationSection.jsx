@@ -1,16 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import {
   ExternalLink,
   Award,
-  Eye,
-  Target,
   ShieldCheck,
   Building2,
+  Eye,
+  Target,
   CheckCircle2,
-  Sparkles,
 } from "lucide-react";
-
 import { Container } from "../common/Container";
 import { useLanguage } from "../../context/LanguageContext";
 import { imageData } from "../../data/imagesData";
@@ -19,7 +16,8 @@ export function UniversityAffiliationSection() {
   const { isHindi } = useLanguage();
 
   const universityData = {
-    campusImage: "/assets/affiliations/ggsipu-campus.png",
+    campusImage:
+      "https://res.cloudinary.com/dljt6vgkk/image/upload/v1792904388/e1e2e5a9-77dd-4b2e-9142-acaeaff75b79.png",
     logoUrl: imageData.ggsipuLogo || "/assets/affiliations/ggsipu-logo.png",
     portalUrl: "http://www.ipu.ac.in",
 
@@ -52,21 +50,22 @@ export function UniversityAffiliationSection() {
         },
         {
           id: "quality",
-          title: "QUALITY POLICY",
+          title: "Quality Policy",
           icon: ShieldCheck,
           content:
             "Guru Gobind Singh Indraprastha University is committed to providing professional education with thrust on creativity, innovation, continuous change and motivating environment for knowledge creation and dissemination through its effective quality management system.",
         },
       ],
-      portalBtn: "Visit Official GGSIPU Portal",
-      affiliationNote: "HSCE is permanently affiliated to GGSIPU, Delhi for B.Ed. (Approved Intake: 100 Seats)",
+      portalBtn: "Visit Official GGSIPU Portal (ipu.ac.in)",
+      affiliationBadge:
+        "HSCE Affiliation Code: 147 • Approved B.Ed. Intake: 100 Seats",
     },
 
     hi: {
       eyebrow: "वैधानिक विश्वविद्यालय संबद्धता",
       titleLead: "गुरु गोबिंद सिंह",
       titleAccent: "इंद्रप्रस्थ विश्वविद्यालय (GGSIPU)",
-      badge: "दिल्ली राष्ट्रीय राजधानी क्षेत्र सरकार • यूजीसी 12B मान्यता प्राप्त",
+      badge: "दिल्ली सरकार • यूजीसी 12B मान्यता प्राप्त",
       para1:
         "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली राष्ट्रीय राजधानी क्षेत्र सरकार द्वारा गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय अधिनियम, 1998 (1999 में संशोधित) के प्रावधानों के तहत 1998 में स्थापित प्रथम विश्वविद्यालय है। यह विश्वविद्यालय यूजीसी अधिनियम की धारा 12B के अंतर्गत विश्वविद्यालय अनुदान आयोग (UGC) द्वारा मान्यता प्राप्त है।",
       para2:
@@ -91,157 +90,163 @@ export function UniversityAffiliationSection() {
         },
         {
           id: "quality",
-          title: "गुणवत्ता नीति (QUALITY POLICY)",
+          title: "गुणवत्ता नीति (Quality Policy)",
           icon: ShieldCheck,
           content:
             "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय अपनी प्रभावी गुणवत्ता प्रबंधन प्रणाली के माध्यम से ज्ञान सृजन और प्रसार हेतु रचनात्मकता, नवाचार, निरंतर परिवर्तन और प्रेरणादायक वातावरण पर बल देते हुए गुणवत्तापूर्ण व्यावसायिक शिक्षा प्रदान करने के लिए प्रतिबद्ध है।",
         },
       ],
-      portalBtn: "आधिकारिक जीजीएसआईपीयू पोर्टल देखें",
-      affiliationNote: "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन बी.एड. हेतु जीजीएसआईपीयू दिल्ली से स्थायी रूप से संबद्ध है (वार्षिक स्वीकृत सीटें: 100)",
+      portalBtn: "आधिकारिक जीजीएसआईपीयू पोर्टल (ipu.ac.in) देखें",
+      affiliationBadge:
+        "HSCE संबद्धता कोड: 147 • बी.एड. स्वीकृत वार्षिक सीटें: 100",
     },
   };
 
   const content = isHindi ? universityData.hi : universityData.en;
 
   return (
-    <section className="py-14 sm:py-16 bg-[#F8F9FA] border-y border-[#E6E9F0] relative overflow-hidden">
-      {/* Background Subtle Watermark Crest */}
-      <div
-        className="absolute -right-20 -bottom-20 w-96 h-96 opacity-[0.03] pointer-events-none select-none"
-        aria-hidden="true"
-      >
-        <img
-          src={universityData.logoUrl}
-          alt=""
-          className="w-full h-full object-contain grayscale"
-        />
-      </div>
+    <section className="relative overflow-hidden border-y border-slate-200/80 bg-[radial-gradient(circle_at_top_left,_rgba(247,201,72,0.14),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] py-12 sm:py-16 font-sans">
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,75,140,0.025),transparent_18%,transparent_82%,rgba(200,16,46,0.025))]" />
 
       <Container>
-        {/* Top Header Eyebrow */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[#194178] text-[11px] font-bold uppercase tracking-wider font-poppins">
-            <Building2 size={13} className="text-[#c8102e]" />
-            <span>{content.eyebrow}</span>
+        <div className="relative mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div className="max-w-3xl">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#0a4b8c]">
+              {content.eyebrow}
+            </p>
+            <h2 className="text-2xl font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl lg:text-[32px]">
+              {content.titleLead}{" "}
+              <span className="font-extrabold text-[#0a4b8c]">
+                {content.titleAccent}
+              </span>
+            </h2>
+            <div className="mt-3 h-0.5 w-12 rounded-full bg-[#FBDD23]" />
           </div>
 
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-2xs">
-            <ShieldCheck size={14} className="text-emerald-600" />
-            <span>{content.badge}</span>
-          </span>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0a4b8c]/15 bg-[#0a4b8c]/5 px-3.5 py-1.5 text-xs font-semibold text-[#0a4b8c] shadow-xs">
+              <ShieldCheck size={14} className="shrink-0 text-[#0a4b8c]" />
+              <span>{content.badge}</span>
+            </span>
+
+            <a
+              href={universityData.portalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 rounded-lg border border-[#0a4b8c]/20 bg-[#0a4b8c] px-4 py-2 text-xs font-bold text-white shadow-[0_12px_24px_rgba(10,75,140,0.18)] transition hover:bg-[#083a6f]">
+              <span>{content.portalBtn}</span>
+              <ExternalLink
+                size={13}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
+            </a>
+          </div>
         </div>
 
-        {/* Main 2-Column Content: Left Campus Photo + Right University Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-8">
-          {/* Left: University Campus Photo */}
+        <div className="relative mb-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <div className="relative group rounded-2xl overflow-hidden shadow-md border-2 border-white bg-white">
+            <div className="group relative h-full overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_38px_rgba(15,23,42,0.08)]">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#FBDD23] via-[#0a4b8c] to-[#c8102e]" />
+
               <img
                 src={universityData.campusImage}
                 alt="Guru Gobind Singh Indraprastha University (GGSIPU) Campus"
-                className="w-full h-auto max-h-[340px] sm:max-h-[380px] object-cover transition-transform duration-500 group-hover:scale-105"
+                className="h-full max-h-[320px] w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:max-h-[360px]"
                 loading="lazy"
               />
 
-              {/* Gradient Scrim & Identification Ribbon */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/10 flex flex-col justify-end p-4 sm:p-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white p-1 shrink-0 shadow-md">
-                    <img
-                      src={universityData.logoUrl}
-                      alt="GGSIPU Crest"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div className="text-white">
-                    <p className="font-poppins font-bold text-xs sm:text-sm drop-shadow-sm leading-tight">
-                      GGS Indraprastha University
-                    </p>
-                    <p className="text-[11px] text-white/80 font-sans">
-                      Sector 16-C, Dwarka, New Delhi – 110078
-                    </p>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between border-t border-slate-100 bg-[#f4f7fb] p-3 text-xs font-medium text-slate-600">
+                <span className="flex items-center gap-1.5">
+                  <Building2 size={14} className="text-[#c8102e]" />
+                  <span>Main Campus: Dwarka, New Delhi</span>
+                </span>
+                <span className="rounded-full border border-[#0a4b8c]/20 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#0a4b8c]">
+                  Estd. 1998
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Right: Statutory Establishment & Objective */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-serif leading-tight text-[#194178] mb-4">
-              {content.titleLead}{" "}
-              <span className="text-[#c8102e]">{content.titleAccent}</span>
-            </h2>
+          <div className="flex flex-col justify-center gap-4 lg:col-span-7">
+            <div className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)] sm:p-6">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="h-10 w-10 rounded-xl bg-[#0a4b8c]/10 p-2 text-[#0a4b8c]">
+                  <Award size={18} className="h-full w-full" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0a4b8c]">
+                  Institutional Legacy
+                </span>
+              </div>
 
-            <div className="space-y-3.5 text-xs sm:text-sm text-slate-700 font-sans leading-relaxed text-justify">
-              <p className="bg-white/80 p-3.5 rounded-xl border border-gray-200/80 shadow-2xs">
-                {content.para1}
-              </p>
-              <p>
-                {content.para2}
-              </p>
+              <div className="space-y-4 text-justify text-sm leading-relaxed text-slate-700 sm:text-base">
+                <p className="rounded-xl bg-[#f7faff] p-4 text-slate-700 ring-1 ring-slate-200/80">
+                  {content.para1}
+                </p>
+                <p>{content.para2}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Connecting Broad-Purpose Statement */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200/90 shadow-2xs mb-8 text-xs sm:text-sm text-slate-700 font-sans leading-relaxed text-justify">
+        <div className="mb-10 rounded-[24px] border border-slate-200/80 bg-white p-5 text-justify text-sm leading-relaxed text-slate-700 shadow-[0_12px_25px_rgba(15,23,42,0.04)] sm:p-6 sm:text-base">
           <p>{content.para3}</p>
         </div>
 
-        {/* 3 Synchronized Color Cards: Vision, Mission & Quality Policy */}
-        <div className="space-y-5">
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              label: "Founded",
+              value: "1998",
+              tone: "bg-[#0a4b8c] text-white",
+            },
+            {
+              label: "UGC Status",
+              value: "12B",
+              tone: "bg-[#FBDD23] text-[#0c1b33]",
+            },
+            {
+              label: "Affiliation",
+              value: "HSCE • 147",
+              tone: "bg-[#c8102e] text-white",
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className={`rounded-2xl border border-slate-200/80 p-4 shadow-sm ${stat.tone}`}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">
+                {stat.label}
+              </p>
+              <p className="mt-2 text-2xl font-extrabold tracking-tight">
+                {stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-3">
           {content.pillars.map((pillar) => {
             const Icon = pillar.icon;
             return (
               <div
                 key={pillar.id}
-                className="rounded-2xl overflow-hidden border border-[#E6E9F0] bg-white shadow-xs transition hover:shadow-md"
-              >
-                {/* Synced Header Bar: Rich Collegiate Crimson with Gold Accent Indicator */}
-                <div className="bg-gradient-to-r from-[#c8102e] via-[#b50e29] to-[#990c22] text-white px-5 sm:px-6 py-3 flex items-center justify-between gap-3 border-b-2 border-[#FBDD23]">
+                className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
+                <div className="flex items-center justify-between gap-3 border-b-2 border-[#FBDD23] bg-gradient-to-r from-[#0a4b8c] to-[#123f7b] px-5 py-3 text-white sm:px-6">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0 text-[#FBDD23]">
-                      <Icon size={16} />
-                    </div>
-                    <h3 className="font-poppins font-bold text-sm sm:text-base tracking-wider uppercase">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
+                      <Icon size={16} className="shrink-0 text-[#FBDD23]" />
+                    </span>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white sm:text-base">
                       {pillar.title}
                     </h3>
                   </div>
-
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-amber-200 bg-black/20 px-2.5 py-0.5 rounded-full hidden sm:inline-block">
-                    GGSIPU Core Directive
-                  </span>
                 </div>
 
-                {/* Body Content */}
-                <div className="p-5 sm:p-6 text-xs sm:text-sm text-slate-700 font-sans leading-relaxed text-justify">
+                <div className="bg-white p-5 text-justify text-sm leading-relaxed text-slate-700 sm:p-6 sm:text-[15px]">
                   <p>{pillar.content}</p>
                 </div>
               </div>
             );
           })}
-        </div>
-
-        {/* Bottom Institutional Verification Footnote & Portal Redirect */}
-        <div className="mt-8 pt-5 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
-          <div className="flex items-center gap-2 text-center sm:text-left">
-            <Sparkles size={16} className="text-[#c8102e] shrink-0" />
-            <p className="font-medium text-slate-700">
-              {content.affiliationNote}
-            </p>
-          </div>
-
-          <a
-            href={universityData.portalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#194178] hover:bg-[#122e56] text-white font-poppins font-semibold text-xs transition shadow-2xs shrink-0"
-          >
-            <span>{content.portalBtn}</span>
-            <ExternalLink size={13} />
-          </a>
         </div>
       </Container>
     </section>

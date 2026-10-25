@@ -23,7 +23,9 @@ export function AdmissionCTA() {
     collegeInfo.phone || admissionModalData.helplinePhoneFallback;
 
   return (
-    <section className="relative isolate w-full overflow-hidden bg-gradient-to-br from-[#0a4b8c] via-[#094179] to-[#062c55] py-14 sm:py-16 lg:py-20 font-sans text-white border-y border-blue-900/50">
+    <section
+      style={{ backgroundColor: "#0a4b8c" }}
+      className="relative isolate w-full overflow-hidden bg-gradient-to-br from-[#0a4b8c] via-[#094179] to-[#062c55] py-14 sm:py-16 lg:py-20 font-sans text-white border-y border-blue-900/50">
       {/* Decorative wave background synced with CampusLifeSection */}
       <div
         aria-hidden="true"

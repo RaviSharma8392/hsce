@@ -3,9 +3,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["'Open Sans'", 'sans-serif'],
-        heading: ["'Poppins'", 'sans-serif'],
-        poppins: ["'Poppins'", 'sans-serif'],
+        sans: ["'Manrope'", "'Noto Sans Devanagari'", 'sans-serif'],
+        serif: ["'Manrope'", "'Noto Sans Devanagari'", 'serif'],
+        heading: ["'Manrope'", "'Noto Sans Devanagari'", 'sans-serif'],
+        poppins: ["'Manrope'", "'Noto Sans Devanagari'", 'sans-serif'],
       },
       colors: {
         brand: {

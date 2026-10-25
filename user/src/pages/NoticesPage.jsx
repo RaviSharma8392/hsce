@@ -40,8 +40,8 @@ import { notices as seedNotices } from "../data/siteData";
 import { imageData } from "../data/imagesData";
 
 import { displayDate } from "../hooks/usePublishedRecords";
-
 import { useLanguage } from "../context/LanguageContext";
+import AdobePdfIcon from "../components/common/AdobePdfIcon";
 
 const PAGE_SIZE = 10;
 const fallbackNotices = Array.isArray(seedNotices) ? seedNotices : [];
@@ -132,7 +132,6 @@ function SectionHeading({ eyebrow, title, subtitle }) {
 
 function NoticeRow({ notice, isHindi }) {
   const title = isHindi && notice.hiTitle ? notice.hiTitle : notice.title;
-
   const description =
     isHindi && notice.hiDescription ? notice.hiDescription : notice.description;
 
@@ -143,77 +142,83 @@ function NoticeRow({ notice, isHindi }) {
         ? CATEGORY_HI[notice.category] || notice.category
         : notice.category;
 
-  const date = displayDate(notice.publicationDate || notice.publishedAt);
+  const rawDate = notice.publicationDate || notice.publishedAt;
+  let monthStr = "OCT";
+  let dayStr = "24";
+
+  if (rawDate) {
+    let d = null;
+    if (typeof rawDate?.toDate === "function") d = rawDate.toDate();
+    else if (typeof rawDate === "string" || typeof rawDate === "number")
+      d = new Date(rawDate);
+    if (d && !Number.isNaN(d.getTime())) {
+      dayStr = String(d.getDate()).padStart(2, "0");
+      monthStr = d.toLocaleString("en", { month: "short" }).toUpperCase();
+    }
+  }
 
   const pdfUrl = notice.pdfUrl && notice.pdfUrl !== "#" ? notice.pdfUrl : "";
   const NoticeLink = pdfUrl ? "a" : "div";
 
   return (
-    <article className="group rounded-xl border border-gray-200 bg-white transition duration-200 hover:border-[#363991]/30 hover:shadow-md hover:shadow-[#363991]/[0.05]">
-      <div className="flex items-start gap-3 p-4 sm:items-center sm:gap-4 sm:p-5">
+    <article className="group overflow-hidden rounded-xl border border-slate-200/90 bg-white transition duration-200 hover:border-[#0a4b8c]/50 hover:shadow-md">
+      <div className="flex min-h-[74px] sm:min-h-[82px] items-stretch">
+        {/* SOLID YELLOW DATE BLOCK (Matching exact screenshot design) */}
+        <div className="flex w-[72px] sm:w-[86px] shrink-0 flex-col items-center justify-center bg-[#FBDD23] px-2 py-3 text-gray-950 font-poppins transition-colors group-hover:bg-[#f6d616]">
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider leading-none text-gray-950">
+            {monthStr}
+          </span>
+          <span className="mt-1 text-xl sm:text-2xl font-extrabold leading-none tracking-tight text-gray-950">
+            {dayStr}
+          </span>
+        </div>
+
+        {/* NOTICE DETAILS */}
         <NoticeLink
           {...(pdfUrl
             ? { href: pdfUrl, target: "_blank", rel: "noopener noreferrer" }
             : {})}
-          aria-label={pdfUrl ? title : undefined}
-          className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#363991]/[0.06] text-[#363991] transition-colors group-hover:bg-[#363991]/10">
-            <PdfIcon compact />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              {categoryLabel && (
-                <span className="inline-flex max-w-full items-center rounded-md bg-[#363991]/[0.06] px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#363991] sm:text-[11px]">
-                  {categoryLabel}
-                </span>
-              )}
-
-              {notice.isPinned && (
-                <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-[10px] font-semibold uppercase text-amber-800">
-                  {isHindi ? "महत्वपूर्ण" : "Important"}
-                </span>
-              )}
-
-              {date && (
-                <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                  <CalendarDays size={13} />
-
-                  {date}
-                </span>
-              )}
-            </div>
-
-            <h3 className="text-sm font-semibold leading-6 text-gray-900 transition-colors group-hover:text-[#363991] sm:text-base">
-              {title || (isHindi ? "शीर्षक उपलब्ध नहीं है" : "Untitled notice")}
-            </h3>
-
-            {description && (
-              <p className="mt-1 line-clamp-2 text-xs leading-5 text-gray-500 sm:text-sm">
-                {description}
-              </p>
+          className="flex min-w-0 flex-1 flex-col justify-center px-4 py-3 sm:px-5">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            {categoryLabel && (
+              <span className="inline-flex items-center rounded bg-[#0a4b8c]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#0a4b8c]">
+                {categoryLabel}
+              </span>
             )}
-
-            {notice.referenceNumber && (
-              <p className="mt-2 text-[11px] text-gray-400">
-                {isHindi ? "संदर्भ संख्या:" : "Reference:"}{" "}
-                {notice.referenceNumber}
-              </p>
+            {notice.isPinned && (
+              <span className="inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-800">
+                {isHindi ? "महत्वपूर्ण" : "Important"}
+              </span>
             )}
           </div>
+
+          <h3 className="text-sm font-bold leading-snug text-gray-900 transition-colors group-hover:text-[#0a4b8c] sm:text-base line-clamp-2">
+            {title || (isHindi ? "शीर्षक उपलब्ध नहीं है" : "Untitled notice")}
+          </h3>
+
+          {description && (
+            <p className="mt-1 line-clamp-2 text-xs leading-5 text-gray-500 sm:text-sm">
+              {description}
+            </p>
+          )}
         </NoticeLink>
 
-        <div className="flex shrink-0 flex-col items-center gap-1 self-center sm:flex-row sm:gap-2">
+        {/* RED ADOBE PDF ICON */}
+        <div className="flex shrink-0 items-center px-4 sm:px-5">
           {pdfUrl ? (
             <a
               href={pdfUrl}
-              download
-              title={isHindi ? "पीडीएफ डाउनलोड करें" : "Download PDF"}
-              aria-label={`${isHindi ? "पीडीएफ डाउनलोड करें" : "Download PDF"}: ${title}`}
-              className="hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-[#363991]/20 hover:bg-[#363991]/[0.05] hover:text-[#363991] sm:flex">
-              <Download size={17} />
+              target="_blank"
+              rel="noopener noreferrer"
+              title={isHindi ? "पीडीएफ खोलें" : "Open PDF"}
+              className="flex items-center justify-center p-1.5 transition-transform duration-200 group-hover:scale-110">
+              <AdobePdfIcon size={28} className="drop-shadow-xs" />
             </a>
-          ) : null}
+          ) : (
+            <div className="flex items-center justify-center p-1.5 transition-transform duration-200 group-hover:scale-110">
+              <AdobePdfIcon size={28} className="drop-shadow-xs" />
+            </div>
+          )}
         </div>
       </div>
     </article>

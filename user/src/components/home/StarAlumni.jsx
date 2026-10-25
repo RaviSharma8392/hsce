@@ -77,9 +77,25 @@ const StarAlumni = () => {
             </div>
 
             {/* Quote Text */}
-            <blockquote className="relative z-10 text-base sm:text-lg leading-relaxed text-blue-50/95 font-normal mb-8">
+            <blockquote className="relative z-10 text-base sm:text-lg leading-relaxed text-blue-50/95 font-normal mb-6">
               &ldquo;{student.quote}&rdquo;
             </blockquote>
+
+            {/* Verified Student Achievement Badges (SGT Style Colorful Pills) */}
+            <div className="relative z-10 mb-6 flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 text-xs font-bold text-emerald-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span>{isHindi ? "सीटेट उत्तीर्ण" : "CTET Cleared"}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-400/30 px-3 py-1 text-xs font-bold text-amber-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                <span>{isHindi ? "16-सप्ताह इंटर्नशिप पूर्ण" : "16-Wk Internship"}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-400/20 border border-blue-300/30 px-3 py-1 text-xs font-bold text-blue-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#FBDD23]" />
+                <span>{isHindi ? "शिक्षक प्लेसमेंट तत्पर" : "Placement Ready"}</span>
+              </span>
+            </div>
 
             {/* Student Details */}
             <div className="relative z-10 border-t border-white/15 pt-5 flex items-center justify-between">

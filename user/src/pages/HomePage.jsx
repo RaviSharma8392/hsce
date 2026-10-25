@@ -5,7 +5,6 @@ import { AdmissionCTA } from "../components/home/AdmissionCTA";
 import { CampusGallerySection } from "../components/home/CampusGallerySection";
 import { PrincipalMessageSection } from "../components/home/PrincipalMessageSection";
 import { FaqWidget } from "../components/home/FaqWidget";
-import { HighlightFeature } from "../components/home/HighlightFeature";
 import StarAlumni from "../components/home/StarAlumni";
 import { Helmet } from "react-helmet-async";
 import { useLanguage } from "../context/LanguageContext";
@@ -15,6 +14,8 @@ import CampusLifeSection from "../components/home/geu/CampusLifeSection";
 import { WhyChooseSection } from "../components/home/HomepageFeatureSections";
 import { AffiliationTrustBarWidget } from "../components/home/AffiliationTrustBarWidget";
 import { UniversityAffiliationSection } from "../components/home/UniversityAffiliationSection";
+import { LatestUpdatesMarquee } from "../components/home/LatestUpdatesMarquee";
+import { SgtStatsBentoSection } from "../components/home/SgtStatsBentoSection";
 import HomepagePopup from "../components/home/HomepagePopup";
 
 export default function HomePage() {
@@ -85,41 +86,43 @@ export default function HomePage() {
       <main ref={homeRef} className="home-page bg-white text-[#222222]">
         {/* 1. Hero Banner */}
         <HeroBanner />
+        {/* 3. SGT-Style Live Announcement Marquee Bar */}
+        <LatestUpdatesMarquee />
 
-        {/* 2. Statutory Approvals & Accreditations (NCTE & GGSIPU) */}
-        <AffiliationTrustBarWidget />
-
-        {/* 3. Leadership & Institution: Chairman's Desk (Left), Principal's Desk (Right) & About HSCE (Below) */}
-        <PrincipalMessageSection />
-
-        {/* 4. Affiliating University (GGSIPU): Campus, Statutory Profile, Vision, Mission & Quality Policy */}
+        {/* 2. Affiliating University (GGSIPU): Campus, Statutory Profile, Vision, Mission & Quality Policy */}
         <UniversityAffiliationSection />
 
-        {/* 5. Campus Notices & Events Highlights */}
-        <NoticeEventsSection />
+        {/* 4. Statutory Approvals & Accreditations (NCTE & GGSIPU) */}
+        <AffiliationTrustBarWidget />
 
-        {/* 5. B.Ed. Programme Overview & Highlights */}
+        {/* 5. SGT-Style Colorful Bento Statistics & Impact Grid */}
+        <SgtStatsBentoSection />
+
+        {/* 6. B.Ed. Programme (2-Year Regular Degree - 3 Step Pathway) */}
         <ProgrammeHighlights />
 
-        {/* 6. Why Choose HSCE (6 Institutional Pillars) */}
+        {/* 7. Leadership & Institution: Chairman's Desk (Left), Principal's Desk (Right) & About HSCE (Below) */}
+        <PrincipalMessageSection />
+
+        {/* 8. Campus Notices & Events Highlights */}
+        <NoticeEventsSection />
+
+        {/* 9. Why Choose HSCE (6 Colorful Institutional Pillars) */}
         <WhyChooseSection />
 
-        {/* 7. Academic Infrastructure & Teacher Preparation */}
-        <HighlightFeature />
-
-        {/* 8. Campus Moments & Facilities Gallery */}
-        <CampusGallerySection />
-
-        {/* 9. Campus Life Beyond the Classroom (Immersive Navy Feature) */}
+        {/* 10. Campus Life Beyond the Classroom (Immersive Navy Feature) */}
         <CampusLifeSection />
 
-        {/* 10. Pupil-Teacher Voice & Student Spotlight */}
+        {/* 11. Campus Moments & Facilities Gallery */}
+        <CampusGallerySection />
+
+        {/* 12. Pupil-Teacher Voice & Student Spotlight */}
         <StarAlumni />
 
-        {/* 11. Admission Call to Action & Helplines */}
+        {/* 13. Admission Call to Action & Helplines */}
         <AdmissionCTA />
 
-        {/* 12. Frequently Asked Questions */}
+        {/* 14. Frequently Asked Questions */}
         <FaqWidget />
       </main>
       <HomepagePopup />

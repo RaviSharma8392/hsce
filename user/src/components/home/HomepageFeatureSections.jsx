@@ -185,35 +185,92 @@ export function WhyChooseSection() {
   const { isHindi } = useLanguage();
   const content = isHindi ? BENEFITS.hi : BENEFITS.en;
 
+  const colorThemes = [
+    {
+      border: "border-blue-200/90 hover:border-blue-500",
+      bg: "bg-gradient-to-br from-blue-50/70 via-white to-white",
+      iconBg: "bg-[#0a4b8c] text-[#FBDD23]",
+      badge: "bg-blue-100 text-[#0a4b8c]",
+      accent: "bg-[#0a4b8c]",
+      hoverText: "group-hover:text-[#0a4b8c]",
+    },
+    {
+      border: "border-emerald-200/90 hover:border-emerald-500",
+      bg: "bg-gradient-to-br from-emerald-50/70 via-white to-white",
+      iconBg: "bg-emerald-600 text-white",
+      badge: "bg-emerald-100 text-emerald-800",
+      accent: "bg-emerald-500",
+      hoverText: "group-hover:text-emerald-800",
+    },
+    {
+      border: "border-amber-200/90 hover:border-amber-500",
+      bg: "bg-gradient-to-br from-amber-50/70 via-white to-white",
+      iconBg: "bg-amber-500 text-gray-950",
+      badge: "bg-amber-100 text-amber-900",
+      accent: "bg-amber-500",
+      hoverText: "group-hover:text-amber-800",
+    },
+    {
+      border: "border-indigo-200/90 hover:border-indigo-500",
+      bg: "bg-gradient-to-br from-indigo-50/70 via-white to-white",
+      iconBg: "bg-indigo-600 text-white",
+      badge: "bg-indigo-100 text-indigo-900",
+      accent: "bg-indigo-600",
+      hoverText: "group-hover:text-indigo-800",
+    },
+    {
+      border: "border-rose-200/90 hover:border-rose-500",
+      bg: "bg-gradient-to-br from-rose-50/70 via-white to-white",
+      iconBg: "bg-[#c8102e] text-white",
+      badge: "bg-rose-100 text-rose-900",
+      accent: "bg-[#c8102e]",
+      hoverText: "group-hover:text-[#c8102e]",
+    },
+    {
+      border: "border-cyan-200/90 hover:border-cyan-500",
+      bg: "bg-gradient-to-br from-cyan-50/70 via-white to-white",
+      iconBg: "bg-cyan-600 text-white",
+      badge: "bg-cyan-100 text-cyan-900",
+      accent: "bg-cyan-500",
+      hoverText: "group-hover:text-cyan-800",
+    },
+  ];
+
   return (
-    <section className="bg-white py-12 font-sans sm:py-16 lg:py-20 border-t border-slate-200/80">
+    <section className="bg-gradient-to-b from-slate-50/60 to-white py-14 font-sans sm:py-16 lg:py-20 border-t border-slate-200/80">
       <Container>
-        <SectionHeading
-          title={content.title}
-          description={content.description}
-        />
+        <div className="mb-8 sm:mb-10 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+          <SectionHeading
+            title={content.title}
+            description={content.description}
+          />
+        </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {content.items.map((item, index) => {
             const Icon = item.icon;
+            const theme = colorThemes[index % colorThemes.length];
 
             return (
               <article
                 key={item.title}
-                className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-[#0a4b8c]/50 hover:shadow-lg">
+                className={`group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border ${theme.border} ${theme.bg} p-6 shadow-xs transition-all duration-300 hover:-translate-y-2 hover:shadow-xl`}>
+                {/* Top colored accent indicator line */}
+                <div className={`absolute top-0 inset-x-0 h-1 ${theme.accent}`} />
+
                 <div>
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0a4b8c]/10 text-[#0a4b8c] transition-colors group-hover:bg-[#0a4b8c] group-hover:text-[#FBDD23] shadow-xs">
-                      <Icon aria-hidden="true" size={22} strokeWidth={2} />
+                    <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${theme.iconBg} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
+                      <Icon aria-hidden="true" size={22} strokeWidth={2.2} />
                     </span>
 
-                    <span className="text-xs font-bold tabular-nums text-[#0a4b8c] bg-blue-50 px-2.5 py-1 rounded-full">
+                    <span className={`text-xs font-bold tabular-nums ${theme.badge} px-3 py-1 rounded-full uppercase tracking-wider`}>
                       {isHindi ? "स्तंभ " : "Pillar "}
                       {String(index + 1).padStart(2, "0")}
                     </span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold leading-snug text-gray-900 transition-colors group-hover:text-[#0a4b8c]">
+                  <h3 className={`text-base sm:text-lg font-bold leading-snug text-gray-900 transition-colors ${theme.hoverText}`}>
                     {item.title}
                   </h3>
 
@@ -222,9 +279,14 @@ export function WhyChooseSection() {
                   </p>
                 </div>
 
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs font-bold text-[#0a4b8c] opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span>{isHindi ? "विस्तार से जानें" : "Explore feature"}</span>
-                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                <div className="mt-6 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-500 group-hover:text-gray-900 transition-colors">
+                    {isHindi ? "शिक्षण उत्कृष्टता" : "Academic Rigor"}
+                  </span>
+                  <div className={`flex items-center gap-1 text-xs font-bold ${theme.hoverText}`}>
+                    <span>{isHindi ? "विवरण देखें" : "Explore"}</span>
+                    <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                  </div>
                 </div>
               </article>
             );

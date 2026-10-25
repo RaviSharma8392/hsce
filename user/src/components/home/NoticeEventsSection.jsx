@@ -23,6 +23,7 @@ import { Container } from "../common/Container";
 import { useLanguage } from "../../context/LanguageContext";
 import { fallbackWidgetNotices } from "../../data/homeWidgetData";
 import { imageData } from "../../data/imagesData";
+import AdobePdfIcon from "../common/AdobePdfIcon";
 
 const THEME_BLUE = "#0a4b8c";
 const THEME_YELLOW = "#FBDD23";
@@ -277,132 +278,122 @@ export function NoticeEventsSection() {
               )}
             />
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-shadow hover:shadow-md">
-              <div className="h-1.5 bg-gradient-to-r from-[#0a4b8c] via-[#094179] to-[#FBDD23]" />
+            {displayedNotices.length > 0 ? (
+              <div className="space-y-3 sm:space-y-3.5">
+                {displayedNotices.map((notice) => {
+                  const date = notice.badgeDate;
+                  const isPdf = Boolean(
+                    notice.pdfUrl && notice.pdfUrl !== "#",
+                  );
 
-              {displayedNotices.length > 0 ? (
-                <div className="divide-y divide-gray-100">
-                  {displayedNotices.map((notice) => {
-                    const date = notice.badgeDate;
-                    const isPdf = Boolean(
-                      notice.pdfUrl && notice.pdfUrl !== "#",
-                    );
+                  const isNew = isNoticeNew(date?.timestamp);
 
-                    const isNew = isNoticeNew(date?.timestamp);
+                  const Wrapper = isPdf ? "a" : Link;
 
-                    const Wrapper = isPdf ? "a" : Link;
+                  const linkProps = isPdf
+                    ? {
+                        href: notice.pdfUrl,
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                      }
+                    : {
+                        to: "/notices",
+                      };
 
-                    const linkProps = isPdf
-                      ? {
-                          href: notice.pdfUrl,
-                          target: "_blank",
-                          rel: "noopener noreferrer",
-                        }
-                      : {
-                          to: "/notices",
-                        };
+                  // Month and Day formatting matching screenshot (e.g. DEC 25, NOV 24, NOV 08, OCT 26)
+                  const monthDisplay = date?.valid && date.month ? date.month : "OCT";
+                  const dayDisplay = date?.valid && date.day ? date.day : "24";
 
-                    return (
-                      <Wrapper
-                        key={notice.id || notice.slug || notice.title}
-                        {...linkProps}
-                        className="group flex min-h-[92px] items-stretch transition-colors duration-200 hover:bg-[#f8fbff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0a4b8c]">
-                        {/* Date / document */}
-                        <div className="flex w-[68px] shrink-0 flex-col items-center justify-center border-r border-gray-100 bg-[#f7f9fc] px-2 transition-colors group-hover:bg-[#f0f5fb] sm:w-[76px]">
-                          {date?.valid ? (
-                            <>
-                              <span className="text-xl font-bold leading-none text-[#0a4b8c]">
-                                {date.day}
-                              </span>
-                              <span className="mt-1 text-[10px] font-semibold tracking-wide text-gray-500">
-                                {date.month}
-                              </span>
-                              <span className="mt-0.5 text-[10px] text-gray-400">
-                                {date.year}
-                              </span>
-                            </>
-                          ) : (
-                            <PdfIcon />
+                  return (
+                    <Wrapper
+                      key={notice.id || notice.slug || notice.title}
+                      {...linkProps}
+                      className="group flex min-h-[72px] sm:min-h-[78px] items-stretch overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-[#0a4b8c]/50">
+                      {/* SOLID YELLOW DATE BLOCK (Full height on left edge, exactly as in image) */}
+                      <div className="flex w-[70px] sm:w-[84px] shrink-0 flex-col items-center justify-center bg-[#FBDD23] px-2 py-3 text-gray-950 font-poppins transition-colors group-hover:bg-[#f6d616]">
+                        <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider leading-none text-gray-950">
+                          {monthDisplay}
+                        </span>
+                        <span className="mt-1 text-xl sm:text-2xl font-extrabold leading-none tracking-tight text-gray-950">
+                          {dayDisplay}
+                        </span>
+                      </div>
+
+                      {/* NOTICE TITLE & BADGES */}
+                      <div className="flex min-w-0 flex-1 flex-col justify-center px-4 py-3 sm:px-5">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          {isNew && (
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-red-100 text-red-700">
+                              {isHindi ? "नई सूचना" : "NEW"}
+                            </span>
+                          )}
+
+                          {notice.isPinned && (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[#0a4b8c] bg-blue-50 px-1.5 py-0.5 rounded">
+                              <Sparkles size={10} />
+                              <span>{isHindi ? "महत्वपूर्ण" : "IMPORTANT"}</span>
+                            </span>
                           )}
                         </div>
 
-                        {/* Notice text */}
-                        <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-4 sm:px-4">
-                          <div className="mb-2 flex flex-wrap items-center gap-2">
-                            {isNew && (
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-red-600">
-                                {isHindi ? "नई सूचना" : "NEW"}
-                              </span>
-                            )}
+                        <h3 className="line-clamp-2 text-sm sm:text-[15px] font-bold text-gray-900 group-hover:text-[#0a4b8c] transition-colors leading-snug">
+                          {notice.title ||
+                            (isHindi ? "कॉलेज सूचना" : "College Notice")}
+                        </h3>
+                      </div>
 
-                            {notice.isPinned && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide text-[#0a4b8c]">
-                                <Sparkles size={11} />
-                                {isHindi ? "महत्वपूर्ण" : "IMPORTANT"}
-                              </span>
-                            )}
-                          </div>
-
-                          <h3 className="line-clamp-2 text-[13px] font-medium leading-5 text-gray-800 transition-colors group-hover:text-[#0a4b8c] sm:text-sm">
-                            {notice.title ||
-                              (isHindi ? "कॉलेज सूचना" : "College Notice")}
-                          </h3>
+                      {/* RED ADOBE PDF ICON */}
+                      <div className="flex shrink-0 items-center px-3 sm:px-4">
+                        <div className="flex items-center justify-center p-1 rounded-lg transition-transform duration-200 group-hover:scale-110">
+                          <AdobePdfIcon size={26} className="drop-shadow-xs" />
                         </div>
+                      </div>
+                    </Wrapper>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-slate-200 bg-white px-5 py-12 text-center">
+                <p className="text-sm font-medium text-gray-700">
+                  {isHindi
+                    ? "अभी कोई सूचना उपलब्ध नहीं है।"
+                    : "No notices available at the moment."}
+                </p>
 
-                        {/* Open link */}
-                        <div className="flex shrink-0 items-center px-3 sm:px-4">
-                          <ArrowUpRight
-                            size={17}
-                            className="text-gray-400 transition-colors group-hover:text-[#0a4b8c]"
-                          />
-                        </div>
-                      </Wrapper>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="px-5 py-12 text-center">
-                  <p className="text-sm font-medium text-gray-700">
-                    {isHindi
-                      ? "अभी कोई सूचना उपलब्ध नहीं है।"
-                      : "No notices available at the moment."}
-                  </p>
+                <p className="mt-2 text-xs leading-5 text-gray-500">
+                  {isHindi
+                    ? "नई सूचनाएं यहां प्रकाशित की जाएंगी।"
+                    : "New college announcements will appear here."}
+                </p>
+              </div>
+            )}
 
-                  <p className="mt-2 text-xs leading-5 text-gray-500">
-                    {isHindi
-                      ? "नई सूचनाएं यहां प्रकाशित की जाएंगी।"
-                      : "New college announcements will appear here."}
-                  </p>
-                </div>
-              )}
+            {/* LOAD MORE & VIEW ALL */}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              {activeNotices.length > visibleNoticeCount ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleNoticeCount((count) =>
+                      Math.min(
+                        count + NOTICE_INCREMENT,
+                        activeNotices.length,
+                      ),
+                    )
+                  }
+                  className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3.5 py-2 text-xs font-semibold text-[#0a4b8c] hover:bg-slate-200 transition cursor-pointer">
+                  <Plus size={15} />
+                  <span>{isHindi ? "और सूचनाएं देखें" : "Load more notices"}</span>
+                </button>
+              ) : <div />}
 
-              {/* LOAD MORE */}
-              {activeNotices.length > visibleNoticeCount && (
-                <div className="border-t border-gray-100 px-4 py-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setVisibleNoticeCount((count) =>
-                        Math.min(
-                          count + NOTICE_INCREMENT,
-                          activeNotices.length,
-                        ),
-                      )
-                    }
-                    className="mx-auto flex items-center gap-2 rounded-md px-3 py-2 text-xs font-semibold text-[#0a4b8c] transition-colors hover:bg-[#f2f7fc]">
-                    <Plus size={15} />
-                    {isHindi ? "और सूचनाएं देखें" : "Load more notices"}
-                  </button>
-                </div>
-              )}
+              <Link
+                to="/notices"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#0a4b8c] hover:underline">
+                <span>{isHindi ? "सभी सूचनाएं देखें" : "View all announcements"}</span>
+                <ArrowRight size={15} />
+              </Link>
             </div>
-
-            <Link
-              to="/notices"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#0a4b8c] hover:underline">
-              {isHindi ? "सभी सूचनाएं देखें" : "View all announcements"}
-              <ArrowRight size={15} />
-            </Link>
           </div>
 
           {/* ================= CAMPUS HIGHLIGHTS ================= */}

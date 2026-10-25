@@ -1,6 +1,4 @@
-/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap"); */
-
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -18,7 +16,7 @@
   --geu-muted: #556070;
   --geu-border: rgba(17, 24, 39, 0.12);
   --geu-shadow: 0 18px 38px rgba(12, 27, 51, 0.12);
-  font-family: "Inter", sans-serif;
+  font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
   color: var(--geu-text);
   background: #f4f6fa;
   font-synthesis: none;
@@ -35,16 +33,18 @@ html {
 .home-page {
   --home-motion-duration: 700ms;
   --home-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
-  font-family: "Manrope", sans-serif;
+  font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
 }
 
 .home-page .font-poppins,
-.home-page .font-sans {
-  font-family: "Manrope", sans-serif;
+.home-page .font-sans,
+.home-page .font-serif {
+  font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
 }
 
-.home-page > section:not(:first-child):not(.home-compact-section) {
-  padding-block: clamp(3rem, 5vw, 5rem);
+.home-page > section {
+  position: relative;
+  isolation: isolate;
 }
 
 .home-page [data-home-reveal="true"] {
@@ -246,3 +246,23 @@ img {
     @apply overflow-hidden rounded-[24px] border border-[#e7ebf3] bg-white shadow-[0_18px_40px_rgba(12,27,51,0.08)];
   }
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+

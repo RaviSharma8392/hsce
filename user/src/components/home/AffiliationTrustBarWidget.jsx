@@ -99,13 +99,54 @@ export function AffiliationTrustBarWidget() {
 
         {/* Affiliation Cards Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 sm:gap-5">
-          {affiliations.map((item) => {
+          {affiliations.map((item, idx) => {
             const Icon = item.icon;
+            const themes = [
+              {
+                topAccent: "bg-[#0a4b8c]",
+                badge: "bg-blue-50 text-[#0a4b8c] border-blue-200",
+                hoverBorder: "hover:border-[#0a4b8c]/50",
+                hoverText: "group-hover:text-[#0a4b8c]",
+                iconColor: "text-[#0a4b8c]",
+              },
+              {
+                topAccent: "bg-[#083a6f]",
+                badge: "bg-blue-50 text-[#083a6f] border-blue-200",
+                hoverBorder: "hover:border-[#083a6f]",
+                hoverText: "group-hover:text-[#083a6f]",
+                iconColor: "text-[#083a6f]",
+              },
+              {
+                topAccent: "bg-[#c8102e]",
+                badge: "bg-rose-50 text-[#c8102e] border-rose-200",
+                hoverBorder: "hover:border-[#c8102e]/60",
+                hoverText: "group-hover:text-[#c8102e]",
+                iconColor: "text-[#c8102e]",
+              },
+              {
+                topAccent: "bg-amber-500",
+                badge: "bg-amber-50 text-amber-900 border-amber-200",
+                hoverBorder: "hover:border-amber-400",
+                hoverText: "group-hover:text-amber-800",
+                iconColor: "text-amber-600",
+              },
+              {
+                topAccent: "bg-emerald-600",
+                badge: "bg-emerald-50 text-emerald-900 border-emerald-200",
+                hoverBorder: "hover:border-emerald-500",
+                hoverText: "group-hover:text-emerald-800",
+                iconColor: "text-emerald-600",
+              },
+            ];
+            const theme = themes[idx % themes.length];
 
             return (
               <div
                 key={item.enTitle}
-                className="group relative flex min-w-0 flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-[#0a4b8c]/50 hover:shadow-lg">
+                className={`group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:-translate-y-2 ${theme.hoverBorder} hover:shadow-xl`}>
+                {/* Top Colored Strip */}
+                <div className={`absolute top-0 inset-x-0 h-1 ${theme.topAccent}`} />
+
                 <div>
                   {/* Logo Container */}
                   <div className="mb-4 flex h-24 w-full items-center justify-center rounded-xl bg-slate-50/90 p-3 border border-slate-100 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/30 sm:h-28">
@@ -113,7 +154,7 @@ export function AffiliationTrustBarWidget() {
                       <img
                         src={item.logoUrl}
                         alt={isHindi ? item.hiTitle : item.enTitle}
-                        className="h-full w-full object-contain"
+                        className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
                         decoding="async"
                       />
@@ -125,7 +166,7 @@ export function AffiliationTrustBarWidget() {
                   </div>
 
                   {/* Text Details */}
-                  <h3 className="text-base font-bold leading-snug text-gray-900 transition-colors group-hover:text-[#0a4b8c]">
+                  <h3 className={`text-base font-bold leading-snug text-gray-900 transition-colors ${theme.hoverText}`}>
                     {isHindi ? item.hiTitle : item.enTitle}
                   </h3>
 
@@ -136,8 +177,8 @@ export function AffiliationTrustBarWidget() {
 
                 {/* Status Pill */}
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0a4b8c]">
-                    <CheckCircle2 size={13} className="text-[#0a4b8c] shrink-0" />
+                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${theme.badge}`}>
+                    <CheckCircle2 size={13} className={`${theme.iconColor} shrink-0`} />
                     <span>{isHindi ? item.badgeHi : item.badgeEn}</span>
                   </span>
                 </div>
