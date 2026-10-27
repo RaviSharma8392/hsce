@@ -217,7 +217,7 @@ export default function LoginPage() {
           {/* Back to Home Link */}
           <div>
             <a
-              href="https://hsce.pages.dev"
+              href="https://www.hscekanjhawala.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"

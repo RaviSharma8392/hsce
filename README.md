@@ -45,6 +45,6 @@ Some contact and principal details are seeded in `user/src/data/collegeDetailsDa
 ## Deployment notes
 
 - Deploy the public and admin apps separately to Cloudflare Pages.
-- Set `VITE_ADMIN_PORTAL_URL` in the public app to the full Admin sign-in URL; the Admin Login link is hidden in production if this is not configured. Local development defaults to `http://localhost:5175/admin/signin`.
+- The public site's Admin Login link defaults to `https://office.hscekanjhawala.com/admin/signin` in production and `http://localhost:5175/admin/signin` locally. Set `VITE_ADMIN_PORTAL_URL` only when overriding those destinations.
 - Protect the admin app with Firebase Authentication and the configured administrator identity.
 - Do not expose secret files or API credentials in either frontend app.

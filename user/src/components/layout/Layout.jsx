@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   ChevronDown,
   ChevronRight,
@@ -42,6 +43,18 @@ const COLORS = {
   background: "#F7F8FC",
 };
 
+const CANONICAL_PATH_ALIASES = {
+  "/about/facilities": "/campus-life",
+  "/admission": "/admissions",
+  "/admission/overview": "/admissions",
+  "/admissions/overview": "/admissions",
+  "/admission/eligibility": "/admissions/eligibility",
+  "/admission/procedure": "/admissions/procedure",
+  "/admission/documents": "/admissions/documents",
+  "/course/bed": "/course",
+  "/course/syllabus": "/syllabus",
+};
+
 const getLabel = (item, isHindi) =>
   isHindi && item.hiLabel ? item.hiLabel : item.label;
 
@@ -51,6 +64,10 @@ export function Layout({ children }) {
   const [activeNestedDropdown, setActiveNestedDropdown] = useState(null);
 
   const location = useLocation();
+  const pathname = location.pathname.replace(/\/+$/, "") || "/";
+  const canonicalPath = CANONICAL_PATH_ALIASES[pathname] || pathname;
+  const canonicalUrl = `https://www.hscekanjhawala.com${canonicalPath}`;
+  const isSearchPage = pathname === "/search";
   const closeTimerRef = useRef(null);
 
   const { language, setLanguage, isHindi } = useLanguage();
@@ -112,7 +129,9 @@ export function Layout({ children }) {
     "info@haryanashaktibed.org";
   const adminPortalHref =
     import.meta.env.VITE_ADMIN_PORTAL_URL ||
-    (import.meta.env.DEV ? "http://localhost:5175/admin/signin" : "");
+    (import.meta.env.DEV
+      ? "http://localhost:5175/admin/signin"
+      : "https://office.hscekanjhawala.com/admin/signin");
   const leftFloatingItems = [
     {
       name: "Phone",
@@ -347,14 +366,20 @@ export function Layout({ children }) {
   };
 
   return (
-    <div
-      className="flex min-h-screen flex-col font-sans antialiased"
-      style={{
-        backgroundColor: COLORS.background,
-        color: COLORS.text,
-        fontFamily:
-          '"Inter", "Noto Sans Devanagari", "Mangal", "Segoe UI", sans-serif',
-      }}>
+    <>
+      <Helmet>
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:url" content={canonicalUrl} />
+        {isSearchPage && <meta name="robots" content="noindex, follow" />}
+      </Helmet>
+      <div
+        className="flex min-h-screen flex-col font-sans antialiased"
+        style={{
+          backgroundColor: COLORS.background,
+          color: COLORS.text,
+          fontFamily:
+            '"Inter", "Noto Sans Devanagari", "Mangal", "Segoe UI", sans-serif',
+        }}>
       {/* ==========================================
           FLOATING LEFT SIDEBAR: CONTACT & SOCIAL
       =========================================== */}
@@ -617,6 +642,7 @@ export function Layout({ children }) {
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
-    </div>
+      </div>
+    </>
   );
 }
