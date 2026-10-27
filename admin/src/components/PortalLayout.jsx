@@ -41,7 +41,7 @@ export default function PortalLayout({
 
           {showPublicLink && (
             <a
-              href="http://localhost:5173"
+              href="https://www.hscekanjhawala.com/"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100 px-3.5 py-2 rounded-lg border border-blue-200/60 transition-all shadow-2xs hover:shadow-xs shrink-0"

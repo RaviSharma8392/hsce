@@ -435,7 +435,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
           {/* Action Buttons */}
           <div className="flex items-center gap-2.5 flex-wrap">
             <a
-              href="http://localhost:5173/gallery"
+              href="https://www.hscekanjhawala.com/gallery"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">

@@ -190,7 +190,7 @@ export default function DashboardProfileCard({
         )}
 
         <a
-          href="http://localhost:5173"
+          href="https://www.hscekanjhawala.com/"
           target="_blank"
           rel="noreferrer"
           className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/15 hover:bg-white/25 py-2.5 px-3 text-xs font-bold text-white transition-all border border-white/20 hover:border-white/40 shadow-sm">

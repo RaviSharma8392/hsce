@@ -499,7 +499,7 @@ export function Layout({ children }) {
                   <a
                     href={adminPortalHref}
                     className="transition-colors hover:text-[#FBDD23]">
-                    ADMIN LOGIN
+                    OFFICE LOGIN
                   </a>
                 </>
               )}
