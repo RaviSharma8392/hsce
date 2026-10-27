@@ -45,6 +45,7 @@ Some contact and principal details are seeded in `user/src/data/collegeDetailsDa
 ## Deployment notes
 
 - Deploy the public and admin apps separately to Cloudflare Pages.
+- The public build generates route-specific SEO HTML and `sitemap.xml` from `user/src/data/seoPages.js`; update that manifest when adding or removing indexable public routes.
 - The public site's Admin Login link defaults to `https://office.hscekanjhawala.com/admin/signin` in production and `http://localhost:5175/admin/signin` locally. Set `VITE_ADMIN_PORTAL_URL` only when overriding those destinations.
 - Protect the admin app with Firebase Authentication and the configured administrator identity.
 - Do not expose secret files or API credentials in either frontend app.
