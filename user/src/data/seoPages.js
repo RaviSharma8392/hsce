@@ -5,7 +5,7 @@ export const seoPages = [
     path: "/",
     title: `${collegeName}, Kanjhawala, Delhi | B.Ed.`,
     description:
-      "Learn about the two-year B.Ed. programme, admissions, eligibility, campus facilities and notices at Haryana Shakti College of Education in Kanjhawala, Delhi.",
+      "Explore Haryana Shakti College of Education, Kanjhawala, Delhi. Find B.Ed. course information, admission details, eligibility, campus facilities, college notices and contact information.",
   },
   {
     path: "/about",

@@ -78,7 +78,7 @@ export default function HomePage() {
           content={
             isHindi
               ? "कंझावला, दिल्ली स्थित हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में दो वर्षीय बी.एड. कार्यक्रम, प्रवेश, पात्रता, परिसर सुविधाओं और सूचनाओं की जानकारी प्राप्त करें।"
-              : "Learn about the two-year B.Ed. programme, admissions, eligibility, campus facilities and notices at Haryana Shakti College of Education in Kanjhawala, Delhi."
+              : "Explore Haryana Shakti College of Education, Kanjhawala, Delhi. Find B.Ed. course information, admission details, eligibility, campus facilities, college notices and contact information."
           }
         />
       </Helmet>

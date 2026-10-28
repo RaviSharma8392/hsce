@@ -24,7 +24,7 @@ npm run lint:admin
 - Public website: http://localhost:5173
 - Admin portal: http://localhost:5175
 
-The apps are separate projects. Run `npm install` in `user/` and `admin/` (or `npm run install:all` from this folder). Copy each `.env.example` to `.env.local` and set the same Firebase web-app values in both apps before testing authentication or live content.
+The apps are separate projects. Run `npm install` in `user/` and `admin/` (or `npm run install:all` from this folder). Create a local `.env.local` file in each app and set the same Firebase web-app values in both apps before testing authentication or live content. These files are ignored by Git and must not be committed.
 
 The admin portal has one full-access Admin sign-in and no staff/principal panels. Register the chosen email at `/admin/register`, verify it, then grant access in Firestore by creating `adminUsers/{uid}` with `role: "principal"`, `active: true`, and the account `email`. Public registration never grants its own role.
 
@@ -32,7 +32,7 @@ The admin portal has one full-access Admin sign-in and no staff/principal panels
 
 1. Create a Firebase project.
 2. Enable Authentication, Firestore and Storage.
-3. Copy `user/.env.example` and `admin/.env.example` to `.env.local` within each app and replace every example value with the Firebase web-app configuration. Configure a restricted unsigned Cloudinary preset in the admin app for notice PDF uploads.
+3. Create `user/.env.local` and `admin/.env.local` locally and populate them with the Firebase web-app configuration variable names used by each app's Firebase config. Keep these files private and untracked. Configure a restricted unsigned Cloudinary preset in the admin app for notice PDF uploads.
 
 The `user/` and `admin/` apps connect directly to Firebase through their client SDK configuration and can be hosted on Cloudflare Pages. Manage Firestore and Storage security rules in the Firebase Console. Local app code does not deploy or change those rules.
 

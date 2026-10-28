@@ -18,6 +18,7 @@ import {
   collegeInfo as defaultCollegeInfo,
   navItems,
 } from "../../data/siteData";
+import { seoPages } from "../../data/seoPages";
 
 import { usePublishedRecords } from "../../hooks/usePublishedRecords";
 import { useLanguage } from "../../context/LanguageContext";
@@ -44,7 +45,24 @@ const COLORS = {
 };
 
 const CANONICAL_PATH_ALIASES = {
+  "/about/campus-life": "/campus-life",
+  "/about/overview": "/about",
+  "/about/history-genesis": "/about/history",
+  "/about/vision": "/about/vision-mission",
+  "/about/mission": "/about/vision-mission",
+  "/about/chairman-desk": "/about/chairman",
+  "/about/chairman-message": "/about/chairman",
+  "/about/principal-desk": "/about/principal",
+  "/about/recognition-affiliation": "/about/recognition",
+  "/about/affiliation": "/about/recognition",
   "/about/facilities": "/campus-life",
+  "/about/campus": "/campus-life",
+  "/about/campus-labs": "/campus-life",
+  "/about/fact-sheet": "/about/facts",
+  "/bed": "/course",
+  "/curriculum": "/syllabus",
+  "/calendar": "/course",
+  "/faculty-staff": "/faculty",
   "/admission": "/admissions",
   "/admission/overview": "/admissions",
   "/admissions/overview": "/admissions",
@@ -53,6 +71,25 @@ const CANONICAL_PATH_ALIASES = {
   "/admission/documents": "/admissions/documents",
   "/course/bed": "/course",
   "/course/syllabus": "/syllabus",
+  "/notice": "/notices",
+  "/iqac": "/mandatory-disclosure",
+  "/disclosure": "/mandatory-disclosure",
+  "/disclosures": "/mandatory-disclosure",
+  "/activities": "/gallery",
+  "/events": "/gallery",
+  "/photos": "/gallery",
+  "/committees/overview": "/committees",
+  "/committees/academic": "/committees",
+  "/committees/grievance": "/committees",
+  "/committees/anti-ragging": "/committees",
+  "/tour": "/book-a-tour",
+  "/campus-tour": "/book-a-tour",
+  "/visit": "/book-a-tour",
+  "/enquiry": "/contact/enquiry",
+  "/enquiries": "/contact/enquiry",
+  "/admission-enquiry": "/contact/enquiry",
+  "/contact-us": "/contact",
+  "/privacy-policy": "/privacy",
 };
 
 const getLabel = (item, isHindi) =>
@@ -65,9 +102,13 @@ export function Layout({ children }) {
 
   const location = useLocation();
   const pathname = location.pathname.replace(/\/+$/, "") || "/";
-  const canonicalPath = CANONICAL_PATH_ALIASES[pathname] || pathname;
-  const canonicalUrl = `https://www.hscekanjhawala.com${canonicalPath}`;
+  const canonicalPath =
+    CANONICAL_PATH_ALIASES[pathname] ||
+    (pathname.startsWith("/notices/") ? "/notices" : pathname);
+  const canonicalUrl = `https://hscekanjhawala.com${canonicalPath}`;
   const isSearchPage = pathname === "/search";
+  const seoPage = seoPages.find((page) => page.path === canonicalPath);
+  const isNotFoundPage = !seoPage;
   const closeTimerRef = useRef(null);
 
   const { language, setLanguage, isHindi } = useLanguage();
@@ -369,8 +410,38 @@ export function Layout({ children }) {
     <>
       <Helmet>
         <link rel="canonical" href={canonicalUrl} />
+        <meta
+          property="og:title"
+          content={seoPage?.title || "Page Not Found | Haryana Shakti College of Education"}
+        />
+        <meta
+          property="og:description"
+          content={
+            seoPage?.description ||
+            "The requested page could not be found on the Haryana Shakti College of Education website."
+          }
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:site_name"
+          content="Haryana Shakti College of Education"
+        />
         <meta property="og:url" content={canonicalUrl} />
-        {isSearchPage && <meta name="robots" content="noindex, follow" />}
+        <meta name="twitter:card" content="summary" />
+        <meta
+          name="twitter:title"
+          content={seoPage?.title || "Page Not Found | Haryana Shakti College of Education"}
+        />
+        <meta
+          name="twitter:description"
+          content={
+            seoPage?.description ||
+            "The requested page could not be found on the Haryana Shakti College of Education website."
+          }
+        />
+        {(isSearchPage || isNotFoundPage) && (
+          <meta name="robots" content="noindex, follow" />
+        )}
       </Helmet>
       <div
         className="flex min-h-screen flex-col font-sans antialiased"
