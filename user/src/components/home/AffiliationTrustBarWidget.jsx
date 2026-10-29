@@ -1,192 +1,200 @@
 import React from "react";
-import { Building2, Award, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import {
+  Landmark,
+  ArrowRight,
+  ShieldCheck,
+  GraduationCap,
+  Users,
+  BookOpen,
+  Award,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-
-import { Container } from "../common/Container";
 import { useLanguage } from "../../context/LanguageContext";
 import { imageData } from "../../data/imagesData";
 
 export function AffiliationTrustBarWidget() {
   const { isHindi } = useLanguage();
 
-  const affiliations = [
+  const associations = [
     {
       logoUrl: imageData.ncteLogo,
-      enTitle: "NCTE Approved",
-      hiTitle: "एनसीटीई मान्यता प्राप्त",
-      enDesc: "Statutory Body, Govt. of India",
-      hiDesc: "भारत सरकार की वैधानिक संस्था",
-      badgeEn: "Statutory Recognition",
-      badgeHi: "वैधानिक मान्यता",
+      title: isHindi ? "एनसीटीई मान्यता प्राप्त" : "NCTE Approved",
+      subtitle: isHindi
+        ? "राष्ट्रीय अध्यापक शिक्षा परिषद, भारत सरकार"
+        : "Statutory Body, Government of India",
+      tag: isHindi ? "वैधानिक मान्यता" : "Statutory Recognition",
+      to: "/about/recognition",
     },
     {
       logoUrl: imageData.ggsipuLogo,
-      enTitle: "GGSIPU Affiliated",
-      hiTitle: "जीजीएसआईपीयू से संबद्ध",
-      enDesc: "Guru Gobind Singh Indraprastha University",
-      hiDesc: "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय",
-      badgeEn: "University Affiliation",
-      badgeHi: "विश्वविद्यालय संबद्धता",
+      title: isHindi ? "जीजीएसआईपीयू संबद्ध" : "GGSIPU Affiliated",
+      subtitle: isHindi
+        ? "गुरु गोबिंद सिंह इंद्रप्रस्थ वि.वि. (कोड: 147)"
+        : "Guru Gobind Singh Indraprastha University (Code: 147)",
+      tag: isHindi ? "विश्वविद्यालय संबद्धता" : "University Affiliation",
+      to: "/about/recognition",
     },
     {
-      logoUrl: imageData.naacLogo,
-      enTitle: "NAAC Accreditation",
-      hiTitle: "नैक मान्यता",
-      enDesc: "Quality Assurance in Education",
-      hiDesc: "गुणवत्तापूर्ण उच्च शिक्षा",
-      badgeEn: "Quality Assurance",
-      badgeHi: "गुणवत्ता मानक",
+      icon: Landmark,
+      title: isHindi ? "एचएसईएस सोसाइटी" : "HSES Society",
+      subtitle: isHindi
+        ? "हरियाणा शक्ति एजुकेशन सोसाइटी (2012)"
+        : "Haryana Shakti Education Society (Regd. 2012)",
+      tag: isHindi ? "संस्थापक सोसाइटी" : "Founding Society",
+      to: "/about",
     },
     {
-      icon: Building2,
-      enTitle: "HSES Society",
-      hiTitle: "हरियाणा शक्ति एजुकेशन",
-      enDesc: "Visionary Trust Established in 2012",
-      hiDesc: "2012 में स्थापित शैक्षणिक ट्रस्ट",
-      badgeEn: "Founding Society",
-      badgeHi: "संस्थापक समिति",
-    },
-    {
-      logoUrl: imageData.certificate,
-      enTitle: "2-Year Regular B.Ed.",
-      hiTitle: "नियमित बी.एड. कार्यक्रम",
-      enDesc: "Comprehensive Teacher Education",
-      hiDesc: "व्यावसायिक शिक्षक प्रशिक्षण",
-      badgeEn: "Approved Degree",
-      badgeHi: "मान्यता प्राप्त डिग्री",
+      icon: Award,
+      title: isHindi ? "2-वर्षीय नियमित बी.एड." : "2-Year Regular B.Ed.",
+      subtitle: isHindi
+        ? "व्यावसायिक अध्यापक शिक्षा कार्यक्रम"
+        : "Professional Teacher Education Degree",
+      tag: isHindi ? "मान्यता प्राप्त कोर्स" : "Approved Degree",
+      to: "/course",
     },
   ];
 
   return (
-    <section className="border-y border-slate-200/80 bg-white py-12 font-sans sm:py-14 lg:py-16">
-      <Container>
-        {/* Section Header */}
-        <div className="mb-8 sm:mb-10 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-          <div className="max-w-3xl">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-[34px] leading-tight">
-              {isHindi ? (
-                <>
-                  विश्वास, गुणवत्ता एवं{" "}
-                  <span className="text-[#0a4b8c]">संबद्धता की पहचान</span>
-                </>
-              ) : (
-                <>
-                  Recognized Excellence in{" "}
-                  <span className="text-[#0a4b8c]">Teacher Education</span>
-                </>
-              )}
-            </h2>
-
-            <div className="mt-3.5 h-0.5 w-12 rounded-full bg-[#FBDD23]" />
-
-            <p className="mt-3 text-sm leading-relaxed text-gray-600 sm:text-base">
-              {isHindi
-                ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन एनसीटीई से विधिवत मान्यता प्राप्त और गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU), दिल्ली से संबद्ध है।"
-                : "HSCE operates under statutory approval from the National Council for Teacher Education (NCTE) and affiliation with Guru Gobind Singh Indraprastha University (GGSIPU), Delhi."}
-            </p>
-          </div>
-
-          <Link
-            to="/about"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#0a4b8c]/20 bg-blue-50/50 px-4 py-2.5 text-sm font-semibold text-[#0a4b8c] transition-all duration-200 hover:bg-[#0a4b8c] hover:text-white hover:shadow-sm">
-            <span>{isHindi ? "मान्यता आदेश देखें" : "View Disclosures"}</span>
-            <ArrowRight
-              size={16}
-              className="transition-transform duration-200 group-hover:translate-x-1"
-            />
-          </Link>
-        </div>
-
-        {/* Affiliation Cards Grid */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 sm:gap-5">
-          {affiliations.map((item, idx) => {
-            const Icon = item.icon;
-            const themes = [
-              {
-                topAccent: "bg-[#0a4b8c]",
-                badge: "bg-blue-50 text-[#0a4b8c] border-blue-200",
-                hoverBorder: "hover:border-[#0a4b8c]/50",
-                hoverText: "group-hover:text-[#0a4b8c]",
-                iconColor: "text-[#0a4b8c]",
-              },
-              {
-                topAccent: "bg-[#083a6f]",
-                badge: "bg-blue-50 text-[#083a6f] border-blue-200",
-                hoverBorder: "hover:border-[#083a6f]",
-                hoverText: "group-hover:text-[#083a6f]",
-                iconColor: "text-[#083a6f]",
-              },
-              {
-                topAccent: "bg-[#c8102e]",
-                badge: "bg-rose-50 text-[#c8102e] border-rose-200",
-                hoverBorder: "hover:border-[#c8102e]/60",
-                hoverText: "group-hover:text-[#c8102e]",
-                iconColor: "text-[#c8102e]",
-              },
-              {
-                topAccent: "bg-amber-500",
-                badge: "bg-amber-50 text-amber-900 border-amber-200",
-                hoverBorder: "hover:border-amber-400",
-                hoverText: "group-hover:text-amber-800",
-                iconColor: "text-amber-600",
-              },
-              {
-                topAccent: "bg-emerald-600",
-                badge: "bg-emerald-50 text-emerald-900 border-emerald-200",
-                hoverBorder: "hover:border-emerald-500",
-                hoverText: "group-hover:text-emerald-800",
-                iconColor: "text-emerald-600",
-              },
-            ];
-            const theme = themes[idx % themes.length];
-
-            return (
-              <div
-                key={item.enTitle}
-                className={`group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:-translate-y-2 ${theme.hoverBorder} hover:shadow-xl`}>
-                {/* Top Colored Strip */}
-                <div className={`absolute top-0 inset-x-0 h-1 ${theme.topAccent}`} />
-
-                <div>
-                  {/* Logo Container */}
-                  <div className="mb-4 flex h-24 w-full items-center justify-center rounded-xl bg-slate-50/90 p-3 border border-slate-100 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/30 sm:h-28">
-                    {item.logoUrl ? (
-                      <img
-                        src={item.logoUrl}
-                        alt={isHindi ? item.hiTitle : item.enTitle}
-                        className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white text-[#0a4b8c] shadow-xs">
-                        <Icon size={34} strokeWidth={1.8} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Text Details */}
-                  <h3 className={`text-base font-bold leading-snug text-gray-900 transition-colors ${theme.hoverText}`}>
-                    {isHindi ? item.hiTitle : item.enTitle}
-                  </h3>
-
-                  <p className="mt-1.5 text-xs font-medium leading-relaxed text-gray-500">
-                    {isHindi ? item.hiDesc : item.enDesc}
-                  </p>
-                </div>
-
-                {/* Status Pill */}
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${theme.badge}`}>
-                    <CheckCircle2 size={13} className={`${theme.iconColor} shrink-0`} />
-                    <span>{isHindi ? item.badgeHi : item.badgeEn}</span>
-                  </span>
-                </div>
+    <section className="bg-white border-b border-gray-200/90 font-sans">
+      {/* 1. OUR ASSOCIATIONS SECTION (Sharp Collegiate Design Synchronized with Upper Sections) */}
+      <div className="py-12 sm:py-16">
+        <div className="mx-auto max-w-[1440px] px-4 xl:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Heading & Description */}
+            <div className="lg:col-span-3 pr-2">
+              <div className="flex items-center gap-2.5 mb-2.5 sm:mb-3">
+                <span className="h-1 w-8 bg-[#FBDD23] rounded-none" />
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#2E3A8C]">
+                  {isHindi ? "हमारी संबद्धताएं" : "OUR ASSOCIATIONS"}
+                </span>
               </div>
-            );
-          })}
+
+              <h2 className="text-2xl sm:text-[28px] font-bold text-[#2E3A8C] leading-snug tracking-tight">
+                {isHindi
+                  ? "मजबूत शैक्षणिक आधार का निर्माण"
+                  : "Building a Strong Academic Foundation"}
+              </h2>
+
+              <p className="mt-3 text-xs sm:text-[13.5px] text-slate-600 leading-relaxed font-normal">
+                {isHindi
+                  ? "हमारा संस्थान प्रतिष्ठित शैक्षणिक निकायों द्वारा मान्यता प्राप्त एवं समर्थित है, जो शिक्षक शिक्षा में गुणवत्ता, विश्वसनीयता और उत्कृष्टता सुनिश्चित करता है।"
+                  : "Our institution is recognized and supported by esteemed educational bodies, ensuring quality, credibility and excellence in teacher education."}
+              </p>
+
+              <Link
+                to="/about/recognition"
+                className="mt-5 inline-flex items-center gap-2 rounded-none bg-[#2E3A8C] hover:bg-[#1E255E] text-white px-6 py-2.5 text-xs font-bold uppercase tracking-wider shadow-sm transition-all active:scale-[0.98]">
+                <span>{isHindi ? "और अधिक जानें" : "Learn More"}</span>
+                <ArrowRight size={13} className="text-[#FBDD23]" />
+              </Link>
+            </div>
+
+            {/* Right Column: 4 Sharp Collegiate Association Cards */}
+            <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {associations.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.title}
+                    to={item.to}
+                    className="group flex flex-col justify-between rounded-none border border-slate-200 border-t-4 border-t-[#2E3A8C] hover:border-t-[#FBDD23] bg-white p-5 shadow-xs hover:shadow-xl transition-all duration-300 text-center">
+                    <div>
+                      {/* Logo or Icon Container: Sharp Frame */}
+                      <div className="flex h-18 w-full items-center justify-center mb-4 rounded-none bg-slate-50 border border-slate-100 p-2.5 group-hover:bg-amber-50/40 transition-colors">
+                        {item.logoUrl ? (
+                          <img
+                            src={item.logoUrl}
+                            alt={item.title}
+                            className="max-h-12 max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-none bg-blue-50 text-[#2E3A8C] group-hover:bg-[#FBDD23] group-hover:text-slate-900 transition-colors">
+                            <Icon size={24} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Title & Subtitle */}
+                      <h3 className="font-bold text-[15px] sm:text-[16px] text-[#2E3A8C] leading-snug tracking-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-[11.5px] text-slate-500 mt-1.5 line-clamp-2 leading-relaxed font-normal">
+                        {item.subtitle}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="inline-block rounded-none bg-slate-100 group-hover:bg-[#FBDD23] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-800 transition-colors">
+                        {item.tag}
+                      </span>
+                      <span className="flex h-6 w-6 items-center justify-center rounded-none text-slate-400 group-hover:text-[#2E3A8C] group-hover:translate-x-1 transition-all">
+                        <ArrowRight size={13} strokeWidth={2.5} />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </Container>
+      </div>
+
+      {/* 2. ACADEMIC EXCELLENCE NAVY RIBBON STRIP (Sharp Collegiate Styling) */}
+      <div className="relative bg-[#2E3A8C] text-white py-4 sm:py-5 overflow-hidden border-t border-b border-[#FBDD23]/30">
+        {/* Subtle decorative radial glow */}
+        <div
+          className="absolute right-0 top-0 bottom-0 w-36 pointer-events-none opacity-20"
+          style={{
+            background:
+              "radial-gradient(circle at 100% 50%, #FBDD23 0%, transparent 70%)",
+          }}
+        />
+
+        <div className="mx-auto max-w-[1440px] px-4 xl:px-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+            {/* Left: Script Title */}
+            <div className="shrink-0 flex items-center gap-3">
+              <span className="text-xl sm:text-2xl font-bold text-white/95 tracking-wide">
+                Academic Excellence
+              </span>
+              <span className="hidden sm:inline-block h-6 w-px bg-white/20" />
+            </div>
+
+            {/* Center: 4 Value Pillars */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 xl:gap-8 text-xs sm:text-[13px] font-semibold text-white/90">
+              <div className="flex items-center gap-2">
+                <GraduationCap size={16} className="text-[#FBDD23]" />
+                <span>{isHindi ? "गुणवत्तापूर्ण शिक्षा" : "Quality Education"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={16} className="text-[#FBDD23]" />
+                <span>{isHindi ? "विश्वसनीय मान्यता" : "Trusted Recognition"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users size={16} className="text-[#FBDD23]" />
+                <span>{isHindi ? "समग्र विकास" : "Holistic Development"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <BookOpen size={16} className="text-[#FBDD23]" />
+                <span>{isHindi ? "उज्जवल भविष्य" : "Better Tomorrow"}</span>
+              </div>
+            </div>
+
+            {/* Right: Join HSCE + Arrow (Sharp Rectangular Badge) */}
+            <Link
+              to="/admissions"
+              className="shrink-0 flex items-center gap-2.5 text-[#FBDD23] hover:text-white transition-colors group">
+              <span className="text-lg sm:text-xl font-bold">
+                Join HSCE
+              </span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-none border border-[#FBDD23] text-[#FBDD23] group-hover:bg-[#FBDD23] group-hover:text-[#2E3A8C] transition-all">
+                <ArrowRight size={13} strokeWidth={2.5} />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

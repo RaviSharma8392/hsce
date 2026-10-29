@@ -1,7 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../config/firebase";
+import { getLazyAuth, getLazyFirestore } from "../config/firebaseLazy";
 
 export const SUPER_ADMIN_EMAIL = "sharmaravi8392@gmail.com";
 
@@ -53,8 +51,9 @@ export function useAuthState() {
 
       // Synchronize/ensure Firestore document exists for Super Admin
       try {
-        await setDoc(
-          doc(db, "adminUsers", currentUser.uid),
+        const { db, firestore } = await getLazyFirestore();
+        await firestore.setDoc(
+          firestore.doc(db, "adminUsers", currentUser.uid),
           {
             uid: currentUser.uid,
             email: SUPER_ADMIN_EMAIL,
@@ -63,7 +62,7 @@ export function useAuthState() {
             verified: true,
             displayName: "Ravi Sharma (Principal)",
             verifiedBy: "system",
-            verifiedAt: serverTimestamp(),
+            verifiedAt: firestore.serverTimestamp(),
             permissions: superPermissions,
           },
           { merge: true }
@@ -78,8 +77,9 @@ export function useAuthState() {
 
     // 2. All other users: must be verified and granted access by Ravi Sharma
     try {
-      const userDocRef = doc(db, "adminUsers", currentUser.uid);
-      const userSnapshot = await getDoc(userDocRef);
+      const { db, firestore } = await getLazyFirestore();
+      const userDocRef = firestore.doc(db, "adminUsers", currentUser.uid);
+      const userSnapshot = await firestore.getDoc(userDocRef);
 
       if (userSnapshot.exists()) {
         const record = userSnapshot.data();
@@ -114,16 +114,26 @@ export function useAuthState() {
 
   useEffect(() => {
     let active = true;
+    let unsubscribe;
     setLoading(true);
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const subscribe = async () => {
+      const { auth, authSdk } = await getLazyAuth();
       if (!active) return;
-      await checkUserAuthorization(currentUser);
+      unsubscribe = authSdk.onAuthStateChanged(auth, async (currentUser) => {
+        if (!active) return;
+        await checkUserAuthorization(currentUser);
+      });
+    };
+
+    subscribe().catch((error) => {
+      console.error("Could not initialize portal authentication:", error);
+      if (active) setLoading(false);
     });
 
     return () => {
       active = false;
-      unsubscribe();
+      unsubscribe?.();
     };
   }, [checkUserAuthorization]);
 
@@ -134,7 +144,13 @@ export function useAuthState() {
     permissions,
     adminRecord,
     loading,
-    checkAuth: () => checkUserAuthorization(auth.currentUser),
-    logout: () => signOut(auth),
+    checkAuth: async () => {
+      const { auth } = await getLazyAuth();
+      return checkUserAuthorization(auth.currentUser);
+    },
+    logout: async () => {
+      const { auth, authSdk } = await getLazyAuth();
+      return authSdk.signOut(auth);
+    },
   };
 }

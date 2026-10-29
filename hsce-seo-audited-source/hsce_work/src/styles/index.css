@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #222222;
+  background: #f5f5f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f5f5f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition: all 0.2s ease;
+}
+
+:focus-visible {
+  outline: 3px solid #363991;
+  outline-offset: 2px;
+}
+
+.section-card {
+  @apply rounded-lg border border-[#E5E5E5] bg-white p-6 shadow-sm;
+}
+
+.primary-button {
+  @apply inline-flex items-center justify-center rounded-md bg-[#363991] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#282b7d] transition disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.secondary-button {
+  @apply inline-flex items-center justify-center rounded-md border border-[#363991] bg-white px-4 py-2 text-sm font-medium text-[#363991] hover:bg-[#363991] hover:text-white transition disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.accent-button {
+  @apply inline-flex items-center justify-center rounded-md bg-[#E0535E] px-4 py-2 text-sm font-medium text-white hover:bg-[#c93f49] shadow-sm transition;
+}
+
+.yellow-button {
+  @apply inline-flex items-center justify-center rounded-md bg-[#FBDD23] px-4 py-2 text-sm font-bold text-[#1b1e5a] hover:bg-[#e6ca18] shadow-sm transition;
+}
+
+.page-banner {
+  @apply bg-[#1c3274] py-14 md:py-16 text-white shadow-sm;
+}
+
+.page-banner h1 {
+  @apply text-3xl font-bold font-poppins tracking-tight md:text-4xl lg:text-[42px] leading-tight text-white;
+}

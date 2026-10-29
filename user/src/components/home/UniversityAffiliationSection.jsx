@@ -1,16 +1,34 @@
 import React from "react";
-import {
-  ExternalLink,
-  Award,
-  ShieldCheck,
-  Building2,
-  Eye,
-  Target,
-  CheckCircle2,
-} from "lucide-react";
+import { ExternalLink, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Container } from "../common/Container";
 import { useLanguage } from "../../context/LanguageContext";
 import { imageData } from "../../data/imagesData";
+
+/* Subtle decorative dot pattern matching second reference image */
+function DotPattern({ className = "" }) {
+  return (
+    <svg
+      width="72"
+      height="54"
+      viewBox="0 0 72 54"
+      fill="none"
+      className={className}
+      aria-hidden="true">
+      <defs>
+        <pattern
+          id="univ-dot-grid"
+          x="0"
+          y="0"
+          width="12"
+          height="12"
+          patternUnits="userSpaceOnUse">
+          <circle cx="2.5" cy="2.5" r="1.5" fill="currentColor" />
+        </pattern>
+      </defs>
+      <rect width="72" height="54" fill="url(#univ-dot-grid)" />
+    </svg>
+  );
+}
 
 export function UniversityAffiliationSection() {
   const { isHindi } = useLanguage();
@@ -19,113 +37,139 @@ export function UniversityAffiliationSection() {
     campusImage:
       "https://res.cloudinary.com/dljt6vgkk/image/upload/v1792904388/e1e2e5a9-77dd-4b2e-9142-acaeaff75b79.png",
     logoUrl: imageData.ggsipuLogo || "/assets/affiliations/ggsipu-logo.png",
-    portalUrl: "http://www.ipu.ac.in",
+    portalUrl: "https://www.ipu.ac.in",
 
     en: {
-      eyebrow: "STATUTORY UNIVERSITY AFFILIATION",
+      eyebrow: "UNIVERSITY AFFILIATION",
       titleLead: "Guru Gobind Singh",
       titleAccent: "Indraprastha University (GGSIPU)",
       badge: "Govt. of NCT of Delhi • UGC 12B Recognized",
+      affiliationBadge: "HSCE Affiliation Code: 147 • Approved B.Ed. Intake: 100 Seats",
+
       para1:
-        "Guru Gobind Singh Indraprastha University (GGSIPU) is the first University established in 1998 by Govt. of NCT of Delhi under the provisions of Guru Gobind Singh Indraprastha University Act, 1998 read with its Amendment in 1999. The University is recognized by University Grants Commission (UGC), India under section 12B of UGC Act.",
-      para2:
-        'It is a teaching and affiliating University with the explicit objective of facilitating and promoting "studies, research and extension work in emerging areas of higher education with focus on professional education,',
-      para3:
-        'for example engineering, technology, management studies, medicine, pharmacy, nursing, education, law, etc. and also to achieve excellence in these and connected fields and other matters connected therewith or incidental thereto." In order to serve the broad purposes for which the University was established, it set out its statements of Vision, Mission and Quality Policy which read as under:',
+        "Guru Gobind Singh Indraprastha University (GGSIPU) is the premier affiliating state university established in 1998 by the Govt. of NCT of Delhi under the Guru Gobind Singh Indraprastha University Act. The university is duly recognized by the University Grants Commission (UGC) under section 12B. GGSIPU oversees admissions, academic curricula, syllabus standards, and examinations for HSCE.",
+
+      campusLabel: "University Main Campus",
+      campusLocation: "Sector 16-C, Dwarka, New Delhi",
+      portalBtn: "Visit Official GGSIPU Website",
+      principlesHeading: "Guiding Principles of GGSIPU",
+      principlesSub:
+        "Academic excellence, societal welfare, and progressive pedagogy guiding our teacher education framework.",
 
       pillars: [
         {
-          id: "vision",
-          title: "VISION",
-          icon: Eye,
+          num: "01",
+          title: "University Vision",
+          pillLabel: "Vision",
+          badgeLabel: "Vision Directive",
+          tag: "Statutory Vision • GGSIPU Act 1998",
           content:
-            "The University will stimulate both the hearts and minds of scholars, empower them to contribute to the welfare of society at large, train them to adopt themselves to the changing needs of the economy, advocate them for cultural leadership to ensure peace, harmony and prosperity for all.",
+            "To stimulate both the hearts and minds of scholars, empower them to contribute to the welfare of society at large, and train them to adapt to the changing needs of the economy.",
         },
         {
-          id: "mission",
-          title: "MISSION",
-          icon: Target,
+          num: "02",
+          title: "Academic Mission",
+          pillLabel: "Mission",
+          badgeLabel: "Mission Core",
+          tag: "Professional Education • Centres of Excellence",
           content:
-            "Guru Gobind Singh Indraprastha University shall strive hard to provide a market oriented professional education to the student community of India and particularly in Delhi. It will serve the education as well as meet the needs of the growing Indian Industries by promoting establishment of Schools and colleges as learning Centres of Excellence. Guru Gobind Singh Indraprastha University will focus on emerging areas of professional education in the field of Engineering, Technology, Medicine, Education, Pharmacy, Nursing, Law and more.",
+            "To provide market-oriented professional education, promote schools and colleges as learning Centres of Excellence, and nurture progressive educators.",
         },
         {
-          id: "quality",
-          title: "Quality Policy",
-          icon: ShieldCheck,
+          num: "03",
+          title: "Quality Policy Framework",
+          pillLabel: "Quality",
+          badgeLabel: "Quality Policy",
+          tag: "Quality Management System • UGC 12B Recognized",
           content:
-            "Guru Gobind Singh Indraprastha University is committed to providing professional education with thrust on creativity, innovation, continuous change and motivating environment for knowledge creation and dissemination through its effective quality management system.",
+            "Committed to providing professional education with thrust on creativity, innovation, and motivating environment through an effective quality management system.",
         },
       ],
-      portalBtn: "Visit Official GGSIPU Portal (ipu.ac.in)",
-      affiliationBadge:
-        "HSCE Affiliation Code: 147 • Approved B.Ed. Intake: 100 Seats",
     },
 
     hi: {
-      eyebrow: "वैधानिक विश्वविद्यालय संबद्धता",
+      eyebrow: "विश्वविद्यालय संबद्धता",
       titleLead: "गुरु गोबिंद सिंह",
       titleAccent: "इंद्रप्रस्थ विश्वविद्यालय (GGSIPU)",
       badge: "दिल्ली सरकार • यूजीसी 12B मान्यता प्राप्त",
+      affiliationBadge: "HSCE संबद्धता कोड: 147 • बी.एड. स्वीकृत वार्षिक सीटें: 100",
+
       para1:
-        "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली राष्ट्रीय राजधानी क्षेत्र सरकार द्वारा गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय अधिनियम, 1998 (1999 में संशोधित) के प्रावधानों के तहत 1998 में स्थापित प्रथम विश्वविद्यालय है। यह विश्वविद्यालय यूजीसी अधिनियम की धारा 12B के अंतर्गत विश्वविद्यालय अनुदान आयोग (UGC) द्वारा मान्यता प्राप्त है।",
-      para2:
-        'यह एक शिक्षण एवं संबद्धक विश्वविद्यालय है जिसका स्पष्ट उद्देश्य "व्यावसायिक शिक्षा पर ध्यान केंद्रित करते हुए उच्च शिक्षा के उभरते क्षेत्रों में अध्ययन, अनुसंधान एवं विस्तार कार्य को सुगम एवं प्रोत्साहित करना है,',
-      para3:
-        'उदाहरणार्थ इंजीनियरिंग, प्रौद्योगिकी, प्रबंधन अध्ययन, चिकित्सा, फार्मेसी, नर्सिंग, शिक्षा, कानून आदि और इन तथा संबद्ध क्षेत्रों में उत्कृष्टता प्राप्त करना।" जिन व्यापक उद्देश्यों के लिए विश्वविद्यालय स्थापित किया गया था, उनकी पूर्ति हेतु विश्वविद्यालय ने अपने विज़न, मिशन एवं गुणवत्ता नीति के कथन निर्धारित किए हैं जो निम्नानुसार हैं:',
+        "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली राष्ट्रीय राजधानी क्षेत्र सरकार द्वारा 1998 में स्थापित प्रथम राज्य विश्वविद्यालय है। यह विश्वविद्यालय यूजीसी अधिनियम की धारा 12B के अंतर्गत विश्वविद्यालय अनुदान आयोग (UGC) द्वारा विधिवत मान्यता प्राप्त है। विश्वविद्यालय HSCE में प्रवेश, पाठ्यक्रम और परीक्षाओं का नियमन करता है।",
+
+      campusLabel: "विश्वविद्यालय मुख्य परिसर",
+      campusLocation: "सेक्टर 16-C, द्वारका, नई दिल्ली",
+      portalBtn: "आधिकारिक GGSIPU वेबसाइट देखें",
+      principlesHeading: "GGSIPU के मार्गदर्शक सिद्धांत",
+      principlesSub:
+        "शैक्षणिक उत्कृष्टता, सामाजिक कल्याण और नवाचारी शिक्षण विधियां जो हमारे बी.एड. पाठ्यक्रम को दिशा प्रदान करती हैं।",
 
       pillars: [
         {
-          id: "vision",
-          title: "दृष्टिकोण (VISION)",
-          icon: Eye,
+          num: "01",
+          title: "दृष्टिकोण (Vision)",
+          pillLabel: "विज़न",
+          badgeLabel: "विज़न निर्देश",
+          tag: "सांविधिक विज़न • जीजीएसआईपीयू अधिनियम 1998",
           content:
-            "विश्वविद्यालय विद्वानों के हृदय और मस्तिष्क दोनों को प्रेरित करेगा, उन्हें व्यापक समाज के कल्याण में योगदान देने के लिए सशक्त बनाएगा, अर्थव्यवस्था की बदलती आवश्यकताओं के अनुरूप स्वयं को ढालने के लिए प्रशिक्षित करेगा तथा सभी के लिए शांति, सद्भाव और समृद्धि सुनिश्चित करने हेतु सांस्कृतिक नेतृत्व को बढ़ावा देगा।",
+            "विद्वानों के हृदय और मस्तिष्क दोनों को प्रेरित करना, समाज कल्याण हेतु सशक्त बनाना तथा बदलती अर्थव्यवस्था के अनुरूप तैयार करना।",
         },
         {
-          id: "mission",
-          title: "ध्येय (MISSION)",
-          icon: Target,
+          num: "02",
+          title: "ध्येय (Mission)",
+          pillLabel: "मिशन",
+          badgeLabel: "मिशन कोर",
+          tag: "व्यावसायिक शिक्षण • उत्कृष्टता केंद्र",
           content:
-            "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय भारत और विशेष रूप से दिल्ली के छात्र समुदाय को बाजारोन्मुखी व्यावसायिक शिक्षा प्रदान करने हेतु निरंतर प्रयासरत रहेगा। यह स्कूलों और कॉलेजों को उत्कृष्टता के शिक्षण केंद्रों के रूप में स्थापित कर शिक्षा की सेवा करेगा तथा भारतीय उद्योगों की आवश्यकताओं को पूरा करेगा। विश्वविद्यालय इंजीनियरिंग, प्रौद्योगिकी, चिकित्सा, शिक्षा, फार्मेसी, नर्सिंग, कानून आदि क्षेत्रों में व्यावसायिक शिक्षा पर ध्यान केंद्रित करेगा।",
+            "बाजारोन्मुखी व्यावसायिक शिक्षा प्रदान करना, महाविद्यालयों को शिक्षण उत्कृष्टता केंद्रों के रूप में स्थापित करना और समर्पित शिक्षक तैयार करना।",
         },
         {
-          id: "quality",
+          num: "03",
           title: "गुणवत्ता नीति (Quality Policy)",
-          icon: ShieldCheck,
+          pillLabel: "गुणवत्ता",
+          badgeLabel: "गुणवत्ता नीति",
+          tag: "गुणवत्ता प्रबंधन प्रणाली • यूजीसी 12B",
           content:
-            "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय अपनी प्रभावी गुणवत्ता प्रबंधन प्रणाली के माध्यम से ज्ञान सृजन और प्रसार हेतु रचनात्मकता, नवाचार, निरंतर परिवर्तन और प्रेरणादायक वातावरण पर बल देते हुए गुणवत्तापूर्ण व्यावसायिक शिक्षा प्रदान करने के लिए प्रतिबद्ध है।",
+            "रचनात्मकता, नवाचार और प्रभावी गुणवत्ता प्रबंधन प्रणाली के माध्यम से प्रेरणादायक वातावरण में उच्चस्तरीय व्यावसायिक शिक्षा प्रदान करना।",
         },
       ],
-      portalBtn: "आधिकारिक जीजीएसआईपीयू पोर्टल (ipu.ac.in) देखें",
-      affiliationBadge:
-        "HSCE संबद्धता कोड: 147 • बी.एड. स्वीकृत वार्षिक सीटें: 100",
     },
   };
 
   const content = isHindi ? universityData.hi : universityData.en;
 
   return (
-    <section className="relative overflow-hidden border-y border-slate-200/80 bg-[radial-gradient(circle_at_top_left,_rgba(247,201,72,0.14),transparent_28%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] py-12 sm:py-16 font-sans">
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,75,140,0.025),transparent_18%,transparent_82%,rgba(200,16,46,0.025))]" />
+    <section className="relative overflow-hidden border-b border-gray-200/90 bg-[#F8FAFC] py-14 font-sans sm:py-16 lg:py-20">
+      {/* Subtle corner dot matrix patterns */}
+      <DotPattern className="absolute top-6 left-6 text-slate-300/80 pointer-events-none hidden sm:block" />
+      <DotPattern className="absolute bottom-6 right-6 text-slate-300/80 pointer-events-none hidden sm:block" />
 
       <Container>
-        <div className="relative mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+        {/* ============================================================== */}
+        {/* SECTION HEADER (Matching HomeFeaturedOverview style)           */}
+        {/* ============================================================== */}
+        <div className="relative z-10 mb-8 sm:mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#0a4b8c]">
-              {content.eyebrow}
-            </p>
-            <h2 className="text-2xl font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl lg:text-[32px]">
-              {content.titleLead}{" "}
-              <span className="font-extrabold text-[#0a4b8c]">
-                {content.titleAccent}
+            <div className="mb-2.5 flex items-center gap-2">
+              <span className="h-0.5 w-6 bg-[#FBDD23]" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#2E3A8C]">
+                {content.eyebrow}
               </span>
+            </div>
+
+            <h2 className="text-2xl font-bold tracking-tight text-[#2E3A8C] sm:text-3xl lg:text-[34px] leading-tight">
+              {content.titleLead}{" "}
+              <span className="text-[#2E3A8C]">{content.titleAccent}</span>
             </h2>
-            <div className="mt-3 h-0.5 w-12 rounded-full bg-[#FBDD23]" />
+
+            <p className="mt-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+              {content.affiliationBadge}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0a4b8c]/15 bg-[#0a4b8c]/5 px-3.5 py-1.5 text-xs font-semibold text-[#0a4b8c] shadow-xs">
-              <ShieldCheck size={14} className="shrink-0 text-[#0a4b8c]" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs">
+              <ShieldCheck size={14} className="text-[#2E3A8C]" />
               <span>{content.badge}</span>
             </span>
 
@@ -133,120 +177,157 @@ export function UniversityAffiliationSection() {
               href={universityData.portalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 rounded-lg border border-[#0a4b8c]/20 bg-[#0a4b8c] px-4 py-2 text-xs font-bold text-white shadow-[0_12px_24px_rgba(10,75,140,0.18)] transition hover:bg-[#083a6f]">
+              className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-sm bg-[#2E3A8C] hover:bg-[#202965] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all active:scale-[0.98]">
               <span>{content.portalBtn}</span>
-              <ExternalLink
-                size={13}
-                className="transition-transform group-hover:translate-x-0.5"
-              />
+              <ExternalLink size={13} className="text-[#FBDD23]" />
             </a>
           </div>
         </div>
 
-        <div className="relative mb-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-5">
-            <div className="group relative h-full overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_38px_rgba(15,23,42,0.08)]">
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#FBDD23] via-[#0a4b8c] to-[#c8102e]" />
+        {/* ============================================================== */}
+        {/* MAIN COMPOSITE GRID (Clean, Elegant, Zero Clutter)              */}
+        {/* ============================================================== */}
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+          {/* ============================================================ */}
+          {/* LEFT: University Campus & Verified Institutional Profile     */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-5 flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_25px_-4px_rgba(0,0,0,0.06)]">
+            <div>
+              {/* Campus Image */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                <img
+                  src={universityData.campusImage}
+                  alt="Guru Gobind Singh Indraprastha University campus"
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                />
 
-              <img
-                src={universityData.campusImage}
-                alt="Guru Gobind Singh Indraprastha University (GGSIPU) Campus"
-                className="h-full max-h-[320px] w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:max-h-[360px]"
-                loading="lazy"
-              />
-
-              <div className="flex items-center justify-between border-t border-slate-100 bg-[#f4f7fb] p-3 text-xs font-medium text-slate-600">
-                <span className="flex items-center gap-1.5">
-                  <Building2 size={14} className="text-[#c8102e]" />
-                  <span>Main Campus: Dwarka, New Delhi</span>
-                </span>
-                <span className="rounded-full border border-[#0a4b8c]/20 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#0a4b8c]">
-                  Estd. 1998
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-center gap-4 lg:col-span-7">
-            <div className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)] sm:p-6">
-              <div className="mb-3 flex items-center gap-2">
-                <div className="h-10 w-10 rounded-xl bg-[#0a4b8c]/10 p-2 text-[#0a4b8c]">
-                  <Award size={18} className="h-full w-full" />
+                {/* Subtle verified pill on image */}
+                <div className="absolute top-3 left-3 rounded-md bg-[#2E3A8C]/95 backdrop-blur-xs px-3 py-1 text-[11px] font-bold text-white shadow-sm border border-white/10">
+                  Estd. 1998 • UGC 12B
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0a4b8c]">
-                  Institutional Legacy
-                </span>
+
+                <div className="absolute bottom-3 inset-x-3 rounded-lg bg-white/95 backdrop-blur-xs px-3.5 py-2 shadow-md flex items-center justify-between border border-slate-100">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#2E3A8C] truncate">
+                      {content.campusLabel}
+                    </p>
+                    <p className="text-[10px] text-slate-500 truncate">
+                      {content.campusLocation}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded bg-[#FBDD23] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-900">
+                    Code 147
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-4 text-justify text-sm leading-relaxed text-slate-700 sm:text-base">
-                <p className="rounded-xl bg-[#f7faff] p-4 text-slate-700 ring-1 ring-slate-200/80">
+              {/* Campus Story */}
+              <div className="p-5 sm:p-6">
+                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-600 font-normal">
                   {content.para1}
                 </p>
-                <p>{content.para2}</p>
               </div>
+            </div>
+
+            {/* Bottom Verification Strip */}
+            <div className="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-[#2E3A8C]">
+                {isHindi ? "संबद्धता स्थिति" : "Affiliation Status"}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <CheckCircle2 size={13} className="text-emerald-600" />
+                <span>{isHindi ? "सक्रिय एवं मान्यता प्राप्त" : "Active & Approved"}</span>
+              </span>
             </div>
           </div>
-        </div>
 
-        <div className="mb-10 rounded-[24px] border border-slate-200/80 bg-white p-5 text-justify text-sm leading-relaxed text-slate-700 shadow-[0_12px_25px_rgba(15,23,42,0.04)] sm:p-6 sm:text-base">
-          <p>{content.para3}</p>
-        </div>
-
-        <div className="mb-8 grid gap-4 md:grid-cols-3">
-          {[
-            {
-              label: "Founded",
-              value: "1998",
-              tone: "bg-[#0a4b8c] text-white",
-            },
-            {
-              label: "UGC Status",
-              value: "12B",
-              tone: "bg-[#FBDD23] text-[#0c1b33]",
-            },
-            {
-              label: "Affiliation",
-              value: "HSCE • 147",
-              tone: "bg-[#c8102e] text-white",
-            },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className={`rounded-2xl border border-slate-200/80 p-4 shadow-sm ${stat.tone}`}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">
-                {stat.label}
-              </p>
-              <p className="mt-2 text-2xl font-extrabold tracking-tight">
-                {stat.value}
-              </p>
+          {/* ============================================================ */}
+          {/* RIGHT: 3 Royal Blue Cards matching user second reference img */}
+          {/* (Solid Royal Blue, Left Graphic Plaque, White Title, Yellow Tag & Yellow Badge) */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-7 flex flex-col justify-between gap-4">
+            {/* Header Box */}
+            <div className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="h-0.5 w-5 bg-[#FBDD23]" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#1A4298]">
+                    {isHindi ? "सांविधिक मार्गदर्शक सिद्धांत" : "Statutory Framework"}
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
+                  {content.principlesHeading}
+                </h3>
+                <p className="mt-1 text-xs sm:text-[13px] text-slate-500 leading-relaxed max-w-xl">
+                  {content.principlesSub}
+                </p>
+              </div>
+              <span className="shrink-0 self-start sm:self-center inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-[#1A4298]">
+                3 Core Pillars
+              </span>
             </div>
-          ))}
-        </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
-          {content.pillars.map((pillar) => {
-            const Icon = pillar.icon;
-            return (
-              <div
-                key={pillar.id}
-                className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
-                <div className="flex items-center justify-between gap-3 border-b-2 border-[#FBDD23] bg-gradient-to-r from-[#0a4b8c] to-[#123f7b] px-5 py-3 text-white sm:px-6">
-                  <div className="flex items-center gap-2.5">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
-                      <Icon size={16} className="shrink-0 text-[#FBDD23]" />
+            {/* 3 Royal Blue Cards (Image 2 style: horizontal, left graphic plaque, bold white title, yellow tag, yellow badge, no redirect links) */}
+            <div className="flex-1 flex flex-col gap-3.5 sm:gap-4">
+              {content.pillars.map((pillar) => (
+                <div
+                  key={pillar.num}
+                  className="group relative overflow-hidden rounded-xl bg-[#16429A] hover:bg-[#133A8A] text-white p-4 sm:p-5 shadow-md transition-all duration-300 border border-white/10 flex flex-col sm:flex-row items-stretch gap-4 sm:gap-5">
+                  
+                  {/* Left Side: Graphic Plaque (Replaces photo with collegiate design - zero photos, clean geometry) */}
+                  <div className="shrink-0 sm:w-28 md:w-32 self-stretch rounded-lg bg-[#0E2864]/90 border border-white/15 flex flex-col items-center justify-center p-3 text-center shadow-inner min-h-[85px] sm:min-h-0">
+                    <span className="text-2xl sm:text-3xl font-black text-[#FBDD23] tracking-tight leading-none">
+                      {pillar.num}
                     </span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white sm:text-base">
-                      {pillar.title}
-                    </h3>
+                    <span className="mt-1 text-[10px] font-extrabold uppercase tracking-widest text-blue-200">
+                      {pillar.pillLabel}
+                    </span>
+                    <div className="mt-2 h-0.5 w-6 bg-[#FBDD23]/60 rounded-full" />
+                    <span className="mt-1.5 text-[9px] font-bold uppercase tracking-wider text-blue-300/80">
+                      GGSIPU
+                    </span>
+                  </div>
+
+                  {/* Right Side: Title, Tag, Body, and Yellow Badge matching Image 2 */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                      {/* Title matching Image 2's bold white title */}
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-base sm:text-lg font-bold text-white leading-snug tracking-tight">
+                          {pillar.title}
+                        </h4>
+                        <span className="shrink-0 text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-white/10 text-blue-200 border border-white/10">
+                          Code 147
+                        </span>
+                      </div>
+
+                      {/* Yellow Tag line (Matching yellow date/accent text in Image 2) */}
+                      <p className="mt-1 text-xs sm:text-[13px] font-bold text-[#FBDD23] tracking-wide">
+                        {pillar.tag}
+                      </p>
+
+                      {/* Genuine Principle Content */}
+                      <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-blue-50 font-normal">
+                        {pillar.content}
+                      </p>
+                    </div>
+
+                    {/* Bottom strip with Yellow Action Badge (matching the 'View Album' yellow button from Image 2, static/no redirect) */}
+                    <div className="mt-3 pt-2.5 flex items-center justify-between border-t border-white/15 text-[11px]">
+                      <span className="text-[11px] font-medium text-blue-200 flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#FBDD23]" />
+                        {isHindi ? "संस्थागत मार्गदर्शक सिद्धांत" : "Statutory Directive"}
+                      </span>
+                      <span className="inline-flex items-center rounded-sm bg-[#FBDD23] px-2.5 py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-900 shadow-2xs">
+                        {pillar.badgeLabel}
+                      </span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="bg-white p-5 text-justify text-sm leading-relaxed text-slate-700 sm:p-6 sm:text-[15px]">
-                  <p>{pillar.content}</p>
-                </div>
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          </div>
         </div>
       </Container>
     </section>

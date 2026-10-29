@@ -94,6 +94,8 @@ const EventGrid = () => {
                   <img
                     key={index}
                     src={img}
+                    width="800"
+                    height="600"
                     alt=""
                     loading="lazy"
                     decoding="async"

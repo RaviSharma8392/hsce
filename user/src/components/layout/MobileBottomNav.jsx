@@ -1,91 +1,63 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, GraduationCap, Phone, Menu, X } from "lucide-react";
+import { Home, GraduationCap, Phone, Menu, X } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext";
 
 export function MobileBottomNav({ mobileMenuOpen, setMobileMenuOpen }) {
   const { isHindi } = useLanguage();
   const location = useLocation();
 
-  const isProgramsActive =
-    location.pathname.startsWith("/course") ||
-    location.pathname.startsWith("/syllabus");
-
+  const isHomeActive = location.pathname === "/";
   const isAdmissionActive = location.pathname.startsWith("/admissions");
-
   const isContactActive = location.pathname.startsWith("/contact");
 
-  const handleMenuClick = () => {
+  const handleMenuClick = (e) => {
+    e.stopPropagation();
     setMobileMenuOpen((prev) => !prev);
   };
 
   const itemClass = (isActive) =>
-    `flex-1 min-w-0 flex flex-col items-center justify-center
-    py-2.5 px-1 transition-colors duration-150
-    active:bg-white/10 focus-visible:outline-none
-    focus-visible:ring-2 focus-visible:ring-inset
-    focus-visible:ring-white/50
-    ${
-      isActive
-        ? "bg-white/10 text-white font-semibold"
-        : "bg-transparent text-white/90 hover:bg-white/5 hover:text-white"
-    }`;
+    `flex flex-1 min-w-0 flex-col items-center justify-center gap-1
+     py-2 px-1 text-[11px] font-semibold transition-all duration-200
+     focus-visible:outline-none
+     ${isActive ? "text-[#FBDD23] font-bold" : "text-white/85 hover:text-white"}`;
 
   return (
     <nav
       aria-label={isHindi ? "मोबाइल नेविगेशन" : "Mobile navigation"}
-      className="fixed bottom-3 left-3 right-3 z-50 mx-auto
-      w-auto max-w-[380px] lg:hidden">
-      <div
-        className="flex items-stretch overflow-hidden rounded-full
-        border border-white/10 bg-[#1c1c1e] text-white
-        shadow-[0_6px_22px_rgba(0,0,0,0.28)]">
-        {/* Programs */}
+      className="fixed bottom-3 inset-x-3.5 z-[100] rounded-2xl bg-[#161A26]/95 backdrop-blur-md text-white border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] lg:hidden">
+      <div className="flex items-center divide-x divide-white/10 py-1 max-w-lg mx-auto">
+        {/* 1. Home */}
         <Link
-          to="/course/bed"
+          to="/"
           onClick={() => setMobileMenuOpen(false)}
-          aria-current={isProgramsActive ? "page" : undefined}
-          className={`${itemClass(
-            isProgramsActive && !mobileMenuOpen,
-          )} border-r border-white/10`}>
-          <BookOpen size={21} strokeWidth={2} />
-
-          <span className="mt-1 text-[11px] leading-tight">
-            {isHindi ? "प्रोग्राम" : "Programs"}
-          </span>
+          aria-current={isHomeActive && !mobileMenuOpen ? "page" : undefined}
+          className={itemClass(isHomeActive && !mobileMenuOpen)}>
+          <Home size={19} strokeWidth={1.9} />
+          <span>{isHindi ? "होम" : "Home"}</span>
         </Link>
 
-        {/* Admission */}
+        {/* 2. Admission */}
         <Link
           to="/admissions"
           onClick={() => setMobileMenuOpen(false)}
-          aria-current={isAdmissionActive ? "page" : undefined}
-          className={`${itemClass(
-            isAdmissionActive && !mobileMenuOpen,
-          )} border-r border-white/10`}>
-          <GraduationCap size={22} strokeWidth={2} />
-
-          <span className="mt-1 text-[11px] leading-tight">
-            {isHindi ? "प्रवेश" : "Admission"}
-          </span>
+          aria-current={isAdmissionActive && !mobileMenuOpen ? "page" : undefined}
+          className={itemClass(isAdmissionActive && !mobileMenuOpen)}>
+          <GraduationCap size={20} strokeWidth={1.9} />
+          <span>{isHindi ? "प्रवेश" : "Admission"}</span>
         </Link>
 
-        {/* Contact */}
+        {/* 3. Connect (Contact / Helplines) */}
         <Link
           to="/contact"
           onClick={() => setMobileMenuOpen(false)}
-          aria-current={isContactActive ? "page" : undefined}
-          className={`${itemClass(
-            isContactActive && !mobileMenuOpen,
-          )} border-r border-white/10`}>
-          <Phone size={20} strokeWidth={2} />
-
-          <span className="mt-1 text-[11px] leading-tight">
-            {isHindi ? "संपर्क" : "Contact"}
-          </span>
+          aria-current={isContactActive && !mobileMenuOpen ? "page" : undefined}
+          className={itemClass(isContactActive && !mobileMenuOpen)}>
+          <Phone size={18} strokeWidth={1.9} />
+          <span>{isHindi ? "संपर्क" : "Connect"}</span>
         </Link>
 
-        {/* Menu */}
+        {/* 4. Menu (Hamburger Drawer Toggle) */}
         <button
           type="button"
           onClick={handleMenuClick}
@@ -99,16 +71,13 @@ export function MobileBottomNav({ mobileMenuOpen, setMobileMenuOpen }) {
                 ? "मेन्यू खोलें"
                 : "Open menu"
           }
-          className={`${itemClass(false)} cursor-pointer`}>
+          className={`${itemClass(mobileMenuOpen)} cursor-pointer`}>
           {mobileMenuOpen ? (
-            <X size={21} strokeWidth={2} />
+            <X size={19} strokeWidth={2.2} />
           ) : (
-            <Menu size={21} strokeWidth={2} />
+            <Menu size={19} strokeWidth={2.2} />
           )}
-
-          <span className="mt-1 text-[11px] leading-tight">
-            {isHindi ? "मेन्यू" : "Menu"}
-          </span>
+          <span>{isHindi ? "मेन्यू" : "Menu"}</span>
         </button>
       </div>
     </nav>

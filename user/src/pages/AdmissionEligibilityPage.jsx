@@ -1,23 +1,14 @@
 import React from "react";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import {
   GraduationCap,
   CheckCircle2,
-  FileCheck,
   AlertCircle,
   Phone,
-  ArrowRight,
   BookOpen,
-  Award,
-  Sparkles,
-  HelpCircle,
-  Check,
 } from "lucide-react";
-import { Container } from "../components/common/Container";
-import { SectionHeading } from "../components/common/SectionHeading";
-import { PageHeaderBanner } from "../components/common/PageHeaderBanner";
-import { AdmissionSubNav } from "../components/admissions/AdmissionSubNav";
+import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout";
+import { getAdmissionsSidebarConfig } from "../data/navigationConfig";
 import { useLanguage } from "../context/LanguageContext";
 import { useAdmissionModal } from "../context/AdmissionModalContext";
 import { collegeInfo } from "../data/siteData";
@@ -25,6 +16,7 @@ import { collegeInfo } from "../data/siteData";
 export default function AdmissionEligibilityPage() {
   const { isHindi } = useLanguage();
   const { openAdmissionModal } = useAdmissionModal();
+  const sidebarConfig = getAdmissionsSidebarConfig(isHindi);
 
   const eligibilityCriteria = [
     {
@@ -102,188 +94,174 @@ export default function AdmissionEligibilityPage() {
   const cleanPhone = helplinePhone.replace(/\D/g, "");
 
   return (
-    <>
-      <Helmet>
-        <title>
-          {isHindi
-            ? "बी.एड. पात्रता मापदंड एवं योग्यता | हरियाणा शक्ति कॉलेज ऑफ एजुकेशन"
-            : "B.Ed. Eligibility Criteria & Requirements | Haryana Shakti College of Education"}
-        </title>
-        <meta
-          name="description"
-          content={
-            isHindi
-              ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में 2-वर्षीय बी.एड. पाठ्यक्रम हेतु न्यूनतम योग्यता, अंक प्रतिशत एवं विषय पात्रता नियम।"
-              : "Minimum qualifying marks, category-wise percentage criteria, pedagogy combinations, and NCTE norms for B.Ed. admission at HSCE Delhi."
-          }
-        />
-      </Helmet>
-
-      {/* Page Header Banner */}
-      <PageHeaderBanner
-        title={isHindi ? "बी.एड. पात्रता मापदंड" : "B.Ed. Eligibility Criteria"}
-        subtitle={
-          isHindi
-            ? "राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE) एवं गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) द्वारा निर्धारित शैक्षणिक अर्हता एवं न्यूनतम अंक मापदंड।"
-            : "Academic session eligibility criteria, category-wise qualifying marks, pedagogy prerequisites, and statutory relaxation guidelines."
-        }
-        breadcrumbs={[
-          { label: isHindi ? "प्रवेश" : "Admissions", href: "/admissions/overview" },
-          { label: isHindi ? "पात्रता मापदंड" : "Eligibility Criteria" },
-        ]}
-      />
-
-      {/* Tabbed Sub-Navigation */}
-      <AdmissionSubNav activeTabId="eligibility" />
-
-      {/* Main Content */}
-      <section className="py-12 bg-[#F8F9FA]">
-        <Container>
-          {/* Key Eligibility Highlights Banner */}
-          <div className="mb-10 rounded-2xl bg-gradient-to-r from-[#1c3274] to-[#243d8a] text-white p-6 sm:p-8 shadow-sm">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="space-y-2 max-w-2xl">
-                <span className="inline-block px-3 py-1 rounded-full bg-amber-400 text-[#0c1b33] text-xs font-bold uppercase tracking-wider font-poppins">
-                  {isHindi ? "शैक्षणिक सत्र 2026-27" : "Academic Session 2026-27"}
-                </span>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-poppins leading-tight text-white">
-                  {isHindi
-                    ? "एनसीटीई एवं जीजीएसआईपीयू अनुमोदित पात्रता नियम"
-                    : "NCTE & GGSIPU Approved Academic Eligibility"}
-                </h2>
-                <p className="text-white/85 text-xs sm:text-sm font-sans leading-relaxed">
-                  {isHindi
-                    ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में 2-वर्षीय नियमित बी.एड. पाठ्यक्रम हेतु प्रवेश केवल वे अभ्यर्थी ले सकते हैं जो नीचे दिए गए न्यूनतम अंक एवं शैक्षणिक मापदंड पूर्ण करते हों।"
-                    : "Admission to our two-year regular Bachelor of Education (B.Ed.) programme is granted strictly to candidates who satisfy the university and statutory qualifying criteria."}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => openAdmissionModal({ defaultProgramme: "B.Ed. (Bachelor of Education - 2 Years)" })}
-                  className="inline-flex items-center gap-2 rounded-xl bg-white text-[#1c3274] px-5 py-3 font-poppins text-xs font-bold shadow-md hover:bg-amber-50 hover:text-[#142657] transition cursor-pointer">
-                  <GraduationCap size={16} />
-                  <span>{isHindi ? "ऑनलाइन आवेदन करें" : "Apply Online (2026-27)"}</span>
-                </button>
-                <a
-                  href={`tel:${cleanPhone}`}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-5 py-3 font-poppins text-xs font-semibold text-white hover:bg-white/20 transition">
-                  <Phone size={16} />
-                  <span>{isHindi ? "पात्रता सहायता डेस्क" : "Eligibility Helpline"}</span>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Table: Category-Wise Criteria */}
-          <div className="mb-14 bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-xs">
-            <div className="mb-6 pb-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <SectionHeading
-                  eyebrow={isHindi ? "न्यूनतम योग्यता" : "Qualifying Criteria"}
-                  title={isHindi ? "वर्गवार शैक्षणिक पात्रता एवं न्यूनतम अंक" : "Category-Wise Percentage Requirements"}
-                />
-              </div>
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                GGSIPU Norms Compliant
+    <CollegiatePageLayout
+      bannerTitle={isHindi ? "बी.एड. पात्रता मापदंड" : "B.Ed. Eligibility Criteria"}
+      bannerSubtitle={
+        isHindi
+          ? "राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE) एवं गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) द्वारा निर्धारित शैक्षणिक अर्हता एवं न्यूनतम अंक मापदंड।"
+          : "Academic session eligibility criteria, category-wise qualifying marks, pedagogy prerequisites, and statutory relaxation guidelines."
+      }
+      breadcrumbs={[
+        { label: isHindi ? "प्रवेश" : "Admissions", href: "/admissions" },
+        { label: isHindi ? "पात्रता मापदंड" : "Eligibility Criteria" },
+      ]}
+      sidebarTitle={sidebarConfig.title}
+      sidebarItems={sidebarConfig.items}
+      quickActions={sidebarConfig.quickActions}>
+      <div className="space-y-8">
+        {/* Key Eligibility Callout Banner */}
+        <div className="rounded-md border border-gray-200/90 bg-[#2E3A8C] text-white p-6 sm:p-7 shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div className="space-y-2 max-w-2xl">
+              <span className="inline-block px-3 py-1 rounded bg-[#F5CB1E] text-slate-900 text-xs font-bold uppercase tracking-wider">
+                {isHindi ? "शैक्षणिक सत्र 2026-27" : "Academic Session 2026-27"}
               </span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm font-sans">
-                <thead>
-                  <tr className="border-b-2 border-gray-200 bg-gray-50 text-gray-700 font-poppins font-bold uppercase text-[11px] sm:text-xs tracking-wider">
-                    <th className="py-3 px-4">Category</th>
-                    <th className="py-3 px-4">Qualifying Examination</th>
-                    <th className="py-3 px-4">Minimum Aggregate Requirement</th>
-                    <th className="py-3 px-4">Statutory Norm</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {eligibilityCriteria.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-blue-50/40 transition">
-                      <td className="py-4 px-4 font-bold text-gray-900 font-poppins whitespace-nowrap">
-                        {isHindi ? item.hiCategory : item.category}
-                      </td>
-                      <td className="py-4 px-4 text-gray-700 leading-relaxed">
-                        {isHindi ? item.hiDegree : item.degree}
-                      </td>
-                      <td className="py-4 px-4 font-semibold text-[#1c3274]">
-                        {isHindi ? item.hiRequirement : item.requirement}
-                      </td>
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <span className="inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-700">
-                          {item.badge}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Pedagogy Subjects Prerequisites */}
-          <div className="mb-14 bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-xs">
-            <div className="mb-6">
-              <SectionHeading
-                eyebrow={isHindi ? "शिक्षण विषय नियम" : "Pedagogy Rules"}
-                title={isHindi ? "शिक्षण पद्धति (Pedagogy) विषयों के चयन नियम" : "Prerequisites for Choosing Pedagogy Subjects"}
-              />
-              <p className="text-xs sm:text-sm text-gray-600 mt-1 font-sans">
+              <h2 className="text-xl sm:text-2xl font-bold font-serif leading-tight">
                 {isHindi
-                  ? "बी.एड. पाठ्यक्रम के दौरान छात्र-अध्यापकों को दो शिक्षण विषय (Teaching Subjects) चुनने होते हैं, जो उनकी स्नातक पढ़ाई पर आधारित होने चाहिए।"
-                  : "Pupil-teachers must select two pedagogy school subjects corresponding to the major disciplines studied in their graduation/postgraduation."}
+                  ? "एनसीटीई एवं जीजीएसआईपीयू अनुमोदित पात्रता नियम"
+                  : "NCTE & GGSIPU Approved Academic Eligibility"}
+              </h2>
+              <p className="text-white/90 text-xs sm:text-sm font-sans leading-relaxed">
+                {isHindi
+                  ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में 2-वर्षीय नियमित बी.एड. पाठ्यक्रम हेतु प्रवेश केवल वे अभ्यर्थी ले सकते हैं जो नीचे दिए गए न्यूनतम अंक एवं शैक्षणिक मापदंड पूर्ण करते हों।"
+                  : "Admission to our two-year regular Bachelor of Education (B.Ed.) programme is granted strictly to candidates who satisfy the university and statutory qualifying criteria."}
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {pedagogySubjects.map((ped, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-gray-200 bg-slate-50 p-5 hover:border-[#1c3274]/40 hover:bg-white transition-all shadow-2xs">
-                  <div className="flex items-center gap-2 mb-3">
-                    <BookOpen size={16} className="text-[#1c3274]" />
-                    <h4 className="font-poppins font-bold text-sm text-gray-900">
-                      {isHindi ? ped.hiStream : ped.stream}
-                    </h4>
-                  </div>
-                  <ul className="space-y-1 mb-3 text-xs text-gray-800 font-medium font-poppins">
-                    {ped.subjects.map((sub, sIdx) => (
-                      <li key={sIdx} className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#1c3274]" />
-                        <span>{sub}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-[11px] text-gray-500 leading-relaxed font-sans border-t border-gray-200/60 pt-2.5">
-                    {ped.requirement}
-                  </p>
-                </div>
-              ))}
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => openAdmissionModal({ defaultProgramme: "B.Ed. (Bachelor of Education - 2 Years)" })}
+                className="inline-flex items-center gap-2 rounded bg-white text-[#2E3A8C] px-4 py-2.5 text-xs font-bold shadow-xs hover:bg-slate-100 transition cursor-pointer">
+                <GraduationCap size={15} />
+                <span>{isHindi ? "ऑनलाइन आवेदन" : "Apply Online"}</span>
+              </button>
+              <a
+                href={`tel:${cleanPhone}`}
+                className="inline-flex items-center gap-2 rounded border border-white/40 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/20 transition">
+                <Phone size={15} />
+                <span>{isHindi ? "हेल्पलाइन" : "Helpdesk"}</span>
+              </a>
             </div>
+          </div>
+        </div>
+
+        {/* Category-Wise Criteria Table (Image 3 Style) */}
+        <div className="rounded-md border border-gray-200/90 bg-white overflow-hidden shadow-xs">
+          <div className="bg-[#E4E7F5] px-6 py-4 border-b border-gray-200/80 flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#2E3A8C]">
+                {isHindi ? "न्यूनतम योग्यता" : "Qualifying Criteria"}
+              </span>
+              <h3 className="font-serif text-xl font-bold text-[#1E242C]">
+                {isHindi ? "वर्गवार शैक्षणिक पात्रता एवं न्यूनतम अंक" : "Category-Wise Percentage Requirements"}
+              </h3>
+            </div>
+            <span className="text-xs font-bold px-3 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+              GGSIPU Norms Compliant
+            </span>
           </div>
 
-          {/* Important Regulatory Notes */}
-          <div className="rounded-2xl bg-amber-50 border border-amber-200 p-6 sm:p-7 flex flex-col md:flex-row items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0">
-              <AlertCircle size={22} />
-            </div>
-            <div className="space-y-1 text-xs sm:text-sm text-amber-900">
-              <h4 className="font-bold font-poppins text-base text-amber-950">
-                {isHindi ? "महत्वपूर्ण नियामक दिशानिर्देश" : "Important Eligibility Guidelines"}
-              </h4>
-              <ul className="list-disc pl-5 space-y-1 leading-relaxed">
-                <li>Candidates appearing in their final year degree examination are eligible to apply, but must present original marksheets and provisional degree at the time of physical reporting.</li>
-                <li>Rounding off of marks is strictly not permissible (e.g. 49.9% marks cannot be considered as 50%).</li>
-                <li>Degrees obtained through open / distance learning (ODL) must be recognized by UGC-DEB and AIU for equivalence.</li>
-                <li>No candidate without a valid university CET/CUET allotment will be admitted to the regular seat quota.</li>
-              </ul>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm font-sans border-collapse">
+              <thead>
+                <tr className="bg-[#1F242C] text-white">
+                  <th className="py-3.5 px-5 font-bold border-r border-[#333a44]">Category</th>
+                  <th className="py-3.5 px-5 font-bold border-r border-[#333a44]">Qualifying Examination</th>
+                  <th className="py-3.5 px-5 font-bold border-r border-[#333a44]">Minimum Aggregate</th>
+                  <th className="py-3.5 px-5 font-bold">Statutory Norm</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200/80">
+                {eligibilityCriteria.map((item, idx) => (
+                  <tr
+                    key={idx}
+                    className={`transition-colors hover:bg-blue-50/40 ${
+                      idx % 2 === 1 ? "bg-slate-50/70" : "bg-white"
+                    }`}>
+                    <td className="py-3.5 px-5 font-bold text-slate-900 border-r border-gray-200/80 whitespace-nowrap">
+                      {isHindi ? item.hiCategory : item.category}
+                    </td>
+                    <td className="py-3.5 px-5 text-slate-700 leading-relaxed border-r border-gray-200/80">
+                      {isHindi ? item.hiDegree : item.degree}
+                    </td>
+                    <td className="py-3.5 px-5 font-bold text-[#2E3A8C] border-r border-gray-200/80">
+                      {isHindi ? item.hiRequirement : item.requirement}
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap">
+                      <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700 border border-gray-200">
+                        {item.badge}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </Container>
-      </section>
-    </>
+        </div>
+
+        {/* Pedagogy Subjects Prerequisites */}
+        <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="border-b border-gray-200 pb-4 mb-6">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#2E3A8C]">
+              {isHindi ? "शिक्षण विषय नियम" : "Pedagogy Rules"}
+            </span>
+            <h3 className="mt-1 font-serif text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              {isHindi ? "शिक्षण पद्धति (Pedagogy) विषयों के चयन नियम" : "Prerequisites for Choosing Pedagogy Subjects"}
+            </h3>
+            <div className="mt-3 h-1 w-20 bg-[#2E3A8C] rounded-full" />
+            <p className="text-xs sm:text-sm text-slate-600 mt-2 font-sans">
+              {isHindi
+                ? "बी.एड. पाठ्यक्रम के दौरान छात्र-अध्यापकों को दो शिक्षण विषय (Teaching Subjects) चुनने होते हैं, जो उनकी स्नातक पढ़ाई पर आधारित होने चाहिए।"
+                : "Pupil-teachers must select two pedagogy school subjects corresponding to the major disciplines studied in their graduation/postgraduation."}
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pedagogySubjects.map((ped, idx) => (
+              <div
+                key={idx}
+                className="rounded-md border border-gray-200 bg-slate-50/60 p-4 hover:border-[#2E3A8C] hover:bg-white transition-all shadow-2xs">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <BookOpen size={16} className="text-[#2E3A8C]" />
+                  <h4 className="font-serif font-bold text-sm text-slate-900">
+                    {isHindi ? ped.hiStream : ped.stream}
+                  </h4>
+                </div>
+                <ul className="space-y-1 mb-2.5 text-xs text-slate-800 font-medium">
+                  {ped.subjects.map((sub, sIdx) => (
+                    <li key={sIdx} className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#2E3A8C]" />
+                      <span>{sub}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[11px] text-slate-500 leading-relaxed border-t border-gray-200/80 pt-2 font-sans">
+                  {ped.requirement}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Regulatory Guidelines */}
+        <div className="rounded-md border border-amber-200 bg-amber-50/70 p-5 flex items-start gap-3.5 shadow-2xs">
+          <div className="p-2 rounded bg-amber-100 text-[#2E3A8C] shrink-0 mt-0.5">
+            <AlertCircle size={20} />
+          </div>
+          <div className="space-y-1 text-xs sm:text-sm text-slate-800">
+            <h4 className="font-serif font-bold text-sm text-slate-900">
+              {isHindi ? "महत्वपूर्ण नियामक दिशानिर्देश" : "Important Eligibility Guidelines"}
+            </h4>
+            <ul className="list-disc pl-4 space-y-1 text-xs text-slate-700 leading-relaxed">
+              <li>Candidates appearing in their final year degree examination are eligible to apply, but must present original marksheets and provisional degree at physical reporting.</li>
+              <li>Rounding off of marks is strictly not permissible (e.g. 49.9% marks cannot be considered as 50%).</li>
+              <li>Degrees obtained through open / distance learning (ODL) must be recognized by UGC-DEB and AIU for equivalence.</li>
+              <li>No candidate without a valid university CET/CUET allotment will be admitted to the regular seat quota.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </CollegiatePageLayout>
   );
 }

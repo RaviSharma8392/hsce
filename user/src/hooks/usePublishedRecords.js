@@ -1,16 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
-import { db, firebaseReady } from "../config/firebase";
+import { firebaseReady } from "../config/firebaseOptions";
 
 export async function fetchPublishedRecords(
   collectionName,
@@ -18,19 +7,26 @@ export async function fetchPublishedRecords(
 ) {
   if (!firebaseReady) return [];
 
-  const constraints = [where("isPublished", "==", true)];
-  if (orderByField) constraints.push(orderBy(orderByField, orderDirection));
-  constraints.push(limit(limitCount));
-
   try {
-    const snapshot = await getDocs(
-      query(collection(db, collectionName), ...constraints),
+    const { getLazyFirestore } = await import("../config/firebaseLazy");
+    const { db, firestore } = await getLazyFirestore();
+    const constraints = [firestore.where("isPublished", "==", true)];
+    if (orderByField) {
+      constraints.push(firestore.orderBy(orderByField, orderDirection));
+    }
+    constraints.push(firestore.limit(limitCount));
+    const snapshot = await firestore.getDocs(
+      firestore.query(
+        firestore.collection(db, collectionName),
+        ...constraints,
+      ),
     );
     return snapshot.docs.map((item) => ({
       id: item.id,
       ...item.data(),
     }));
-  } catch {
+  } catch (error) {
+    console.warn(`Could not fetch published records from ${collectionName}:`, error);
     return [];
   }
 }
@@ -43,18 +39,21 @@ export async function fetchPublishedRecordByField(
   if (!firebaseReady || !fieldValue) return null;
 
   try {
-    const snapshot = await getDocs(
-      query(
-        collection(db, collectionName),
-        where("isPublished", "==", true),
-        where(fieldName, "==", fieldValue),
-        limit(1),
+    const { getLazyFirestore } = await import("../config/firebaseLazy");
+    const { db, firestore } = await getLazyFirestore();
+    const snapshot = await firestore.getDocs(
+      firestore.query(
+        firestore.collection(db, collectionName),
+        firestore.where("isPublished", "==", true),
+        firestore.where(fieldName, "==", fieldValue),
+        firestore.limit(1),
       ),
     );
     return snapshot.empty
       ? null
       : { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
-  } catch {
+  } catch (error) {
+    console.warn(`Could not fetch published ${collectionName} record:`, error);
     return null;
   }
 }
@@ -63,12 +62,17 @@ export async function fetchPublishedRecordById(collectionName, recordId) {
   if (!firebaseReady || !recordId) return null;
 
   try {
-    const snapshot = await getDoc(doc(db, collectionName, recordId));
+    const { getLazyFirestore } = await import("../config/firebaseLazy");
+    const { db, firestore } = await getLazyFirestore();
+    const snapshot = await firestore.getDoc(
+      firestore.doc(db, collectionName, recordId),
+    );
     const data = snapshot.data();
     return snapshot.exists() && data?.isPublished === true
       ? { id: snapshot.id, ...data }
       : null;
-  } catch {
+  } catch (error) {
+    console.warn(`Could not fetch published ${collectionName} record ${recordId}:`, error);
     return null;
   }
 }
@@ -94,33 +98,51 @@ export function usePublishedRecords(collectionName, fallback = [], options = {})
       return undefined;
     }
 
-    const constraints = [where("isPublished", "==", true)];
-    if (orderByField) {
-      constraints.push(orderBy(orderByField, orderDirection));
-    }
-    constraints.push(limit(limitCount));
+    let active = true;
+    let unsubscribe;
 
-    const q = query(collection(db, collectionName), ...constraints);
+    const subscribe = async () => {
+      const { getLazyFirestore } = await import("../config/firebaseLazy");
+      const { db, firestore } = await getLazyFirestore();
+      if (!active) return;
 
-    // Set up real-time listener: updates automatically on changes,
-    // avoids showing old content, and eliminates window focus/visibility reload triggers
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const liveRecords = snapshot.docs.map((item) => ({
-          id: item.id,
-          ...item.data(),
-        }));
-        setRecords(liveRecords.length > 0 ? liveRecords : fallback);
-      },
-      (error) => {
-        console.warn(`Firestore listener on ${collectionName}:`, error);
-        setRecords(fallback);
-      },
-    );
+      const constraints = [firestore.where("isPublished", "==", true)];
+      if (orderByField) {
+        constraints.push(firestore.orderBy(orderByField, orderDirection));
+      }
+      constraints.push(firestore.limit(limitCount));
+      const q = firestore.query(
+        firestore.collection(db, collectionName),
+        ...constraints,
+      );
+
+      unsubscribe = firestore.onSnapshot(
+        q,
+        (snapshot) => {
+          const liveRecords = snapshot.docs.map((item) => ({
+            id: item.id,
+            ...item.data(),
+          }));
+          setRecords(liveRecords.length > 0 ? liveRecords : fallback);
+        },
+        (error) => {
+          console.warn(`Firestore listener on ${collectionName}:`, error);
+          setRecords(fallback);
+        },
+      );
+    };
+
+    subscribe().catch((error) => {
+      console.warn(
+        `Could not initialize Firestore listener on ${collectionName}:`,
+        error,
+      );
+      if (active) setRecords(fallback);
+    });
 
     return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
+      active = false;
+      unsubscribe?.();
     };
   }, [collectionName, limitCount, orderByField, orderDirection]);
 

@@ -156,6 +156,8 @@ export default function PortalWatermark({
         <div className="absolute inset-0 flex flex-col items-center justify-center p-20 pointer-events-none">
           <img
             src="/assets/brand/college-logo.png"
+            width="432"
+            height="432"
             alt=""
             className={`w-32 h-32 object-contain grayscale ${logoOpacity}`}
           />

@@ -30,6 +30,7 @@ import {
   compressImageFile,
   getCloudinaryConfig,
   setCloudinaryConfig,
+  optimizeCloudinaryImageUrl,
 } from "../services/cloudinary";
 import {
   subscribeToGallery,
@@ -621,7 +622,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
               {/* Thumbnail Container */}
               <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
                 <img
-                  src={img.image}
+                  src={optimizeCloudinaryImageUrl(img.image, 900)}
                   alt={img.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -742,7 +743,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                   <tr key={img.id} className="hover:bg-slate-50/80 transition">
                     <td className="py-3 px-4">
                       <img
-                        src={img.image}
+                        src={optimizeCloudinaryImageUrl(img.image, 1200)}
                         alt={img.title}
                         className="w-14 h-10 object-cover rounded-lg border border-slate-200 cursor-pointer"
                         onClick={() => setLightboxItem(img)}
@@ -976,7 +977,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                   </div>
                   <div className="relative aspect-[16/9] max-h-52 overflow-hidden rounded-lg bg-black/10 flex items-center justify-center">
                     <img
-                      src={formImagePreview}
+                      src={optimizeCloudinaryImageUrl(formImagePreview, 1000)}
                       alt="Upload preview"
                       className="w-full h-full object-cover"
                     />
@@ -1158,7 +1159,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
             </div>
             <div className="max-h-[70vh] bg-black flex items-center justify-center p-2">
               <img
-                src={lightboxItem.image}
+                src={optimizeCloudinaryImageUrl(lightboxItem.image, 1400)}
                 alt={lightboxItem.title}
                 className="max-h-[66vh] w-auto max-w-full object-contain"
               />

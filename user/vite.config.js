@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { seoPages } from './src/data/seoPages.js'
+import { createSeoStructuredData } from './src/data/seoStructuredData.js'
 
 const siteUrl = 'https://hscekanjhawala.com'
 
@@ -39,10 +40,19 @@ function createSitemap() {
 }
 
 function createRouteHtml(template, page) {
-  const canonicalUrl = `${siteUrl}${page.path === '/' ? '/' : page.path}`
+  const canonicalUrl = `${siteUrl}${page.path}`
   const title = escapeHtml(page.title)
   const description = escapeHtml(page.description)
-  const robots = page.indexable === false ? 'noindex, follow' : 'index, follow'
+  const robots =
+    page.indexable === false
+      ? 'noindex, follow'
+      : 'index, follow, max-image-preview:large'
+  const image = escapeHtml(page.image || `${siteUrl}/assets/brand/college-logo.png`)
+  const imageAlt = escapeHtml(page.imageAlt || 'Haryana Shakti College of Education')
+  const structuredData = JSON.stringify(createSeoStructuredData(page)).replaceAll(
+    '<',
+    '\\u003c',
+  )
 
   return template
     .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${title}</title>`)
@@ -75,8 +85,24 @@ function createRouteHtml(template, page) {
       () => `<meta property="og:url" content="${canonicalUrl}" />`,
     )
     .replace(
+      /<meta\s+property="og:image"\s+content="[^"]*"\s*\/>/,
+      () => `<meta property="og:image" content="${image}" />`,
+    )
+    .replace(
+      /<meta\s+property="og:image:alt"\s+content="[^"]*"\s*\/>/,
+      () => `<meta property="og:image:alt" content="${imageAlt}" />`,
+    )
+    .replace(
+      /<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/>/,
+      () => `<meta name="twitter:image" content="${image}" />`,
+    )
+    .replace(
       /<link\s+rel="canonical"\s+href="[^"]*"\s*\/>/,
       () => `<link rel="canonical" href="${canonicalUrl}" />`,
+    )
+    .replace(
+      '<!-- seo-json-ld -->',
+      `<script type="application/ld+json">${structuredData}</script>`,
     )
 }
 
@@ -133,13 +159,7 @@ function seoPagesPlugin() {
             ? indexPath
             : resolve(outputDirectory, `${page.path.slice(1)}.html`)
         await mkdir(dirname(pagePath), { recursive: true })
-        let routeHtml = createRouteHtml(template, page)
-        if (page.path !== '/') {
-          routeHtml = routeHtml.replace(
-            /<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/,
-            '',
-          )
-        }
+        const routeHtml = createRouteHtml(template, page)
         await writeFile(pagePath, routeHtml)
       }
 
@@ -152,10 +172,7 @@ function seoPagesPlugin() {
       })
         .replace(/<meta\s+property="og:url"\s+content="[^"]*"\s*\/>/, '')
         .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/>/, '')
-        .replace(
-          /<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/,
-          '',
-        )
+        .replace('<!-- seo-json-ld -->', '')
       await writeFile(resolve(outputDirectory, '404.html'), notFoundHtml)
 
       await writeFile(resolve(outputDirectory, 'sitemap.xml'), createSitemap())

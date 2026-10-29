@@ -12,17 +12,20 @@ export function PageHeaderBanner({
   title,
   subtitle,
   breadcrumbs = [],
+  headingLevel = "h1",
   className = "",
 }) {
+  const Heading = headingLevel;
+
   return (
     <div className={`w-full ${className}`}>
       {/* Top Deep Royal Blue Banner Section */}
       <div className="bg-[#1c3274] text-white py-12 sm:py-16 md:py-20 relative overflow-hidden">
         <Container>
           <div className="max-w-4xl">
-            <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-bold font-poppins text-white tracking-tight leading-tight">
+            <Heading className="text-3xl sm:text-4xl lg:text-[42px] font-bold font-poppins text-white tracking-tight leading-tight">
               {title}
-            </h1>
+            </Heading>
             {subtitle && (
               <p className="mt-3 text-sm sm:text-base text-white/90 font-normal leading-relaxed font-sans max-w-3xl">
                 {subtitle}
@@ -57,9 +60,9 @@ export function PageHeaderBanner({
                   <span className="mx-2 text-gray-400 font-light select-none">
                     /
                   </span>
-                  {crumb.href && !isLast ? (
+                  {(crumb.href || crumb.path || crumb.to) && !isLast ? (
                     <Link
-                      to={crumb.href}
+                      to={crumb.href || crumb.path || crumb.to}
                       className="text-gray-700 hover:text-[#1c3274] transition-colors font-medium">
                       {crumb.label}
                     </Link>

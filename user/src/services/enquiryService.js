@@ -91,3 +91,6 @@ export async function submitStudentEnquiry(data) {
     record: localRecord,
   };
 }
+
+export const submitEnquiry = submitStudentEnquiry;
+

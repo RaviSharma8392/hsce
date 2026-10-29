@@ -1,13 +1,13 @@
+import React from "react";
 import {
   ArrowRight,
-  GraduationCap,
   MapPin,
-  Phone,
+  PhoneCall,
   BookOpen,
   Mail,
-  Sparkles,
+  GraduationCap,
+  ShieldCheck,
 } from "lucide-react";
-
 import { Link } from "react-router-dom";
 import { collegeInfo } from "../../data/collegeDetailsData";
 import { useAdmissionModal } from "../../context/AdmissionModalContext";
@@ -15,201 +15,200 @@ import { admissionModalData } from "../../data/admissionModalData";
 import { useLanguage } from "../../context/LanguageContext";
 import { Container } from "../common/Container";
 
+/* Decorative dot pattern matching second reference image */
+function DotPattern({ className = "" }) {
+  return (
+    <svg
+      width="72"
+      height="54"
+      viewBox="0 0 72 54"
+      fill="none"
+      className={className}
+      aria-hidden="true">
+      <defs>
+        <pattern
+          id="cta-dot-grid"
+          x="0"
+          y="0"
+          width="12"
+          height="12"
+          patternUnits="userSpaceOnUse">
+          <circle cx="2.5" cy="2.5" r="1.5" fill="currentColor" />
+        </pattern>
+      </defs>
+      <rect width="72" height="54" fill="url(#cta-dot-grid)" />
+    </svg>
+  );
+}
+
 export function AdmissionCTA() {
   const { isHindi } = useLanguage();
   const { openAdmissionModal } = useAdmissionModal();
 
-  const admissionPhone =
-    collegeInfo.phone || admissionModalData.helplinePhoneFallback;
+  const phone1 = collegeInfo.phone || admissionModalData.helplinePhoneFallback || "9953155054";
+  const phone2 = "8056777077";
 
   return (
-    <section
-      style={{ backgroundColor: "#0a4b8c" }}
-      className="relative isolate w-full overflow-hidden bg-gradient-to-br from-[#0a4b8c] via-[#094179] to-[#062c55] py-14 sm:py-16 lg:py-20 font-sans text-white border-y border-blue-900/50">
-      {/* Decorative wave background synced with CampusLifeSection */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden">
-        <svg
-          className="absolute -bottom-20 -left-24 h-[650px] w-[850px] max-w-none opacity-20 sm:-left-10 lg:-bottom-32 lg:left-[5%] lg:h-[850px] lg:w-[1000px]"
-          viewBox="0 0 800 800"
-          fill="none">
-          {Array.from({ length: 32 }).map((_, i) => (
-            <path
-              key={i}
-              d={`M ${40 + i * 8} 820 C ${
-                100 + i * 12
-              } ${560 - i * 5}, ${320 + i * 8} ${
-                260 - i * 7
-              }, ${800} ${80 + i * 12}`}
-              stroke="white"
-              strokeWidth="1.2"
-              strokeOpacity={0.3 + (i % 4) * 0.1}
-            />
-          ))}
-        </svg>
-
-        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border border-white/15 sm:h-[450px] sm:w-[450px]" />
-        <div className="absolute -right-12 -top-12 h-56 w-56 rounded-full border border-white/15 sm:h-[350px] sm:w-[350px]" />
-
-        <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-transparent to-[#052243]/50" />
-
-        <span
-          className="pointer-events-none absolute bottom-6 right-8 hidden text-[110px] font-bold leading-none text-white/[0.05] lg:block xl:right-12 xl:text-[150px]">
-          APPLY
-        </span>
-      </div>
+    <section className="relative isolate w-full overflow-hidden bg-[#F8FAFC] py-14 sm:py-16 lg:py-20 font-sans border-b border-gray-200/90">
+      {/* Subtle corner dot patterns matching reference image */}
+      <DotPattern className="absolute top-6 left-6 text-slate-300/80 pointer-events-none hidden sm:block" />
+      <DotPattern className="absolute bottom-6 right-6 text-slate-300/80 pointer-events-none hidden sm:block" />
 
       <Container>
-        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16">
-          {/* LEFT CONTENT */}
+        <div className="relative z-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16">
+          {/* ============================================================ */}
+          {/* LEFT CONTENT: Heading, Real HSCE Story & Action Buttons      */}
+          {/* ============================================================ */}
           <div className="flex flex-col justify-center lg:col-span-7">
             {/* EYEBROW */}
-            <div className="mb-6 flex items-center gap-3">
-              <span className="h-0.5 w-8 bg-[#FBDD23]" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#FBDD23]">
+            <div className="mb-4 flex items-center gap-2.5">
+              <span className="h-0.5 w-6 bg-[#FBDD23]" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#2E3A8C]">
                 {isHindi ? "प्रवेश आमंत्रण" : "Your Teaching Journey Starts Here"}
               </span>
             </div>
 
-            {/* HEADING */}
-            <h2 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-[42px]">
+            {/* HEADING (Font & text matching second image) */}
+            <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-[40px]">
               {isHindi ? (
                 <>
                   शिक्षा के क्षेत्र में अपने{" "}
-                  <span className="font-bold text-[#FBDD23]">भविष्य को संवारें</span>
+                  <span className="text-[#2E3A8C]">भविष्य को संवारें</span>
                 </>
               ) : (
                 <>
                   Explore Your Future in{" "}
-                  <span className="font-bold text-[#FBDD23]">Education</span>
+                  <span className="text-[#2E3A8C]">Education</span>
                 </>
               )}
             </h2>
 
             {/* DESCRIPTION */}
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-blue-50/90 sm:text-lg sm:leading-8 font-normal">
+            <p className="mt-5 max-w-2xl text-sm sm:text-[15px] leading-relaxed text-slate-600 font-normal">
               {isHindi
                 ? "हमारे दो वर्षीय नियमित बी.एड. कार्यक्रम के साथ शिक्षक बनने की दिशा में कदम बढ़ाएं। पाठ्यक्रम, पात्रता, प्रवेश प्रक्रिया और काउंसलिंग की संपूर्ण जानकारी के लिए हमारी टीम से संपर्क करें।"
                 : "Discover our two-year regular B.Ed. programme and take the next step towards a career in teaching. Connect with our team to learn about the course, eligibility criteria, admission process, and other important details."}
             </p>
 
-            {/* BENEFIT HIGHLIGHTS (100% BILINGUAL) */}
-            <div className="mt-7 flex flex-wrap items-center gap-6 text-sm font-medium text-white">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-[#FBDD23]">
-                  <Sparkles size={15} />
-                </span>
-                {isHindi ? "व्यावसायिक शिक्षक शिक्षा" : "Teacher Education (B.Ed.)"}
+            {/* TWO HIGHLIGHT PILLARS (Matching the style of overview cards) */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-xl">
+              <div className="flex items-center gap-3 rounded-xl bg-white p-3.5 border border-slate-200/90 shadow-2xs">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2E3A8C] text-[#FBDD23]">
+                  <GraduationCap size={20} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-900">
+                    {isHindi ? "शिक्षक शिक्षा (बी.एड.)" : "Teacher Education (B.Ed.)"}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {isHindi ? "स्वीकृत सीटें: 100" : "Approved Intake: 100 Seats"}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-[#FBDD23]">
-                  <BookOpen size={15} />
-                </span>
-                {isHindi ? "दो वर्षीय नियमित बी.एड." : "Two-Year Regular Programme"}
+              <div className="flex items-center gap-3 rounded-xl bg-white p-3.5 border border-slate-200/90 shadow-2xs">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FBDD23] text-[#2E3A8C]">
+                  <BookOpen size={20} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-900">
+                    {isHindi ? "दो वर्षीय नियमित पाठ्यक्रम" : "Two-Year Regular Programme"}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {isHindi ? "एनसीटीई एवं जीजीएसआईपीयू" : "NCTE & GGSIPU Recognized"}
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            {/* ACTION BUTTONS (Solid uppercase buttons matching HomeFeaturedOverview) */}
+            <div className="mt-8 flex flex-wrap items-center gap-3.5">
               <button
                 type="button"
                 onClick={() => openAdmissionModal()}
-                className="group inline-flex h-12 items-center justify-center gap-2.5 rounded-lg bg-[#FBDD23] px-8 text-sm font-bold text-gray-900 shadow-md transition-all duration-200 hover:bg-[#ffe338] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a4b8c]">
-                <span>
-                  {isHindi ? "प्रवेश संबंधी पूछताछ करें" : "Enquire About Admission"}
-                </span>
-                <ArrowRight
-                  size={16}
-                  strokeWidth={2.2}
-                  className="transition-transform duration-200 group-hover:translate-x-1 text-gray-900"
-                />
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sm bg-[#2E3A8C] px-7 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all hover:bg-[#202965] active:scale-[0.98] cursor-pointer">
+                <span>{isHindi ? "प्रवेश पूछताछ करें" : "Enquire About Admission"}</span>
+                <ArrowRight size={14} className="text-[#FBDD23]" />
               </button>
 
               <Link
                 to="/course/bed"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/5 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-                {isHindi ? "पाठ्यक्रम विवरण देखें" : "Explore B.Ed. Course"}
+                className="inline-flex min-h-[44px] items-center justify-center rounded-sm bg-[#FBDD23] px-7 py-3 text-xs font-bold uppercase tracking-wider text-slate-900 shadow-xs transition-all hover:bg-[#FFDC13] active:scale-[0.98]">
+                <span>{isHindi ? "बी.एड. विवरण देखें" : "Explore B.Ed. Course"}</span>
               </Link>
             </div>
           </div>
 
-          {/* RIGHT CONTACT CARDS */}
-          <div className="flex flex-col gap-4 lg:col-span-5">
-            {/* CAMPUS CARD */}
-            <div className="group flex items-start gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border border-transparent hover:border-[#FBDD23]/60">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0a4b8c]/10 text-[#0a4b8c] transition-colors duration-300 group-hover:bg-[#0a4b8c] group-hover:text-[#FBDD23]">
-                <MapPin size={22} strokeWidth={2.2} />
+          {/* ============================================================ */}
+          {/* RIGHT SIDE: 3 CRISP WHITE CONTACT CARDS                      */}
+          {/* ============================================================ */}
+          <div className="flex flex-col gap-3.5 lg:col-span-5">
+            {/* Campus Address Card */}
+            <div className="group flex items-start gap-4 rounded-xl bg-white p-5 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] border border-slate-100 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#2E3A8C] text-[#FBDD23] shadow-xs">
+                <MapPin size={20} strokeWidth={2.2} />
               </div>
-
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-[#626262]">
-                  {isHindi ? "हमारे परिसर में आएं" : "Visit Our Campus"}
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#2E3A8C]">
+                  {isHindi ? "कैंपस का पता" : "Visit Our Campus"}
                 </p>
-                <p className="mt-1 text-sm font-semibold leading-snug text-[#252525] transition-colors group-hover:text-[#0a4b8c]">
-                  {collegeInfo.address || "Contact us for campus address"}
+                <p className="mt-0.5 text-xs sm:text-sm font-semibold leading-snug text-slate-900">
+                  {collegeInfo.address || "Kanjhawala, Delhi – 110081"}
                 </p>
-
-                <div className="mt-3 h-0.5 w-6 rounded-full bg-[#FBDD23] transition-all duration-300 group-hover:w-12" />
+                <Link
+                  to="/contact"
+                  className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#2E3A8C] hover:underline">
+                  <span>{isHindi ? "स्थान व मानचित्र देखें →" : "View Map & Directions →"}</span>
+                </Link>
               </div>
             </div>
 
-            {/* PHONE CARD */}
-            <div className="group flex items-start gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border border-transparent hover:border-[#FBDD23]/60">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0a4b8c]/10 text-[#0a4b8c] transition-colors duration-300 group-hover:bg-[#0a4b8c] group-hover:text-[#FBDD23]">
-                <Phone size={22} strokeWidth={2.2} />
+            {/* Admissions Helpline Card */}
+            <div className="group flex items-start gap-4 rounded-xl bg-white p-5 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] border border-slate-100 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FBDD23] text-[#2E3A8C] shadow-xs">
+                <PhoneCall size={20} strokeWidth={2.2} />
               </div>
-
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-[#626262]">
-                  {isHindi ? "प्रवेश हेल्पलाइन" : "Admissions Helpline"}
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#2E3A8C]">
+                  {isHindi ? "प्रवेश हेल्पलाइन नंबर" : "Admissions Helpline"}
                 </p>
-
-                <a
-                  href={`tel:${String(
-                    collegeInfo.phone ||
-                      admissionModalData.helplinePhoneFallback,
-                  ).replace(/[^\d+]/g, "")}`}
-                  className="mt-1 block text-sm font-bold text-[#0a4b8c] hover:underline">
-                  {collegeInfo.phone ||
-                    admissionModalData.helplinePhoneFallback}
-                </a>
-
-                <a
-                  href="tel:8056777077"
-                  className="mt-0.5 block text-sm font-bold text-[#0a4b8c] hover:underline">
-                  8056777077
-                </a>
-
-                <div className="mt-3 h-0.5 w-6 rounded-full bg-[#FBDD23] transition-all duration-300 group-hover:w-12" />
-              </div>
-            </div>
-
-            {/* EMAIL CARD */}
-            <div className="group flex items-start gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border border-transparent hover:border-[#FBDD23]/60">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0a4b8c]/10 text-[#0a4b8c] transition-colors duration-300 group-hover:bg-[#0a4b8c] group-hover:text-[#FBDD23]">
-                <Mail size={22} strokeWidth={2.2} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-[#626262]">
-                  {isHindi ? "सामान्य पूछताछ" : "General Enquiries"}
-                </p>
-
-                {collegeInfo.email ? (
+                <div className="mt-1 flex flex-wrap items-center gap-3">
                   <a
-                    href={`mailto:${collegeInfo.email}`}
-                    className="mt-1 block truncate text-sm font-bold text-[#0a4b8c] hover:underline">
-                    {collegeInfo.email}
+                    href={`tel:${phone1.replace(/\D/g, "")}`}
+                    className="text-sm font-bold text-slate-900 hover:text-[#2E3A8C] transition-colors">
+                    {phone1}
                   </a>
-                ) : (
-                  <p className="mt-1 text-sm font-semibold text-[#252525]">
-                    Contact us for details
-                  </p>
-                )}
+                  <span className="text-slate-300">•</span>
+                  <a
+                    href={`tel:${phone2.replace(/\D/g, "")}`}
+                    className="text-sm font-bold text-slate-900 hover:text-[#2E3A8C] transition-colors">
+                    {phone2}
+                  </a>
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500">
+                  {isHindi ? "सोम - शनि, 9:00 AM - 4:00 PM" : "Mon - Sat, 9:00 AM - 4:00 PM"}
+                </p>
+              </div>
+            </div>
 
-                <div className="mt-3 h-0.5 w-6 rounded-full bg-[#FBDD23] transition-all duration-300 group-hover:w-12" />
+            {/* Direct Email Card */}
+            <div className="group flex items-start gap-4 rounded-xl bg-white p-5 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.06)] border border-slate-100 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#2E3A8C] text-[#FBDD23] shadow-xs">
+                <Mail size={20} strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#2E3A8C]">
+                  {isHindi ? "ईमेल पूछताछ" : "Direct Email Inquiries"}
+                </p>
+                <a
+                  href={`mailto:${collegeInfo.email || "haryanashakticollege@gmail.com"}`}
+                  className="mt-0.5 block truncate text-xs sm:text-sm font-bold text-slate-900 hover:text-[#2E3A8C] transition-colors">
+                  {collegeInfo.email || "haryanashakticollege@gmail.com"}
+                </a>
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
+                  <ShieldCheck size={13} />
+                  <span>{isHindi ? "आधिकारिक संस्थान प्रतिक्रिया" : "Official College Helpdesk"}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -218,3 +217,5 @@ export function AdmissionCTA() {
     </section>
   );
 }
+
+export default AdmissionCTA;

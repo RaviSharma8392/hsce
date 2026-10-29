@@ -1,35 +1,44 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
-import AboutPage from "./pages/AboutPage";
-import AboutHistoryPage from "./pages/AboutHistoryPage";
-import AboutVisionMissionPage from "./pages/AboutVisionMissionPage";
-import AboutChairmanPage from "./pages/AboutChairmanPage";
-import AboutPrincipalPage from "./pages/AboutPrincipalPage";
-import AboutRecognitionPage from "./pages/AboutRecognitionPage";
-import CampusLifePage from "./pages/CampusLifePage";
-import AboutFactsPage from "./pages/AboutFactsPage";
-import GalleryPage from "./pages/GalleryPage";
-import AdmissionsPage from "./pages/AdmissionsPage";
-import AdmissionEligibilityPage from "./pages/AdmissionEligibilityPage";
-import AdmissionProcedurePage from "./pages/AdmissionProcedurePage";
-import AdmissionDocumentsPage from "./pages/AdmissionDocumentsPage";
-import CommitteesPage from "./pages/CommitteesPage";
-import ContactPage from "./pages/ContactPage";
-import CoursePage from "./pages/CoursePage";
-import FacultyPage from "./pages/FacultyPage";
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const AboutHistoryPage = lazy(() => import("./pages/AboutHistoryPage"));
+const AboutVisionMissionPage = lazy(() => import("./pages/AboutVisionMissionPage"));
+const AboutChairmanPage = lazy(() => import("./pages/AboutChairmanPage"));
+const AboutPrincipalPage = lazy(() => import("./pages/AboutPrincipalPage"));
+const AboutRecognitionPage = lazy(() => import("./pages/AboutRecognitionPage"));
+const CampusLifePage = lazy(() => import("./pages/CampusLifePage"));
+const AboutFactsPage = lazy(() => import("./pages/AboutFactsPage"));
+const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const AdmissionsPage = lazy(() => import("./pages/AdmissionsPage"));
+const AdmissionEligibilityPage = lazy(() => import("./pages/AdmissionEligibilityPage"));
+const AdmissionProcedurePage = lazy(() => import("./pages/AdmissionProcedurePage"));
+const AdmissionDocumentsPage = lazy(() => import("./pages/AdmissionDocumentsPage"));
+const CommitteesPage = lazy(() => import("./pages/CommitteesPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const CoursePage = lazy(() => import("./pages/CoursePage"));
+const FacultyPage = lazy(() => import("./pages/FacultyPage"));
 import HomePage from "./pages/HomePage";
-import MandatoryDisclosurePage from "./pages/MandatoryDisclosurePage";
-import NoticesPage from "./pages/NoticesPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import BookATourPage from "./pages/BookATourPage";
-import SyllabusPage from "./pages/SyllabusPage";
-import EnquiryPage from "./pages/EnquiryPage";
-import SearchPage from "./pages/SearchPage";
+const MandatoryDisclosurePage = lazy(() => import("./pages/MandatoryDisclosurePage"));
+const NoticesPage = lazy(() => import("./pages/NoticesPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const BookATourPage = lazy(() => import("./pages/BookATourPage"));
+const SyllabusPage = lazy(() => import("./pages/SyllabusPage"));
+const EnquiryPage = lazy(() => import("./pages/EnquiryPage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
 
 function App() {
   return (
     <Layout>
+      <Suspense
+        fallback={
+          <div
+            className="flex min-h-[40vh] items-center justify-center text-sm text-gray-600"
+            role="status">
+            Loading page...
+          </div>
+        }>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
@@ -123,6 +132,10 @@ function App() {
         <Route path="/admission" element={<AdmissionsPage />} />
         <Route path="/admission/overview" element={<AdmissionsPage />} />
         <Route
+          path="/admission-guide"
+          element={<Navigate to="/admissions" replace />}
+        />
+        <Route
           path="/admissions/eligibility"
           element={<AdmissionEligibilityPage />}
         />
@@ -206,8 +219,10 @@ function App() {
         />
         <Route path="/visit" element={<Navigate to="/book-a-tour" replace />} />
 
-        {/* Contact & Legal */}
+        {/* Contact, Feedback & Legal */}
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/feedback" element={<Navigate to="/contact?tab=guestbook" replace />} />
+        <Route path="/guestbook" element={<Navigate to="/contact?tab=guestbook" replace />} />
         <Route path="/contact/enquiry" element={<EnquiryPage />} />
         <Route
           path="/enquiry"
@@ -232,6 +247,7 @@ function App() {
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </Suspense>
     </Layout>
   );
 }

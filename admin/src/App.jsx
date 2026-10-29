@@ -1,19 +1,18 @@
-import { useState } from "react";
-import { sendEmailVerification } from "firebase/auth";
+import { lazy, Suspense, useState } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import {
   BookOpenCheck,
+  Bot,
   CalendarDays,
   Clock,
   ExternalLink,
   GraduationCap,
   Images,
-  Lock,
   Megaphone,
   MessageSquareText,
   PanelsTopLeft,
   RefreshCw,
-  Shield,
+  Settings,
   ShieldAlert,
   ShieldCheck,
   UserCheck,
@@ -21,16 +20,19 @@ import {
 } from "lucide-react";
 import PortalWatermark from "./components/common/PortalWatermark";
 import { useAuthState, SUPER_ADMIN_EMAIL } from "./hooks/useAuthState";
-import LoginPage from "./pages/LoginPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import FacultyPage from "./pages/FacultyPage";
-import GalleryPage from "./pages/GalleryPage";
-import HomepagePopupPage from "./pages/HomepagePopupPage";
-import NoticesPage from "./pages/NoticesPage";
-import EnquiriesPage from "./pages/EnquiriesPage";
-import CampusToursPage from "./pages/CampusToursPage";
-import SyllabusPage from "./pages/SyllabusPage";
-import AdminUsersPage from "./pages/AdminUsersPage";
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const FacultyPage = lazy(() => import("./pages/FacultyPage"));
+const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const HomepagePopupPage = lazy(() => import("./pages/HomepagePopupPage"));
+const NoticesPage = lazy(() => import("./pages/NoticesPage"));
+const CommitteesPage = lazy(() => import("./pages/CommitteesPage"));
+const SiteSettingsPage = lazy(() => import("./pages/SiteSettingsPage"));
+const EnquiriesPage = lazy(() => import("./pages/EnquiriesPage"));
+const ChatbotEnquiriesPage = lazy(() => import("./pages/ChatbotEnquiriesPage"));
+const CampusToursPage = lazy(() => import("./pages/CampusToursPage"));
+const SyllabusPage = lazy(() => import("./pages/SyllabusPage"));
+const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 
 function PendingVerificationNotice({ user, logout, checkAuth }) {
   const [checking, setChecking] = useState(false);
@@ -53,6 +55,8 @@ function PendingVerificationNotice({ user, logout, checkAuth }) {
         <div className="flex items-center gap-3.5 pb-4 mb-5 border-b border-slate-100">
           <img
             src="/assets/brand/college-logo.png"
+            width="432"
+            height="432"
             alt="HSCE Crest"
             className="h-12 w-auto object-contain"
           />
@@ -133,8 +137,13 @@ const navigationGroups = [
     links: [
       {
         path: "/manage/enquiries",
-        label: "Admission enquiries",
+        label: "Admission form enquiries",
         Icon: GraduationCap,
+      },
+      {
+        path: "/manage/chatbot-enquiries",
+        label: "Chatbot enquiries",
+        Icon: Bot,
       },
       {
         path: "/manage/feedback",
@@ -167,6 +176,16 @@ const navigationGroups = [
         Icon: PanelsTopLeft,
       },
       { path: "/manage/gallery", label: "Campus gallery", Icon: Images },
+      {
+        path: "/manage/committees",
+        label: "Committees & cells",
+        Icon: ShieldAlert,
+      },
+      {
+        path: "/manage/settings",
+        label: "Institutional settings",
+        Icon: Settings,
+      },
     ],
   },
   {
@@ -204,6 +223,8 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
           <div className="relative p-1 rounded-xl bg-slate-50 border border-slate-200/90 shadow-2xs group-hover:border-blue-300 transition-colors shrink-0">
             <img
               src="/assets/brand/college-logo.png"
+              width="432"
+              height="432"
               alt="HSCE Logo"
               className="admin-rail-logo"
             />
@@ -259,6 +280,8 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
               <div className="bg-white p-1 rounded-lg border border-slate-200/80 shadow-2xs shrink-0 lg:hidden">
                 <img
                   src="/assets/brand/college-logo.png"
+                  width="432"
+                  height="432"
                   alt="Haryana Shakti College of Education logo"
                   className="admin-college-logo"
                 />
@@ -324,11 +347,21 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
             </div>
           </header>
           <div className="admin-content">
+            <Suspense fallback={<main className="admin-message" role="status">Loading portal page…</main>}>
             <Routes>
               <Route
                 path="enquiries"
                 element={
                   <EnquiriesPage
+                    currentUser={user}
+                    role={isPrincipalUser ? "principal" : "staff"}
+                  />
+                }
+              />
+              <Route
+                path="chatbot-enquiries"
+                element={
+                  <ChatbotEnquiriesPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
                   />
@@ -346,11 +379,10 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
               <Route
                 path="grievances"
                 element={
-                  isPrincipalUser ? (
-                    <EnquiriesPage currentUser={user} role="principal" />
-                  ) : (
-                    <Navigate to="/manage/enquiries" replace />
-                  )
+                  <EnquiriesPage
+                    currentUser={user}
+                    role={isPrincipalUser ? "principal" : "staff"}
+                  />
                 }
               />
               <Route
@@ -401,6 +433,26 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
                 element={<Navigate to="/manage/notices" replace />}
               />
               <Route
+                path="committees"
+                element={
+                  <CommitteesPage
+                    currentUser={user}
+                    role={isPrincipalUser ? "principal" : "staff"}
+                    permissions={permissions}
+                  />
+                }
+              />
+              <Route
+                path="settings"
+                element={
+                  <SiteSettingsPage
+                    currentUser={user}
+                    role={isPrincipalUser ? "principal" : "staff"}
+                    permissions={permissions}
+                  />
+                }
+              />
+              <Route
                 path="homepage-popup"
                 element={
                   <HomepagePopupPage
@@ -435,6 +487,7 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
                 element={<Navigate to="/manage/notices" replace />}
               />
             </Routes>
+            </Suspense>
           </div>
         </div>
         <footer className="admin-footer relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-500 py-4 px-6 border-t border-slate-200/90 bg-white/90 backdrop-blur-xs">
@@ -462,6 +515,7 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
 
 function AuthenticatedWorkspace({ user, role, permissions, logout }) {
   return (
+    <Suspense fallback={<main className="admin-message" role="status">Loading portal page…</main>}>
     <Routes>
       <Route
         path="/manage/*"
@@ -484,6 +538,7 @@ function AuthenticatedWorkspace({ user, role, permissions, logout }) {
       />
       <Route path="*" element={<Navigate to="/manage/notices" replace />} />
     </Routes>
+    </Suspense>
   );
 }
 
@@ -508,6 +563,7 @@ export default function App() {
   }
 
   return (
+    <Suspense fallback={<main className="admin-message" role="status">Loading portal page…</main>}>
     <Routes>
       {/* PUBLIC PORTAL ENTRYWAYS (UNAUTHENTICATED) */}
       <Route
@@ -562,5 +618,6 @@ export default function App() {
         }
       />
     </Routes>
+    </Suspense>
   );
 }

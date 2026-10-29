@@ -42,12 +42,12 @@ export default function CampusLifeSection() {
 
   return (
     <section
-      style={{ backgroundColor: "#07264e" }}
-      className="relative isolate overflow-hidden bg-[#07264e] font-sans text-white border-y border-blue-900/60 py-16 sm:py-20 lg:py-24">
+      style={{ backgroundColor: "#363991" }}
+      className="relative isolate overflow-hidden bg-[#363991] font-sans text-white border-y border-white/10 py-16 sm:py-20 lg:py-24">
       {/* Dynamic background gradient */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_70%_20%,rgba(10,75,140,0.45),rgba(7,38,78,0.95)_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_70%_20%,rgba(54,57,145,0.45),rgba(40,42,112,0.95)_70%)]"
       />
 
       {/* Sweeping decorative wave lines fanning from bottom-left across the cards */}
@@ -55,7 +55,7 @@ export default function CampusLifeSection() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg
-          className="absolute -bottom-32 left-[10%] h-[750px] w-[1100px] max-w-none opacity-25 sm:left-[15%] lg:left-[22%] lg:h-[900px] lg:w-[1300px]"
+          className="absolute -bottom-32 left-[10%] h-[750px] w-[1100px] max-w-none opacity-20 sm:left-[15%] lg:left-[22%] lg:h-[900px] lg:w-[1300px]"
           viewBox="0 0 1000 800"
           fill="none">
           {Array.from({ length: 36 }).map((_, i) => (
@@ -93,11 +93,11 @@ export default function CampusLifeSection() {
               </div>
 
               {/* Main Heading */}
-              <h2 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-[3.25rem]">
-                <span className="text-white block font-black">
+              <h2 className="font-serif text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-[3.25rem]">
+                <span className="text-white block font-bold">
                   {isHindi ? "परिसर जीवन" : "Campus Life"}
                 </span>
-                <span className="block font-medium text-white/75 mt-1 sm:mt-2">
+                <span className="block font-medium text-white/75 mt-1 sm:mt-2 text-2xl sm:text-3xl lg:text-[2.2rem]">
                   {isHindi ? "कक्षाओं से आगे।" : "Beyond the Classroom."}
                 </span>
               </h2>
@@ -124,7 +124,7 @@ export default function CampusLifeSection() {
 
             {/* Bottom-left Watermark */}
             <div className="mt-12 lg:mt-20 select-none pointer-events-none">
-              <span className="text-7xl sm:text-8xl lg:text-[130px] font-black tracking-wider text-white/[0.06] leading-none block">
+              <span className="text-7xl sm:text-8xl lg:text-[130px] font-black tracking-wider text-white/[0.04] leading-none block">
                 HSCE
               </span>
             </div>
@@ -134,7 +134,7 @@ export default function CampusLifeSection() {
           <div className="flex flex-col justify-between">
             <div>
               {/* Heading */}
-              <h3 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-[2.65rem]">
+              <h3 className="font-serif text-2xl sm:text-3xl lg:text-[2.2rem] font-bold leading-tight tracking-tight">
                 {isHindi ? (
                   <>
                     सीखने और अपनेपन को{" "}
@@ -181,12 +181,12 @@ export default function CampusLifeSection() {
                       onFocus={() => setActiveCard(idx)}
                       className={`group relative min-w-0 rounded-2xl p-6 transition-all duration-300 cursor-pointer ${
                         isActive
-                          ? "border border-[#FBDD23] bg-[#0c315c]/60 shadow-[0_8px_30px_rgb(0,0,0,0.3)] -translate-y-1"
+                          ? "border border-[#FBDD23] bg-[#282A70] shadow-[0_8px_30px_rgb(0,0,0,0.3)] -translate-y-1"
                           : "border border-white/15 bg-white/[0.04] hover:border-white/30 hover:bg-white/[0.07]"
                       }`}>
                       {/* Top row: Icon + Number */}
                       <div className="mb-6 flex items-center justify-between gap-2">
-                        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#FBDD23] text-gray-950 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#FBDD23] text-[#363991] shadow-sm transition-transform duration-300 group-hover:scale-105">
                           <Icon size={20} strokeWidth={2.2} />
                         </span>
 
@@ -196,16 +196,16 @@ export default function CampusLifeSection() {
                       </div>
 
                       {/* Title */}
-                      <h4 className="text-base sm:text-lg font-bold text-white leading-snug">
+                      <h4 className="font-serif text-base sm:text-lg font-bold text-white leading-snug">
                         {isHindi ? feature.titleHi : feature.titleEn}
                       </h4>
 
                       {/* Description */}
-                      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-blue-100/75">
+                      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-blue-100/75 font-normal">
                         {isHindi ? feature.descHi : feature.descEn}
                       </p>
 
-                      {/* Short yellow indicator line */}
+                      {/* Short gold indicator line */}
                       <div
                         className={`mt-6 h-0.5 w-8 rounded-full bg-[#FBDD23] transition-all duration-300 ${
                           isActive ? "w-12 bg-[#FBDD23]" : "group-hover:w-12"
@@ -218,9 +218,9 @@ export default function CampusLifeSection() {
             </div>
 
             {/* Bottom Row: Informational line & Explore Campus CTA */}
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-white/10">
               <div>
-                <p className="text-base sm:text-lg font-bold text-white">
+                <p className="text-base sm:text-lg font-bold text-white font-serif">
                   {isHindi
                     ? "अपने भावी परिसर को जानें।"
                     : "Get to know your future campus."}
@@ -234,11 +234,11 @@ export default function CampusLifeSection() {
 
               <Link
                 to="/campus-life"
-                className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2.5 rounded-full bg-[#FBDD23] px-7 py-3.5 text-sm font-bold text-gray-950 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#ffe338] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07264e]">
+                className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2.5 rounded-full bg-[#FBDD23] px-7 py-3 text-sm font-bold text-[#363991] shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FFDC13] hover:shadow-xl focus-visible:outline-none">
                 <span>{isHindi ? "परिसर भ्रमण करें" : "Explore Campus"}</span>
                 <ArrowRight
                   size={17}
-                  className="transition-transform duration-300 group-hover:translate-x-1 text-gray-950"
+                  className="transition-transform duration-300 group-hover:translate-x-1 text-[#363991]"
                 />
               </Link>
             </div>

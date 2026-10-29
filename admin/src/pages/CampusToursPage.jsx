@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Compass,
   Search,
@@ -70,6 +71,7 @@ const LAB_LABELS = {
 };
 
 export default function CampusToursPage({ currentUser, role = "staff" }) {
+  const navigate = useNavigate();
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -282,6 +284,31 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
           </button>
         </div>
       </div>
+
+      {/* Submission Inboxes Navigation Bar */}
+      <nav
+        aria-label="Submission inboxes"
+        className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+        {[
+          ["enquiries", "Student Enquiries"],
+          ["feedback", "Contact Feedback"],
+          ["grievances", "Student Grievances"],
+          ["tours", "Campus Visit Requests"],
+        ].map(([inbox, label]) => (
+          <button
+            key={inbox}
+            type="button"
+            aria-current={inbox === "tours" ? "page" : undefined}
+            onClick={() => navigate(`/manage/${inbox}`)}
+            className={`rounded-lg border px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              inbox === "tours"
+                ? "border-[#363991] bg-indigo-50 text-[#363991] font-bold shadow-2xs"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            }`}>
+            {label} {inbox === "tours" && <span className="ml-1 text-slate-400 font-bold">({tours.length})</span>}
+          </button>
+        ))}
+      </nav>
 
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

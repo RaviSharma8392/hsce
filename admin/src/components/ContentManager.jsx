@@ -21,7 +21,10 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { db, firebaseReady, storage } from "../config/firebase";
-import { uploadToCloudinary } from "../services/cloudinary";
+import {
+  optimizeCloudinaryImageUrl,
+  uploadToCloudinary,
+} from "../services/cloudinary";
 import AdobePdfIcon from "./common/AdobePdfIcon";
 import { Upload, ExternalLink } from "lucide-react";
 
@@ -125,6 +128,32 @@ export default function ContentManager({
     if (!firebaseReady) return undefined;
     let active = true;
     setLoading(true);
+
+    if (fixedDocumentId) {
+      const docRef = doc(db, collectionName, fixedDocumentId);
+      const unsubscribe = onSnapshot(
+        docRef,
+        (snapshot) => {
+          if (!active) return;
+          if (snapshot.exists()) {
+            setRecords([{ id: snapshot.id, ...snapshot.data() }]);
+          } else {
+            setRecords([]);
+          }
+          setLoading(false);
+        },
+        (snapshotError) => {
+          if (!active) return;
+          setError(snapshotError.message);
+          setLoading(false);
+        },
+      );
+      return () => {
+        active = false;
+        if (typeof unsubscribe === "function") unsubscribe();
+      };
+    }
+
     const constraints = [orderBy("createdAt", "desc")];
     if (cursors[page]) constraints.push(startAfter(cursors[page]));
     constraints.push(limit(PAGE_SIZE + 1));
@@ -142,10 +171,19 @@ export default function ContentManager({
         setHasMore(snapshot.size > PAGE_SIZE);
         setLoading(false);
       },
-      (snapshotError) => {
+      async (snapshotError) => {
         if (!active) return;
-        setError(snapshotError.message);
-        setLoading(false);
+        try {
+          const fallbackSnap = await getDocs(
+            query(collection(db, collectionName), limit(PAGE_SIZE)),
+          );
+          if (!active) return;
+          setRecords(fallbackSnap.docs.map((r) => ({ id: r.id, ...r.data() })));
+          setLoading(false);
+        } catch {
+          setError(snapshotError.message);
+          setLoading(false);
+        }
       },
     );
 
@@ -153,7 +191,7 @@ export default function ContentManager({
       active = false;
       if (typeof unsubscribe === "function") unsubscribe();
     };
-  }, [collectionName, cursors, page]);
+  }, [collectionName, cursors, fixedDocumentId, page]);
 
   const resetForm = () => {
     setValues(initialValues(fields));
@@ -825,7 +863,7 @@ export default function ContentManager({
                     }}>
                     {facultyPreviewImage ? (
                       <img
-                        src={facultyPreviewImage}
+                        src={optimizeCloudinaryImageUrl(facultyPreviewImage, 800)}
                         alt="Faculty preview"
                         style={{
                           width: "64px",
@@ -939,7 +977,7 @@ export default function ContentManager({
                 {imageSource ? (
                   <img
                     className="manager-thumbnail"
-                    src={imageSource}
+                    src={optimizeCloudinaryImageUrl(imageSource, 1200)}
                     alt={record.name || record.title || "Record photo"}
                     style={{
                       width: "52px",

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import {
   Calendar,
   Clock,
@@ -10,6 +10,7 @@ import {
   GraduationCap,
   CheckCircle2,
   ArrowRight,
+  ArrowUpRight,
   ShieldCheck,
   Printer,
   Check,
@@ -17,7 +18,6 @@ import {
   ExternalLink,
   Mail,
   BookOpen,
-  Sparkles,
   Building2,
   HelpCircle,
   Compass,
@@ -25,6 +25,7 @@ import {
 
 import { Container } from "../components/common/Container";
 import { PageHeaderBanner } from "../components/common/PageHeaderBanner";
+import { CollegiateWatermarkBg } from "../components/common/CollegiateWatermarkBg";
 import { useLanguage } from "../context/LanguageContext";
 import { submitTourBooking } from "../services/tourService";
 
@@ -119,7 +120,7 @@ const INITIAL_FORM = {
 };
 
 const FIELD_CLASS =
-  "w-full min-w-0 rounded-lg border border-[#D5D9E2] bg-white px-3.5 py-2.5 text-sm text-[#25283A] outline-none transition placeholder:text-[#9EA3B2] hover:border-[#A8B0C4] focus:border-[#292C75] focus:ring-4 focus:ring-[#292C75]/10";
+  "w-full min-w-0 rounded-sm border border-gray-200 bg-[#F9FAFB] px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-gray-400 focus:border-[#2E3A8C] focus:bg-white focus:outline-none";
 
 const LABEL_CLASS =
   "mb-1.5 block text-xs font-bold tracking-tight text-[#34374A]";
@@ -320,22 +321,10 @@ export default function BookATourPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F7FA] pb-16 font-sans text-[#25283A]">
-      <Helmet>
-        <title>
-          {t(
-            "Book a Campus Tour | Haryana Shakti College of Education",
-            "कैंपस टूर बुक करें | हरियाणा शक्ति कॉलेज ऑफ एजुकेशन",
-          )}
-        </title>
-        <meta
-          name="description"
-          content="Schedule a quick guided campus tour at Haryana Shakti College of Education. Explore curriculum labs, library, meet the faculty, and clear admission doubts."
-        />
-      </Helmet>
-
+    <CollegiateWatermarkBg className="pb-16 font-sans text-[#25283A]">
       <div className="hidden md:block">
         <PageHeaderBanner
+          headingLevel="h2"
           title={t("Book a Campus Tour", "कैंपस टूर बुक करें")}
           subtitle={t(
             "Quick 1-minute booking to visit our campus, inspect teaching labs, and speak directly with faculty.",
@@ -502,14 +491,22 @@ export default function BookATourPage() {
           </section>
         ) : (
           /* UNIFIED STREAMLINED 1-PAGE QUICK FORM */
-          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
             {/* Main Form Card */}
-            <div className="overflow-hidden rounded-2xl border border-[#DCE0E8] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 shadow-xs">
+              {/* Card Section Header */}
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1E293B]">
+                {t("Book a Campus Tour", "कैंपस टूर बुक करें")}
+              </h2>
+
+              {/* Thin Dark Red / Maroon Divider Line (Image Reference) */}
+              <div className="mt-3 h-[1.5px] w-full bg-[#7C2D37] mb-6" />
+
               {/* Form Quick Header */}
-              <div className="border-b border-[#E9EBEF] bg-gradient-to-r from-[#292C75]/[0.03] via-transparent to-transparent px-5 py-5 sm:px-7 sm:py-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#292C75]/15 bg-[#292C75]/[0.06] px-3 py-1 text-[11px] font-bold text-[#292C75]">
-                    <Sparkles size={13} className="text-[#292C75]" />
+              <div className="mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2E3A8C]/15 bg-[#2E3A8C]/[0.06] px-3 py-1 text-[11px] font-bold text-[#2E3A8C]">
+                    <Clock size={13} className="text-[#2E3A8C]" />
                     {t("Quick 1-Minute Booking", "त्वरित 1-मिनट बुकिंग")}
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#666B7C]">
@@ -518,10 +515,10 @@ export default function BookATourPage() {
                   </span>
                 </div>
 
-                <h1 className="mt-2.5 text-xl font-extrabold tracking-tight text-[#25283A] sm:text-2xl">
+                <h1 className="text-xl sm:text-2xl font-bold text-center text-[#1E293B]">
                   {t("Schedule Your Campus Visit", "कॉलेज परिसर भ्रमण तय करें")}
                 </h1>
-                <p className="mt-1 text-xs leading-5 text-[#6B7082] sm:text-sm">
+                <p className="mt-1 text-center text-xs leading-5 text-[#6B7082] sm:text-sm">
                   {t(
                     "Fill in your details below to inspect laboratories, library, and consult with the Principal & admission team.",
                     "प्रयोगशालाओं, पुस्तकालय का निरीक्षण करने और प्राचार्या व प्रवेश टीम से परामर्श के लिए नीचे अपनी जानकारी भरें।",
@@ -927,7 +924,43 @@ export default function BookATourPage() {
             </div>
 
             {/* Desktop Quick Info Sticky Sidebar */}
-            <aside className="space-y-4 lg:sticky lg:top-24">
+            <aside className="space-y-5 lg:sticky lg:top-24">
+              {/* Sidebar Navigation Widget (Matching Reference Image) */}
+              <div className="overflow-hidden rounded-md border border-gray-200/90 bg-white shadow-md">
+                <div className="bg-[#2E3A8C] px-5 py-4">
+                  <h3 className="font-serif text-lg font-bold text-white tracking-wide">
+                    {t("Campus Visit", "परिसर भ्रमण")}
+                  </h3>
+                </div>
+
+                <nav aria-label="Campus Visit Navigation" className="divide-y divide-gray-100">
+                  <div className="px-5 py-3.5 text-sm font-bold bg-slate-50 text-[#2E3A8C] border-l-4 border-l-[#2E3A8C] pl-4">
+                    {t("Schedule Tour Slot", "भ्रमण समय तय करें")}
+                  </div>
+
+                  <Link
+                    to="/campus-life"
+                    className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
+                    <span>{t("Curriculum Labs & Facilities", "शिक्षण लैब्स एवं सुविधाएं")}</span>
+                    <ArrowUpRight size={14} className="text-gray-400" />
+                  </Link>
+
+                  <Link
+                    to="/contact"
+                    className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
+                    <span>{t("Contact Details", "संपर्क विवरण")}</span>
+                    <ArrowUpRight size={14} className="text-gray-400" />
+                  </Link>
+
+                  <Link
+                    to="/contact/enquiry"
+                    className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
+                    <span>{t("Admission Enquiry", "प्रवेश पूछताछ")}</span>
+                    <ArrowUpRight size={14} className="text-gray-400" />
+                  </Link>
+                </nav>
+              </div>
+
               {/* Tour Highlights */}
               <div className="rounded-2xl border border-[#DCE0E8] bg-white p-5 shadow-sm">
                 <div className="flex items-center gap-2 text-[#292C75] font-extrabold text-sm mb-3">
@@ -1038,6 +1071,6 @@ export default function BookATourPage() {
           }
         }
       `}</style>
-    </div>
+    </CollegiateWatermarkBg>
   );
 }

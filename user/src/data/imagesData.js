@@ -1,4 +1,11 @@
 const cloudinaryUpload = "https://res.cloudinary.com/dljt6vgkk/image/upload";
+export const cloudinaryImageUrl = (url, width = 1200) => {
+  if (!url?.startsWith(cloudinaryUpload)) return url;
+  return url.replace(
+    /\/image\/upload\/(?:f_auto,q_auto,w_\d+\/)?/,
+    `/image/upload/f_auto,q_auto,w_${width}/`,
+  );
+};
 
 export const cloudinaryImages = {
   principalPortrait: `${cloudinaryUpload}/f_auto,q_auto,w_900/v1792002698/principal-savita-rathee_mtyemk.png`,
@@ -30,7 +37,7 @@ export const imageData = {
   badminton: "https://res.cloudinary.com/dljt6vgkk/image/upload/v1792004487/badminton_na9luh.png",
   firstYearStudent: "https://res.cloudinary.com/dljt6vgkk/image/upload/v1792004107/first-year-student_ml2zv9.png",
   admissionBanner: "/assets/banner/image.png",
-  admissionBot: "/assets/chatbot/admission-bot.png",
+  admissionBot: "/assets/brand/college-logo.png",
   slideOne: "https://res.cloudinary.com/dljt6vgkk/image/upload/v1792035808/7423a30c-e2e9-45d3-8b8f-45a0da0f3f18.png",
   slideOneMobile: "/assets/slider/slide1-mobile.png",
   slideTwo: "https://res.cloudinary.com/dljt6vgkk/image/upload/v1792035808/7423a30c-e2e9-45d3-8b8f-45a0da0f3f18.png",
@@ -57,6 +64,42 @@ event7:"https://res.cloudinary.com/dljt6vgkk/image/upload/v1792055317/563237f4-a
   ,event8:"https://res.cloudinary.com/dljt6vgkk/image/upload/v1792055397/edfdca66-96d3-41eb-baea-c74175e1a294.png",
   event9:"https://res.cloudinary.com/dljt6vgkk/image/upload/v1792035808/7423a30c-e2e9-45d3-8b8f-45a0da0f3f18.png",
 };
+
+const cloudinaryWidths = {
+  chairmanPortrait: 800,
+  principalPortrait: 800,
+  firstYearStudent: 800,
+  ncteLogo: 500,
+  naacLogo: 500,
+  legacyAdmissionSlide: 1400,
+  slideOne: 1400,
+  slideTwo: 1400,
+  sliderImage: 1400,
+  computerLab: 1000,
+  campusOutdoor: 1000,
+  library: 1000,
+  studentCricket: 1000,
+  studentCarrom: 1000,
+  studentDiscussion: 1000,
+  studentThinking: 1000,
+  principalStudentDiscussion: 1000,
+  badminton: 1000,
+  event1: 900,
+  event2: 900,
+  event3: 900,
+  event4: 900,
+  event5: 900,
+  event6: 900,
+  event7: 900,
+  event8: 900,
+  event9: 900,
+};
+
+for (const [key, url] of Object.entries(imageData)) {
+  if (typeof url === "string") {
+    imageData[key] = cloudinaryImageUrl(url, cloudinaryWidths[key] ?? 1000);
+  }
+}
 
 export const imageFallbacks = {
   chairmanPortrait: "/assets/people/chairman.jpg",

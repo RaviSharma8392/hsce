@@ -4,6 +4,7 @@ import { X, ExternalLink } from "lucide-react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db, firebaseReady } from "../../config/firebase";
 import { usePublishedRecords } from "../../hooks/usePublishedRecords";
+import { cloudinaryImageUrl } from "../../data/imagesData";
 
 function getCleanDestination(rawUrl) {
   if (!rawUrl || typeof rawUrl !== "string") return null;
@@ -170,7 +171,9 @@ export default function HomepagePopup() {
             redirectTarget ? "cursor-pointer" : ""
           }`}>
           <img
-            src={imageUrl}
+            src={cloudinaryImageUrl(imageUrl, 1200)}
+            width="1200"
+            height="1600"
             alt="HSCE Announcement"
             className="block max-h-[85vh] w-full object-contain bg-slate-900 mx-auto transition-transform duration-300 group-hover:scale-[1.01]"
           />

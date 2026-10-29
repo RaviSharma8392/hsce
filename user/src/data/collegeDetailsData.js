@@ -16,9 +16,6 @@ export const collegeInfo = {
   alternatePhone: "8056777077",
   email: "hsce.kanjhawala@gmail.com",
   instagram: "https://www.instagram.com/hscekanjhawala/",
-  facebook: "https://www.facebook.com/",
-  twitter: "https://twitter.com/",
-  youtube: "https://www.youtube.com/",
   affiliation: "Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU)",
   recognition: "AN UNDERTAKING OF HARYANA SHAKTI EDUCATION SOCIETY",
   accreditationNote: "(ACCREDITED BY NAAC & APPROVED BY NCTE)",
@@ -226,7 +223,7 @@ export const aboutCollegeData = {
 };
 
 export const navItems = [
-  { label: "Home", hiLabel: "मुख्य पृष्ठ", to: "/" },
+  { label: "Home", hiLabel: "होम", to: "/", isHome: true },
   {
     label: "About HSCE",
     hiLabel: "कॉलेज परिचय",
@@ -237,69 +234,102 @@ export const navItems = [
       { label: "Vision & Mission", hiLabel: "लक्ष्य एवं दृष्टि", to: "/about/vision-mission" },
       { label: "Chairman's Desk", hiLabel: "चेयरमैन का संदेश", to: "/about/chairman" },
       { label: "Principal's Desk", hiLabel: "प्राचार्या का संदेश", to: "/about/principal" },
+      { label: "Recognition & Affiliation", hiLabel: "मान्यता एवं संबद्धता", to: "/about/recognition" },
       { label: "Fact Sheet", hiLabel: "तथ्य विवरण", to: "/about/facts" },
     ],
   },
-{
-  label: "Academics",
-  hiLabel: "शैक्षणिक",
-  to: "/course",
-  subLinks: [
-    {
-      label: "B.Ed. (Bachelor of Education)",
-      hiLabel: "बी.एड. (बैचलर ऑफ एजुकेशन)",
-      to: "/course/bed",
-    },
-    {
-      label: "B.Ed. Syllabus (Year-wise PDF)",
-      hiLabel: "बी.एड. पाठ्यक्रम (वर्ष-वार पीडीएफ)",
-      to: "/syllabus",
-    },
-    {
-      label: "Faculty & Staff",
-      hiLabel: "संकाय एवं कर्मचारी",
-      to: "/faculty",
-    },
-  ],
-},
+  {
+    label: "Academics",
+    hiLabel: "शैक्षणिक",
+    to: "/course",
+    subLinks: [
+      {
+        label: "B.Ed. (Bachelor of Education)",
+        hiLabel: "बी.एड. (बैचलर ऑफ एजुकेशन)",
+        to: "/course?tab=course",
+      },
+      {
+        label: "Pedagogy Specializations",
+        hiLabel: "शिक्षण विषय (Pedagogy)",
+        to: "/course?tab=pedagogy",
+      },
+      {
+        label: "Examination Guidelines",
+        hiLabel: "परीक्षा एवं मूल्यांकन प्रणाली",
+        to: "/course?tab=examination",
+      },
+      {
+        label: "B.Ed. Syllabus (Year-wise PDF)",
+        hiLabel: "बी.एड. पाठ्यक्रम (वर्ष-वार पीडीएफ)",
+        to: "/syllabus",
+      },
+    ],
+  },
   {
     label: "Admissions",
     hiLabel: "प्रवेश प्रक्रिया",
     to: "/admissions",
     subLinks: [
       { label: "Admission Overview", hiLabel: "प्रवेश अवलोकन", to: "/admissions" },
-      { label: "Admission Enquiry", hiLabel: "प्रवेश पूछताछ", to: "/contact/enquiry" },
-      { label: "Apply Online (2026-27)", hiLabel: "ऑनलाइन आवेदन (2026-27)", to: "/admissions?apply=true" },
-      { label: "Book a Campus Tour", hiLabel: "कैंपस टूर बुक करें", to: "/book-a-tour" },
+      { label: "Eligibility Criteria", hiLabel: "पात्रता मापदंड", to: "/admissions/eligibility" },
+      { label: "Admission Procedure", hiLabel: "प्रवेश प्रक्रिया", to: "/admissions/procedure" },
+      { label: "Required Documents", hiLabel: "आवश्यक दस्तावेज़", to: "/admissions/documents" },
+      { label: "Online Enquiry", hiLabel: "ऑनलाइन प्रवेश पूछताछ", to: "/enquiry" },
     ],
   },
   {
-    label: "Photo Gallery",
-    hiLabel: "छायाचित्र दीर्घा",
-    to: "/gallery",
-  },
-  {
-    label: "Notices",
-    hiLabel: "सूचनाएं एवं परिपत्र",
-    to: "/notices",
-  },
-  {
-    label: "Mandatory Disclosure",
-    hiLabel: "अनिवार्य प्रकटीकरण",
-    to: "/mandatory-disclosure",
+    label: "Faculty",
+    hiLabel: "संकाय",
+    to: "/faculty",
+    subLinks: [
+      { label: "Faculty Directory", hiLabel: "शिक्षक एवं प्राध्यापक", to: "/faculty" },
+      { label: "Teaching Departments", hiLabel: "शैक्षणिक विभाग", to: "/faculty?tab=teaching" },
+      { label: "Non-Teaching Staff", hiLabel: "गैर-शिक्षण कर्मचारी", to: "/faculty?tab=admin" },
+    ],
   },
   {
     label: "Campus Life",
     hiLabel: "कैंपस जीवन",
     to: "/campus-life",
+    subLinks: [
+      { label: "Campus Facilities Overview", hiLabel: "परिसर सुविधाएं अवलोकन", to: "/campus-life?tab=overview" },
+      { label: "Smart Classrooms", hiLabel: "स्मार्ट क्लासरूम", to: "/campus-life?tab=classrooms" },
+      { label: "ICT & Computer Lab", hiLabel: "आईसीटी व कंप्यूटर लैब", to: "/campus-life?tab=ict-lab" },
+      { label: "Curriculum Resource Lab", hiLabel: "पाठ्यक्रम संसाधन लैब", to: "/campus-life?tab=science-lab" },
+      { label: "Library & Resource Center", hiLabel: "पुस्तकालय एवं वाचनालय", to: "/campus-life?tab=library" },
+      { label: "Multipurpose Hall", hiLabel: "बहुउद्देशीय सभागार", to: "/campus-life?tab=auditorium" },
+      { label: "Sports & Yoga Ground", hiLabel: "खेल एवं योग केंद्र", to: "/campus-life?tab=sports" },
+      { label: "Photo Gallery", hiLabel: "छायाचित्र दीर्घा", to: "/gallery" },
+      { label: "Book a Campus Tour", hiLabel: "कैंपस भ्रमण बुक करें", to: "/book-a-tour" },
+    ],
+  },
+  {
+    label: "Notices",
+    hiLabel: "सूचनाएं",
+    to: "/notices",
+    badge: "New",
+  },
+  {
+    label: "Mandatory Disclosure",
+    hiLabel: "अनिवार्य प्रकटीकरण",
+    to: "/mandatory-disclosure",
+    subLinks: [
+      { label: "NCTE Regulatory Disclosure", hiLabel: "एनसीटीई विनियामक प्रकटीकरण", to: "/mandatory-disclosure" },
+      { label: "Institutional Committees", hiLabel: "संस्थागत समितियाँ", to: "/committees?tab=directory" },
+      { label: "Lodge Online Grievance", hiLabel: "ऑनलाइन शिकायत निवारण", to: "/committees?tab=lodge" },
+      { label: "Notices & Circulars", hiLabel: "सूचनाएं एवं परिपत्र", to: "/notices" },
+    ],
   },
   {
     label: "Contact Us",
     hiLabel: "संपर्क करें",
     to: "/contact",
     subLinks: [
-      { label: "Contact Directory", hiLabel: "संपर्क विवरण", to: "/contact" },
-      { label: "Send an Enquiry", hiLabel: "ऑनलाइन पूछताछ भेजें", to: "/contact/enquiry" },
+      { label: "Contact Directory", hiLabel: "संपर्क विवरण", to: "/contact?tab=details" },
+      { label: "Guest Book & Feedback", hiLabel: "अतिथि पुस्तिका (Guest Book)", to: "/contact?tab=guestbook" },
+      { label: "Job Opportunities", hiLabel: "रोजगार के अवसर", to: "/contact?tab=jobs" },
+      { label: "Admission Enquiry", hiLabel: "ऑनलाइन प्रवेश पूछताछ", to: "/enquiry" },
+      { label: "Book a Campus Tour", hiLabel: "कैंपस भ्रमण बुक करें", to: "/book-a-tour" },
     ],
   },
 ];

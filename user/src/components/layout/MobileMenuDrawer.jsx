@@ -1,246 +1,301 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Plus,
-  Minus,
+  X,
+  ChevronDown,
   ChevronRight,
-  GraduationCap,
   Phone,
+  MessageCircle,
+  Search,
+  Sparkles,
+  MapPin,
 } from "lucide-react";
 import { navItems } from "../../data/siteData";
 import { imageData } from "../../data/imagesData";
 import { useLanguage } from "../../context/LanguageContext";
-import { useAdmissionModal } from "../../context/AdmissionModalContext";
 
 export function MobileMenuDrawer({ isOpen, onClose, phoneNumber }) {
-  const { isHindi, setLanguage } = useLanguage();
-  const { openModal } = useAdmissionModal();
+  const { isHindi, setLanguage, language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Track expanded accordion items
+  // Track expanded accordion item index
   const [expandedIndex, setExpandedIndex] = useState(null);
 
-  // Lock body scroll when drawer is open
+  // Close drawer ONLY when route actually changes
+  const prevPathRef = useRef(location.pathname);
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (prevPathRef.current !== location.pathname) {
+      prevPathRef.current = location.pathname;
+      onClose();
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  }, [location.pathname, onClose]);
 
-  if (!isOpen) return null;
+  // Lock body scroll when drawer is open & handle Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const toggleAccordion = (index) => {
     setExpandedIndex((prev) => (prev === index ? null : index));
   };
 
-  const handleLinkClick = (to) => {
+  const handleLinkNavigate = (to) => {
     onClose();
-    if (to) navigate(to);
+    if (to) {
+      navigate(to);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Mobile Navigation Menu"
-      style={{ backgroundColor: "#ffffff" }}
-      className="fixed inset-0 z-40 bg-white pt-4 pb-28 overflow-y-auto flex flex-col justify-between animate-fadeIn lg:hidden">
-      <div className="w-full max-w-lg mx-auto px-5 bg-white">
-        {/* Top Header Bar Inside Drawer: College Brand + Language Switcher */}
-        <div className="flex items-center justify-between pb-4 mb-3 border-b border-slate-100 bg-white">
-          <div className="flex items-center gap-2.5">
-            <img
-              src={imageData.collegeLogo}
-              alt="Logo"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-              className="h-11 w-11 object-contain drop-shadow-xs shrink-0"
-            />
-            <div className="flex flex-col text-left min-w-0">
-              <span className="font-bold text-xs sm:text-sm text-[#1c3274] leading-tight truncate">
-                {isHindi ? "हरियाणा शक्ति कॉलेज" : "Haryana Shakti College"}
-              </span>
-              <span className="text-[10px] text-slate-500 leading-tight">
-                {isHindi
-                  ? "शिक्षा महाविद्यालय (B.Ed.)"
-                  : "College of Education (B.Ed.)"}
-              </span>
-            </div>
-          </div>
+  const collegePhone = phoneNumber || "9953155054";
+  const cleanPhone = String(collegePhone).replace(/[^\d+]/g, "");
+  const collegeWhatsapp = String(collegePhone).replace(/\D/g, "");
 
+  return (
+    <>
+      {/* 1. Backdrop Overlay */}
+      <div
+        className={`fixed inset-0 z-[140] bg-black/60 backdrop-blur-xs transition-opacity duration-300 ${
+          isOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* 2. Off-Canvas Sidebar (Opens from Right Side) */}
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label={isHindi ? "नेविगेशन मेन्यू" : "Navigation Menu"}
+        className={`fixed top-0 bottom-0 right-0 z-[150] w-[88vw] max-w-[360px] sm:max-w-[400px] bg-white shadow-[-10px_0_40px_rgba(7,30,61,0.25)] flex flex-col transition-transform duration-300 ease-in-out transform ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Top Header: Brand Royal Navy Header with Close Button */}
+        <div className="relative shrink-0 bg-[#363991] px-4 py-3.5 text-white border-b border-amber-400/20 shadow-xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0 pr-2">
+              <div className="w-10 h-10 rounded-full bg-white p-1 shrink-0 shadow-sm flex items-center justify-center border border-amber-300">
+                <img
+                  src={imageData.collegeLogo}
+                  width="36"
+                  height="36"
+                  alt="HSCE Logo"
+                  className="h-full w-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col text-left min-w-0">
+                <span className="font-extrabold text-xs sm:text-[13px] text-white leading-tight truncate">
+                  {isHindi ? "हरियाणा शक्ति कॉलेज" : "Haryana Shakti College"}
+                </span>
+                <span className="text-[10px] text-amber-300 font-semibold leading-tight truncate">
+                  Approved by NCTE &bull; GGSIPU
+                </span>
+              </div>
+            </div>
+
+            {/* Circular Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isHindi ? "मेन्यू बंद करें" : "Close Menu"}
+              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0"
+            >
+              <X size={18} className="stroke-[2.5]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Utility Bar: Language Switcher & Quick Search Link */}
+        <div className="shrink-0 bg-slate-50 border-b border-slate-200/80 px-4 py-2 flex items-center justify-between gap-2">
           {/* Language Switcher */}
-          <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-xs shrink-0">
+          <div className="flex items-center bg-white p-0.5 rounded-full border border-slate-200 text-xs shadow-2xs">
             <button
               type="button"
               onClick={() => setLanguage("en")}
-              className={`px-3 py-1 rounded-full font-semibold transition ${
-                !isHindi
-                  ? "bg-[#1c3274] text-white shadow-xs"
+              className={`px-3 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                language !== "hi"
+                  ? "bg-[#363991] text-[#FBDD23] shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}>
+              }`}
+            >
               English
             </button>
             <button
               type="button"
               onClick={() => setLanguage("hi")}
-              className={`px-3 py-1 rounded-full font-semibold transition ${
-                isHindi
-                  ? "bg-[#1c3274] text-white shadow-xs"
+              className={`px-3 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                language === "hi"
+                  ? "bg-[#363991] text-[#FBDD23] shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}>
+              }`}
+            >
               हिन्दी
             </button>
           </div>
+
+          {/* Quick Search */}
+          <button
+            type="button"
+            onClick={() => handleLinkNavigate("/search")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-[#363991] hover:border-slate-300 text-xs font-semibold shadow-2xs transition cursor-pointer"
+          >
+            <Search size={13} className="text-slate-400" />
+            <span className="text-[11px]">{isHindi ? "खोजें" : "Search"}</span>
+          </button>
         </div>
 
-        {/* Accordion Menu List (Matching Image 2 with pure solid white background) */}
-        <div className="divide-y divide-slate-100 bg-white">
+        {/* Scrollable Navigation Items */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 divide-y divide-slate-100">
           {navItems.map((item, idx) => {
-            const hasSubLinks = Boolean(
-              item.subLinks && item.subLinks.length > 0,
-            );
+            const hasSubLinks = Boolean(item.subLinks && item.subLinks.length > 0);
             const isExpanded = expandedIndex === idx;
-            const itemLabel =
-              isHindi && item.hiLabel ? item.hiLabel : item.label;
+            const itemLabel = isHindi && item.hiLabel ? item.hiLabel : item.label;
 
             return (
-              <div key={item.label || idx} className="py-0.5 bg-white">
+              <div key={item.label || idx} className="py-0.5">
                 {hasSubLinks ? (
-                  <div className="bg-white">
-                    {/* Parent Accordion Row */}
+                  <div>
+                    {/* Parent Accordion Trigger */}
                     <button
                       type="button"
                       onClick={() => toggleAccordion(idx)}
-                      className="w-full flex items-center justify-between py-3.5 px-1 text-left text-slate-800 hover:text-[#1c3274] transition-colors cursor-pointer group bg-white">
-                      <span className="text-[15px] sm:text-base font-normal font-sans text-slate-800 group-hover:text-[#1c3274]">
+                      className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl text-left transition-colors cursor-pointer group ${
+                        isExpanded
+                          ? "bg-blue-50/70 text-[#363991] font-bold"
+                          : "text-slate-800 hover:bg-slate-50 font-semibold"
+                      }`}
+                    >
+                      <span className="text-[13px] leading-tight">
                         {itemLabel}
                       </span>
-                      <span className="text-slate-400 group-hover:text-slate-700 transition-colors p-1">
-                        {isExpanded ? (
-                          <Minus size={18} strokeWidth={2} />
-                        ) : (
-                          <Plus size={18} strokeWidth={2} />
-                        )}
-                      </span>
+                      <ChevronDown
+                        size={16}
+                        className={`text-slate-400 group-hover:text-[#363991] transition-transform duration-200 shrink-0 ${
+                          isExpanded ? "rotate-180 text-[#363991]" : ""
+                        }`}
+                      />
                     </button>
 
                     {/* Sublinks Container */}
                     {isExpanded && (
-                      <div className="pl-3 pr-1 pb-3 space-y-1 bg-[#f8fafc] border border-slate-100 rounded-xl my-1 py-2">
-                        {item.subLinks.map((sub, sIdx) => {
-                          const subLabel =
-                            isHindi && sub.hiLabel ? sub.hiLabel : sub.label;
-                          const hasNested = Boolean(
-                            sub.subLinks && sub.subLinks.length > 0,
-                          );
+                      <div className="mt-1 mb-2 ml-3 pl-3 border-l-2 border-[#FBDD23]/60 space-y-1 animate-in fade-in duration-150">
+                        {item.subLinks.map((sub, subIdx) => {
+                          const subLabel = isHindi && sub.hiLabel ? sub.hiLabel : sub.label;
+                          const isSubActive = location.pathname === sub.to;
 
                           return (
-                            <div key={sub.label || sIdx}>
-                              {hasNested ? (
-                                <div className="py-1">
-                                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 block mb-1">
-                                    {subLabel}
-                                  </span>
-                                  <div className="pl-2 space-y-1 border-l-2 border-slate-200 ml-3">
-                                    {sub.subLinks.map((nested, nIdx) => (
-                                      <Link
-                                        key={nested.label || nIdx}
-                                        to={nested.to}
-                                        onClick={() =>
-                                          handleLinkClick(nested.to)
-                                        }
-                                        className="flex items-center justify-between px-3 py-1.5 text-xs text-slate-600 hover:text-[#1c3274] hover:bg-white rounded-lg transition font-medium">
-                                        <span>
-                                          {isHindi && nested.hiLabel
-                                            ? nested.hiLabel
-                                            : nested.label}
-                                        </span>
-                                        <ChevronRight
-                                          size={13}
-                                          className="text-slate-300"
-                                        />
-                                      </Link>
-                                    ))}
-                                  </div>
-                                </div>
-                              ) : (
-                                <Link
-                                  to={sub.to}
-                                  onClick={() => handleLinkClick(sub.to)}
-                                  className="flex items-center justify-between px-3 py-2 text-xs sm:text-sm text-slate-600 hover:text-[#1c3274] hover:bg-white rounded-lg transition font-medium">
-                                  <span>{subLabel}</span>
-                                  <ChevronRight
-                                    size={14}
-                                    className="text-slate-300"
-                                  />
-                                </Link>
-                              )}
-                            </div>
+                            <button
+                              key={sub.to || subIdx}
+                              type="button"
+                              onClick={() => handleLinkNavigate(sub.to)}
+                              className={`w-full flex items-center justify-between py-1.5 px-2 rounded-lg text-left text-xs transition cursor-pointer ${
+                                isSubActive
+                                  ? "bg-[#363991] text-white font-bold"
+                                  : "text-slate-600 hover:text-[#363991] hover:bg-slate-50 font-medium"
+                              }`}
+                            >
+                              <span className="truncate pr-2">{subLabel}</span>
+                              <ChevronRight
+                                size={12}
+                                className={isSubActive ? "text-[#FBDD23]" : "text-slate-300"}
+                              />
+                            </button>
                           );
                         })}
                       </div>
                     )}
                   </div>
                 ) : (
-                  /* Single Link Row without sublinks */
-                  <Link
-                    to={item.to}
-                    onClick={() => handleLinkClick(item.to)}
-                    className="w-full flex items-center justify-between py-3.5 px-1 text-[15px] sm:text-base font-normal font-sans text-slate-800 hover:text-[#1c3274] transition-colors bg-white">
+                  /* Single Direct Nav Link */
+                  <button
+                    type="button"
+                    onClick={() => handleLinkNavigate(item.to)}
+                    className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl text-left text-[13px] font-semibold transition cursor-pointer ${
+                      location.pathname === item.to
+                        ? "bg-[#363991] text-white font-bold"
+                        : "text-slate-800 hover:bg-slate-50 hover:text-[#363991]"
+                    }`}
+                  >
                     <span>{itemLabel}</span>
-                    <ChevronRight size={16} className="text-slate-300" />
-                  </Link>
+                    <ChevronRight size={14} className="text-slate-300" />
+                  </button>
                 )}
               </div>
             );
           })}
         </div>
 
-        {/* Quick Action CTA inside drawer */}
-        <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col gap-2.5 bg-white">
+        {/* Drawer Bottom Actions: General Enquiry + Helpline & WhatsApp */}
+        <div className="shrink-0 bg-slate-50 border-t border-slate-200/90 p-3.5 space-y-2">
+          {/* General Admission Enquiry Button */}
           <button
             type="button"
             onClick={() => {
               onClose();
-              openModal();
+              window.dispatchEvent(new CustomEvent("open-enquire-tab"));
             }}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#FBDD23] hover:bg-[#ebd020] text-slate-900 font-bold text-xs sm:text-sm shadow-sm transition">
-            <GraduationCap size={16} />
-            <span>
-              {isHindi
-                ? "ऑनलाइन प्रवेश 2026-27"
-                : "Apply for Admission 2026-27"}
-            </span>
+            className="w-full py-2.5 px-3 rounded-xl bg-[#363991] hover:bg-[#282A70] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
+          >
+            <Sparkles size={14} className="text-[#FBDD23]" />
+            <span>{isHindi ? "सामान्य प्रवेश पूछताछ दर्ज करें" : "General Admission Enquiry"}</span>
           </button>
 
-          <Link
-            to="/contact/enquiry"
-            onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100 text-blue-900 font-bold text-xs transition">
-            <span>
-              {isHindi ? "ऑनलाइन प्रवेश व कॉलेज पूछताछ" : "Send an Admission Enquiry"}
-            </span>
-          </Link>
+          {/* Quick Contact Buttons Grid */}
+          <div className="grid grid-cols-2 gap-2 pt-0.5">
+            {/* WhatsApp */}
+            <a
+              href={`https://wa.me/${collegeWhatsapp}?text=${encodeURIComponent(
+                "Hello HSCE! I have an admission enquiry regarding B.Ed."
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-2xs transition"
+            >
+              <MessageCircle size={14} className="text-emerald-600" />
+              <span>WhatsApp</span>
+            </a>
 
-          <a
-            href={`tel:${String(phoneNumber || "").replace(/[^\d+]/g, "")}`}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition">
-            <Phone size={14} className="text-[#1c3274]" />
-            <span>
-              {isHindi
-                ? `हेल्पलाइन कॉल: ${phoneNumber}`
-                : `Call Helpline: ${phoneNumber}`}
-            </span>
-          </a>
+            {/* Direct Call */}
+            <a
+              href={`tel:${cleanPhone}`}
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-800 text-xs font-semibold shadow-2xs transition"
+            >
+              <Phone size={13} className="text-[#363991]" />
+              <span>{isHindi ? "कॉल करें" : "Call Helpline"}</span>
+            </a>
+          </div>
+
+          {/* College Address Note */}
+          <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 pt-1 text-center">
+            <MapPin size={10} className="shrink-0" />
+            <span className="truncate">Kanjhawala, Delhi – 110081</span>
+          </div>
         </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 }
 

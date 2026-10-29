@@ -1,12 +1,7 @@
 import {
   ArrowRight,
-  BadgeCheck,
   BookOpenCheck,
-  BriefcaseBusiness,
-  Building2,
   GraduationCap,
-  Lightbulb,
-  UsersRound,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Container } from "../common/Container";
@@ -21,39 +16,39 @@ const BENEFITS = {
     items: [
       {
         title: "Recognized & Affiliated",
+        tag: "NCTE & GGSIPU Code 147",
         description:
           "Duly recognized by NCTE (Northern Regional Committee) and affiliated with Guru Gobind Singh Indraprastha University (GGSIPU), Delhi.",
-        icon: BadgeCheck,
       },
       {
         title: "Student-Centered Learning",
+        tag: "1-on-1 Faculty Mentorship",
         description:
           "An inclusive, encouraging pedagogical environment where every aspiring teacher receives individual mentorship.",
-        icon: UsersRound,
       },
       {
         title: "Experienced Faculty",
+        tag: "UGC-NET & Ph.D. Mentors",
         description:
           "Dedicated educators bring deep subject expertise, curriculum insights, research rigor, and classroom mastery.",
-        icon: GraduationCap,
       },
       {
         title: "CTET & Placement Support",
+        tag: "Mock Drills & CTET Guidance",
         description:
           "Specialized CTET coaching, mock recruitment workshops, and guided school placement assistance for future teachers.",
-        icon: BriefcaseBusiness,
       },
       {
         title: "Micro-Teaching & Internship",
+        tag: "16 Wks in Delhi Schools",
         description:
           "16 weeks of structured real-classroom teaching practice across recognized schools in Delhi.",
-        icon: Lightbulb,
       },
       {
         title: "Curriculum Labs & Library",
+        tag: "ICT, Psychology & TLM Labs",
         description:
           "Fully equipped science & psychology laboratories, curriculum resource centre, ICT computer lab, and rich library.",
-        icon: Building2,
       },
     ],
   },
@@ -65,39 +60,39 @@ const BENEFITS = {
     items: [
       {
         title: "मान्यता एवं संबद्धता",
+        tag: "NCTE एवं GGSIPU कोड 147",
         description:
           "NCTE से विधिवत मान्यता प्राप्त और गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU), दिल्ली से संबद्ध।",
-        icon: BadgeCheck,
       },
       {
         title: "विद्यार्थी-केंद्रित शिक्षा",
+        tag: "1-on-1 व्यक्तिगत मार्गदर्शन",
         description:
           "समावेशी एवं प्रेरक शैक्षणिक वातावरण, जहाँ प्रत्येक छात्र-अध्यापक को व्यक्तिगत मार्गदर्शन मिलता है।",
-        icon: UsersRound,
       },
       {
         title: "अनुभवी प्राध्यापक",
+        tag: "यूजीसी-नेट एवं पीएच.डी. शिक्षक",
         description:
           "समर्पित एवं उच्च योग्यता प्राप्त शिक्षक जो विषय ज्ञान, शोध और शिक्षण विधियों का मार्गदर्शन करते हैं।",
-        icon: GraduationCap,
       },
       {
         title: "सीटीईटी एवं प्लेसमेंट सहायता",
+        tag: "मॉक इंटरव्यू व CTET तैयारी",
         description:
           "CTET कार्यशालाएं, साक्षात्कार की तैयारी और अग्रणी विद्यालयों में शिक्षण अवसर हेतु सहयोग।",
-        icon: BriefcaseBusiness,
       },
       {
         title: "व्यावहारिक शिक्षण अभ्यास",
+        tag: "16 सप्ताह स्कूल इंटर्नशिप",
         description:
           "दिल्ली के मान्यता प्राप्त विद्यालयों में 16 सप्ताह का गहन विद्यालय इंटर्नशिप और माइक्रो-टीचिंग अनुभव।",
-        icon: Lightbulb,
       },
       {
         title: "प्रयोगशालाएं एवं पुस्तकालय",
+        tag: "आईसीटी, मनोविज्ञान व पुस्तकालय",
         description:
           "मनोविज्ञान एवं विज्ञान प्रयोगशालाएं, पाठ्यचर्या संसाधन केंद्र, कंप्यूटर लैब और समृद्ध पुस्तकालय।",
-        icon: Building2,
       },
     ],
   },
@@ -165,16 +160,47 @@ const OPPORTUNITIES = {
   },
 };
 
-function SectionHeading({ title, description }) {
+function DotPattern({ className = "" }) {
   return (
-    <header className="mb-7 max-w-3xl sm:mb-9">
-      <h2 className="text-2xl font-bold leading-tight tracking-tight text-[#25283A] sm:text-3xl lg:text-[34px]">
+    <svg
+      width="72"
+      height="54"
+      viewBox="0 0 72 54"
+      fill="none"
+      className={className}
+      aria-hidden="true">
+      <defs>
+        <pattern
+          id="why-choose-dots"
+          x="0"
+          y="0"
+          width="12"
+          height="12"
+          patternUnits="userSpaceOnUse">
+          <circle cx="2.5" cy="2.5" r="1.5" fill="currentColor" />
+        </pattern>
+      </defs>
+      <rect width="72" height="54" fill="url(#why-choose-dots)" />
+    </svg>
+  );
+}
+
+function SectionHeading({ eyebrow, title, description }) {
+  return (
+    <header className="mb-8 max-w-3xl">
+      {eyebrow && (
+        <div className="mb-2.5 flex items-center gap-2">
+          <span className="h-1 w-7 bg-[#FBDD23] rounded-full" />
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#2E3A8C]">
+            {eyebrow}
+          </span>
+        </div>
+      )}
+      <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold leading-tight tracking-tight text-[#2E3A8C]">
         {title}
       </h2>
 
-      <div className="mt-3.5 h-0.5 w-12 rounded-full bg-[#FBDD23]" />
-
-      <p className="mt-3.5 max-w-3xl text-sm leading-7 text-[#626879] sm:text-base sm:leading-8">
+      <p className="mt-3.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-slate-600 font-normal">
         {description}
       </p>
     </header>
@@ -185,107 +211,75 @@ export function WhyChooseSection() {
   const { isHindi } = useLanguage();
   const content = isHindi ? BENEFITS.hi : BENEFITS.en;
 
-  const colorThemes = [
-    {
-      border: "border-blue-200/90 hover:border-blue-500",
-      bg: "bg-gradient-to-br from-blue-50/70 via-white to-white",
-      iconBg: "bg-[#0a4b8c] text-[#FBDD23]",
-      badge: "bg-blue-100 text-[#0a4b8c]",
-      accent: "bg-[#0a4b8c]",
-      hoverText: "group-hover:text-[#0a4b8c]",
-    },
-    {
-      border: "border-emerald-200/90 hover:border-emerald-500",
-      bg: "bg-gradient-to-br from-emerald-50/70 via-white to-white",
-      iconBg: "bg-emerald-600 text-white",
-      badge: "bg-emerald-100 text-emerald-800",
-      accent: "bg-emerald-500",
-      hoverText: "group-hover:text-emerald-800",
-    },
-    {
-      border: "border-amber-200/90 hover:border-amber-500",
-      bg: "bg-gradient-to-br from-amber-50/70 via-white to-white",
-      iconBg: "bg-amber-500 text-gray-950",
-      badge: "bg-amber-100 text-amber-900",
-      accent: "bg-amber-500",
-      hoverText: "group-hover:text-amber-800",
-    },
-    {
-      border: "border-indigo-200/90 hover:border-indigo-500",
-      bg: "bg-gradient-to-br from-indigo-50/70 via-white to-white",
-      iconBg: "bg-indigo-600 text-white",
-      badge: "bg-indigo-100 text-indigo-900",
-      accent: "bg-indigo-600",
-      hoverText: "group-hover:text-indigo-800",
-    },
-    {
-      border: "border-rose-200/90 hover:border-rose-500",
-      bg: "bg-gradient-to-br from-rose-50/70 via-white to-white",
-      iconBg: "bg-[#c8102e] text-white",
-      badge: "bg-rose-100 text-rose-900",
-      accent: "bg-[#c8102e]",
-      hoverText: "group-hover:text-[#c8102e]",
-    },
-    {
-      border: "border-cyan-200/90 hover:border-cyan-500",
-      bg: "bg-gradient-to-br from-cyan-50/70 via-white to-white",
-      iconBg: "bg-cyan-600 text-white",
-      badge: "bg-cyan-100 text-cyan-900",
-      accent: "bg-cyan-500",
-      hoverText: "group-hover:text-cyan-800",
-    },
-  ];
-
   return (
-    <section className="bg-gradient-to-b from-slate-50/60 to-white py-14 font-sans sm:py-16 lg:py-20 border-t border-slate-200/80">
+    <section className="bg-[#F8FAFC] py-14 font-sans sm:py-16 lg:py-20 border-b border-gray-200/90 relative overflow-hidden">
+      {/* Subtle corner dot pattern */}
+      <DotPattern className="absolute top-6 right-6 text-slate-300/80 pointer-events-none hidden sm:block" />
+
       <Container>
         <div className="mb-8 sm:mb-10 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <SectionHeading
+            eyebrow={content.eyebrow}
             title={content.title}
             description={content.description}
           />
+
+          <Link
+            to="/about"
+            className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2E3A8C] hover:bg-[#1E255E] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all active:scale-[0.98]">
+            <span>{isHindi ? "संस्थान परिचय देखें" : "About HSCE Profile"}</span>
+            <ArrowRight size={13} className="text-[#FBDD23]" />
+          </Link>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {content.items.map((item, index) => {
-            const Icon = item.icon;
-            const theme = colorThemes[index % colorThemes.length];
-
             return (
               <article
                 key={item.title}
-                className={`group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border ${theme.border} ${theme.bg} p-6 shadow-xs transition-all duration-300 hover:-translate-y-2 hover:shadow-xl`}>
-                {/* Top colored accent indicator line */}
-                <div className={`absolute top-0 inset-x-0 h-1 ${theme.accent}`} />
+                className="group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl bg-white/90 backdrop-blur-md p-6 sm:p-7 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-10px_rgba(46,58,140,0.12)] hover:border-[#2E3A8C]/40 hover:bg-white">
+                {/* Subtle crystalline top shimmer line */}
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#2E3A8C] via-[#FBDD23] to-[#2E3A8C] opacity-80 group-hover:opacity-100 transition-opacity" />
 
                 <div>
-                  <div className="mb-4 flex items-center justify-between">
-                    <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${theme.iconBg} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
-                      <Icon aria-hidden="true" size={22} strokeWidth={2.2} />
+                  {/* Top Row: Crystal Number Badge + Verified Category Tag (No Clunky Icons) */}
+                  <div className="mb-5 flex items-center justify-between">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/80 text-[#2E3A8C] font-black text-sm tracking-tight shadow-2xs group-hover:bg-[#2E3A8C] group-hover:text-[#FBDD23] group-hover:border-[#2E3A8C] transition-all duration-300">
+                      {String(index + 1).padStart(2, "0")}
                     </span>
 
-                    <span className={`text-xs font-bold tabular-nums ${theme.badge} px-3 py-1 rounded-full uppercase tracking-wider`}>
-                      {isHindi ? "स्तंभ " : "Pillar "}
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100/90 text-[#2E3A8C] border border-slate-200/60 group-hover:bg-[#FBDD23] group-hover:text-slate-900 group-hover:border-[#FBDD23] transition-colors duration-200 shadow-2xs">
+                      {isHindi ? "स्तंभ " : "PILLAR "}
                       {String(index + 1).padStart(2, "0")}
                     </span>
                   </div>
 
-                  <h3 className={`text-base sm:text-lg font-bold leading-snug text-gray-900 transition-colors ${theme.hoverText}`}>
+                  {/* Title */}
+                  <h3 className="text-lg sm:text-[19px] font-bold text-slate-900 group-hover:text-[#2E3A8C] transition-colors leading-snug tracking-tight">
                     {item.title}
                   </h3>
 
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600 font-normal">
+                  {/* Verified Subtitle Tag */}
+                  {item.tag && (
+                    <span className="inline-block mt-2 text-[11px] font-bold text-[#2E3A8C] bg-blue-50/80 border border-blue-200/60 px-2.5 py-0.5 rounded-md">
+                      {item.tag}
+                    </span>
+                  )}
+
+                  {/* Description */}
+                  <p className="mt-3 text-xs sm:text-[13.5px] leading-relaxed text-slate-600 font-normal">
                     {item.description}
                   </p>
                 </div>
 
-                <div className="mt-6 pt-3 border-t border-slate-200/60 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-500 group-hover:text-gray-900 transition-colors">
+                {/* Crystal Footer: Academic Rigor Indicator + Crystal Arrow */}
+                <div className="mt-6 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500 group-hover:text-[#2E3A8C] transition-colors">
+                  <span className="uppercase tracking-wider text-[11px] font-semibold text-slate-500 flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#FBDD23]" />
                     {isHindi ? "शिक्षण उत्कृष्टता" : "Academic Rigor"}
                   </span>
-                  <div className={`flex items-center gap-1 text-xs font-bold ${theme.hoverText}`}>
-                    <span>{isHindi ? "विवरण देखें" : "Explore"}</span>
-                    <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 border border-slate-200/60 text-[#2E3A8C] group-hover:bg-[#2E3A8C] group-hover:text-[#FBDD23] group-hover:border-[#2E3A8C] transition-all duration-200 group-hover:translate-x-0.5 shadow-2xs">
+                    <ArrowRight size={13} strokeWidth={2.5} />
                   </div>
                 </div>
               </article>
@@ -313,7 +307,7 @@ export function CampusWelcomeSection() {
         />
 
         <div className="border-t border-[#E5E7EB] pt-6 sm:pt-7">
-          <h3 className="mb-4 text-lg font-bold text-[#25283A] sm:text-xl">
+          <h3 className="mb-4 text-lg font-bold text-[#363991] sm:text-xl">
             {content.exploreTitle}
           </h3>
 
@@ -325,29 +319,29 @@ export function CampusWelcomeSection() {
                 <Link
                   key={item.href}
                   to={item.href}
-                  className="group flex min-w-0 flex-col border border-[#E5E7EB] bg-white p-5 transition-all duration-200 hover:border-[#0a4b8c] hover:shadow-xs sm:p-6">
+                  className="group flex min-w-0 flex-col border border-gray-200/90 rounded-xl bg-white p-5 transition-all duration-200 hover:border-[#363991] hover:shadow-md sm:p-6">
                   <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0a4b8c]/10 text-[#0a4b8c] transition-colors group-hover:bg-[#FBDD23] group-hover:text-gray-900">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#363991]/10 text-[#363991] transition-colors group-hover:bg-[#363991] group-hover:text-[#FBDD23]">
                       <Icon aria-hidden="true" size={20} strokeWidth={2} />
                     </span>
 
                     <ArrowRight
                       aria-hidden="true"
                       size={18}
-                      className="text-[#0a4b8c] transition-transform duration-200 group-hover:translate-x-1"
+                      className="text-gray-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[#FBDD23]"
                     />
                   </div>
 
-                  <h4 className="text-base font-bold text-[#25283A] transition-colors group-hover:text-[#0a4b8c]">
+                  <h4 className="text-base font-bold text-[#363991] transition-colors group-hover:text-[#282A70]">
                     {item.title}
                   </h4>
 
-                  <p className="mt-2 flex-1 text-sm leading-6 text-[#626879]">
+                  <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
                     {item.description}
                   </p>
 
-                  <span className="mt-4 border-t border-[#E5E7EB] pt-3 text-xs font-bold text-[#0a4b8c] group-hover:underline">
-                    {isHindi ? "और जानें" : "Explore more"}
+                  <span className="mt-4 border-t border-gray-100 pt-3 text-xs font-bold text-[#363991] group-hover:text-[#282A70] transition-colors">
+                    {isHindi ? "और जानें →" : "Explore more →"}
                   </span>
                 </Link>
               );

@@ -1,298 +1,271 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ArrowRight, Camera } from "lucide-react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { useLanguage } from "../../context/LanguageContext";
+import { ArrowUpRight, Camera, ArrowRight } from "lucide-react";
 import { Container } from "../common/Container";
+import { useLanguage } from "../../context/LanguageContext";
+import { useAdmissionModal } from "../../context/AdmissionModalContext";
 import { imageData } from "../../data/imagesData";
-
-function useInView() {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    if (
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      typeof IntersectionObserver === "undefined"
-    ) {
-      setVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.unobserve(element);
-        }
-      },
-      { threshold: 0.12 },
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  return [ref, visible];
-}
-
-function GalleryCell({ children, className = "" }) {
-  return <div className={className}>{children}</div>;
-}
-
-/* Gentle automatic image slideshow */
-function AutoFadingImage({ images, interval = 4500 }) {
-  const [index, setIndex] = useState(0);
-  const [ref, started] = useInView();
-
-  useEffect(() => {
-    if (
-      !started ||
-      images.length < 2 ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % images.length);
-    }, interval);
-
-    return () => window.clearInterval(timer);
-  }, [started, images.length, interval]);
-
-  return (
-    <div
-      ref={ref}
-      className="gallery-image relative h-full w-full overflow-hidden bg-gray-100">
-      {images.map((image, imageIndex) => {
-        const isActive = index === imageIndex;
-
-        return (
-          <img
-            key={image.src}
-            src={image.src}
-            alt={image.alt}
-            aria-hidden={!isActive}
-            loading="lazy"
-            decoding="async"
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-              isActive ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        );
-      })}
-
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
-
-      {images.length > 1 && (
-        <div className="absolute bottom-4 left-4 z-10 flex gap-1.5">
-          {images.map((_, dotIndex) => (
-            <button
-              key={dotIndex}
-              type="button"
-              aria-label={`Show gallery image ${dotIndex + 1}`}
-              aria-pressed={dotIndex === index}
-              onClick={() => setIndex(dotIndex)}
-              className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 ${
-                dotIndex === index ? "w-6 bg-[#F4D46A]" : "w-2 bg-white/70"
-              }`}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function CampusGallerySection() {
   const { isHindi } = useLanguage();
+  const { openAdmissionModal } = useAdmissionModal();
 
-  const mainImages = [
-    {
-      src: imageData.campusOutdoor,
-      alt: "Tree-lined entrance to Haryana Shakti College of Education",
-    },
-    {
-      src: imageData.campusHero,
-      alt: "Haryana Shakti College of Education campus entrance",
-    },
-  ];
-
-  const topRightImages = [
-    {
-      src: imageData.studentDiscussion,
-      alt: "Student-teachers discussing coursework together",
-    },
+  // 4 Core Campus Photos for the 2x2 Photo Gallery Grid (Matching user screenshot 2)
+  const galleryPhotos = [
     {
       src: imageData.principalStudentDiscussion,
-      alt: "The principal meeting with students",
+      alt: "Faculty and pupil-teachers in academic discussion",
+      caption: isHindi ? "शैक्षणिक विचार-विमर्श" : "Academic Discussion",
     },
-  ];
-
-  const bottomMiddleImages = [
+    {
+      src: imageData.studentCricket,
+      alt: "Students playing cricket on college sports ground",
+      caption: isHindi ? "खेल एवं शारीरिक गतिविधियाँ" : "Sports & Athletics",
+    },
     {
       src: imageData.computerLab,
-      alt: "Students learning in the college computer laboratory",
+      alt: "Pupil-teachers in the ICT computer laboratory",
+      caption: isHindi ? "आईसीटी एवं कंप्यूटर लैब" : "ICT Computer Lab",
     },
     {
       src: imageData.library,
-      alt: "Bookshelves in the college library",
+      alt: "Curriculum library and reading room at HSCE",
+      caption: isHindi ? "पाठ्यचर्या पुस्तकालय" : "Curriculum Library",
     },
   ];
 
-  const bottomRightImages = [
+  // 2 Featured Milestone Event Cards (Matching user screenshot 1)
+  const milestoneAlbums = [
     {
-      src: imageData.studentCricket,
-      alt: "Students playing cricket on the college grounds",
+      id: "sports-meet",
+      image: imageData.studentCricket,
+      titleEn: "Annual Sports Meet & Teacher Trainees Cultural Day",
+      titleHi: "वार्षिक खेलकूद प्रतियोगिता एवं सांस्कृतिक महोत्सव",
+      dateEn: "25th Oct 2024",
+      dateHi: "25 अक्टूबर 2024",
+      link: "/gallery",
     },
     {
-      src: imageData.studentCarrom,
-      alt: "Students playing carrom in the college",
+      id: "tlm-workshop",
+      image: imageData.computerLab,
+      titleEn: "Pedagogical TLM Workshop & Curriculum Resource Exhibition",
+      titleHi: "टीएलएम निर्माण कार्यशाला एवं शिक्षण सामग्री प्रदर्शनी",
+      dateEn: "18th Mar 2024",
+      dateHi: "18 मार्च 2024",
+      link: "/gallery",
     },
   ];
-
-  const cardClass =
-    "h-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg";
 
   return (
-    <section className="overflow-hidden bg-white py-12 font-sans sm:py-16 lg:py-20 border-t border-slate-200/80">
+    <section className="bg-[#EDF2F8] py-14 sm:py-16 lg:py-20 font-sans border-b border-gray-200/90">
       <Container>
-        <GalleryCell className="mb-8 flex flex-col justify-between gap-5 sm:mb-10 sm:flex-row sm:items-end">
-          <div className="max-w-2xl">
-            <h2 className="text-2xl font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl lg:text-[34px]">
-              {isHindi ? (
-                <>
-                  सीखने और साथ{" "}
-                  <span className="text-[#0a4b8c]">बढ़ने के पल</span>
-                </>
-              ) : (
-                <>
-                  Life & Learning at{" "}
-                  <span className="text-[#0a4b8c]">HSCE Campus</span>
-                </>
-              )}
+        {/* ============================================================== */}
+        {/* SECTION HEADER                                                 */}
+        {/* ============================================================== */}
+        <div className="mb-10 sm:mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <div className="mb-2.5 flex items-center gap-2">
+              <span className="h-0.5 w-6 bg-[#FBDD23]" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#2E3A8C]">
+                {isHindi ? "त्वरित संदर्भ एवं परिसर झलकियां" : "QUICK REFERENCE & CAMPUS LIFE"}
+              </span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-[#2E3A8C] leading-tight">
+              {isHindi ? "परिसर की गतिविधियां एवं संदर्भ" : "Life, Learning & Quick Reference"}
             </h2>
-
-            <div className="mt-3.5 h-0.5 w-12 rounded-full bg-[#FBDD23]" />
-
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-600 sm:text-base">
-              {isHindi
-                ? "परिसर के स्थानों, गतिविधियों और उन पलों की झलक जो हमारे कॉलेज जीवन को खास बनाते हैं।"
-                : "A closer look at the people, places, curriculum labs and everyday moments that make campus life meaningful."}
-            </p>
           </div>
 
           <Link
             to="/gallery"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#0a4b8c]/20 bg-blue-50/50 px-4 py-2.5 text-sm font-semibold text-[#0a4b8c] transition-all duration-200 hover:bg-[#0a4b8c] hover:text-white hover:shadow-xs">
-            <span>{isHindi ? "पूरी गैलरी देखें" : "Explore Full Gallery"}</span>
+            className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-[#2E3A8C] transition-all hover:border-[#2E3A8C] hover:bg-slate-50 shadow-xs">
+            <Camera size={15} className="text-[#2E3A8C]" />
+            <span>{isHindi ? "पूरी गैलरी देखें" : "View Full Gallery"}</span>
             <ArrowRight
-              size={16}
-              aria-hidden="true"
-              className="transition-transform duration-200 group-hover:translate-x-1"
+              size={14}
+              className="transition-transform group-hover:translate-x-1 text-[#FBDD23]"
             />
           </Link>
-        </GalleryCell>
+        </div>
 
-        {/* Gallery grid */}
-        <div className="grid auto-rows-[230px] grid-cols-1 gap-4 sm:auto-rows-[260px] sm:grid-cols-2 lg:auto-rows-[250px] lg:grid-cols-4 lg:gap-5">
-          {/* Large feature image */}
-          <GalleryCell className="h-[320px] sm:h-[360px] lg:col-span-2 lg:row-span-2 lg:h-full">
-            <div className={`${cardClass} relative`}>
-              <AutoFadingImage images={mainImages} interval={5000} />
-
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/75 to-transparent px-5 pb-6 pt-16 sm:px-6">
-                <span className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#F4D46A]">
-                  <Camera size={14} />
-                  {isHindi ? "कैंपस जीवन" : "Campus life"}
+        {/* ============================================================== */}
+        {/* MAIN COMPOSITE GRID (Matching user screenshots 1 & 2)           */}
+        {/* ============================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+          {/* ============================================================ */}
+          {/* LEFT SIDE: QUICK REFERENCE + 2 EVENT ALBUM CARDS           */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-5 flex flex-col justify-between gap-6">
+            {/* Quick Reference Section with Rotated Vertical Label (Screenshot 2) */}
+            <div className="flex gap-4 sm:gap-6 bg-white/70 backdrop-blur-xs p-5 sm:p-6 rounded-2xl border border-[#2E3A8C]/15 shadow-xs">
+              {/* Vertical Rotated Label */}
+              <div className="flex items-center justify-center select-none shrink-0 border-r border-[#2E3A8C]/20 pr-3 sm:pr-4">
+                <span className="[writing-mode:vertical-rl] rotate-180 text-xs font-extrabold uppercase tracking-[0.28em] text-[#2E3A8C]">
+                  {isHindi ? "त्वरित संदर्भ" : "QUICK REFERENCE"}
                 </span>
-
-                <h3 className="text-xl font-semibold text-white sm:text-2xl">
-                  {isHindi
-                    ? "सीखने और आगे बढ़ने का स्थान"
-                    : "A place to learn and grow"}
-                </h3>
-              </div>
-            </div>
-          </GalleryCell>
-
-          {/* Campus events card */}
-          <GalleryCell className="min-h-[230px]">
-            <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a4b8c] via-[#094179] to-[#062c55] border border-blue-900/40 p-6 text-white shadow-sm transition-all duration-300 hover:shadow-lg sm:p-7">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full border-[24px] border-white/5"
-              />
-
-              <div className="relative">
-                <span className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-[#FBDD23]">
-                  <Camera size={20} />
-                </span>
-
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#FBDD23]">
-                  {isHindi ? "कॉलेज गतिविधियाँ" : "College activities"}
-                </p>
-
-                <h3 className="text-2xl font-bold leading-tight">
-                  {isHindi
-                    ? "कैंपस में क्या हो रहा है?"
-                    : "What's happening on campus?"}
-                </h3>
               </div>
 
-              <Link
-                to="/events"
-                className="group relative mt-6 inline-flex w-fit items-center gap-2 text-sm font-semibold text-white transition-colors hover:text-[#FBDD23]">
-                <span>{isHindi ? "आगामी कार्यक्रम" : "Upcoming events"}</span>
-                <ArrowRight
-                  size={16}
-                  className="transition-transform duration-200 group-hover:translate-x-1 text-[#FBDD23]"
-                />
-              </Link>
-            </div>
-          </GalleryCell>
+              {/* 3 Horizontal Action Rows with Circular Yellow Arrow Buttons */}
+              <div className="flex-1 space-y-4">
+                {/* Row 1: Admission / Appointment */}
+                <div className="pb-3.5 border-b border-[#2E3A8C]/15 flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
+                      {isHindi ? "प्रवेश आमंत्रण" : "Request Admission"}
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isHindi ? "बी.एड. 2026-27 प्रवेश व काउंसलिंग" : "B.Ed. Counseling & Guidance"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => openAdmissionModal()}
+                      className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1 cursor-pointer">
+                      <span>{isHindi ? "पूछताछ करें →" : "Make Enquiry →"}</span>
+                    </button>
+                  </div>
 
-          {/* Image cards */}
-          <GalleryCell className="min-h-[230px]">
-            <div className={cardClass}>
-              <AutoFadingImage images={topRightImages} interval={4800} />
-            </div>
-          </GalleryCell>
+                  <button
+                    type="button"
+                    onClick={() => openAdmissionModal()}
+                    aria-label="Open admission enquiry form"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105 cursor-pointer">
+                    <ArrowUpRight size={18} strokeWidth={2.5} />
+                  </button>
+                </div>
 
-          <GalleryCell className="min-h-[230px]">
-            <div className={cardClass}>
-              <AutoFadingImage images={bottomMiddleImages} interval={5200} />
-            </div>
-          </GalleryCell>
+                {/* Row 2: B.Ed. Curriculum / Schedule */}
+                <div className="pb-3.5 border-b border-[#2E3A8C]/15 flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
+                      {isHindi ? "बी.एड. पाठ्यक्रम" : "Curriculum & Syllabus"}
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isHindi ? "2-वर्षीय एनसीटीई एवं जीजीएसआईपीयू योजना" : "Two-Year GGSIPU Scheme"}
+                    </p>
+                    <Link
+                      to="/course/bed"
+                      className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1">
+                      <span>{isHindi ? "पाठ्यक्रम देखें →" : "View Syllabus →"}</span>
+                    </Link>
+                  </div>
 
-          <GalleryCell className="min-h-[230px]">
-            <div className={cardClass}>
-              <AutoFadingImage images={bottomRightImages} interval={4900} />
+                  <Link
+                    to="/course/bed"
+                    aria-label="View B.Ed. Syllabus"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105">
+                    <ArrowUpRight size={18} strokeWidth={2.5} />
+                  </Link>
+                </div>
+
+                {/* Row 3: Mandatory Disclosures */}
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
+                      {isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosures"}
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isHindi ? "एनसीटीई आदेश एवं वैधानिक शपथ-पत्र" : "NCTE Orders & Affidavits"}
+                    </p>
+                    <Link
+                      to="/mandatory-disclosure"
+                      className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1">
+                      <span>{isHindi ? "दस्तावेज देखें →" : "Read more →"}</span>
+                    </Link>
+                  </div>
+
+                  <Link
+                    to="/mandatory-disclosure"
+                    aria-label="View Mandatory Disclosures"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105">
+                    <ArrowUpRight size={18} strokeWidth={2.5} />
+                  </Link>
+                </div>
+              </div>
             </div>
-          </GalleryCell>
+
+            {/* ========================================================== */}
+            {/* 2 BLUE MILESTONE ALBUM CARDS (Screenshot 1)                */}
+            {/* ========================================================== */}
+            <div className="space-y-3.5">
+              {milestoneAlbums.map((album) => (
+                <div
+                  key={album.id}
+                  className="flex items-center gap-4 rounded-xl bg-[#2E3A8C] hover:bg-[#202965] p-4 text-white shadow-md transition-all duration-300 hover:shadow-lg">
+                  {/* Photo Thumbnail */}
+                  <div className="relative h-20 w-24 sm:h-22 sm:w-28 shrink-0 overflow-hidden rounded-lg bg-slate-200 border border-white/20">
+                    <img
+                      src={album.image}
+                      alt={isHindi ? album.titleHi : album.titleEn}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  {/* Text Details & Yellow View Album Button */}
+                  <div className="min-w-0 flex-1">
+                    <h5 className="text-sm sm:text-base font-bold text-white leading-snug line-clamp-2">
+                      {isHindi ? album.titleHi : album.titleEn}
+                    </h5>
+
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-[#FBDD23]">
+                        {isHindi ? album.dateHi : album.dateEn}
+                      </span>
+
+                      <Link
+                        to={album.link}
+                        className="inline-flex items-center rounded-sm bg-[#FBDD23] hover:bg-[#FFDC13] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-900 shadow-2xs transition-all active:scale-95">
+                        {isHindi ? "एल्बम देखें" : "View Album"}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ============================================================ */}
+          {/* RIGHT SIDE: PHOTO GALLERY ROTATED LABEL + 2x2 PHOTO GRID   */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-7 flex gap-4 sm:gap-6 items-stretch">
+            {/* Center Vertical Rotated Label (Screenshot 2) */}
+            <div className="hidden sm:flex items-center justify-center select-none shrink-0 border-r border-[#2E3A8C]/20 pr-4">
+              <span className="[writing-mode:vertical-rl] rotate-180 text-xs font-extrabold uppercase tracking-[0.28em] text-[#2E3A8C]">
+                {isHindi ? "फोटो गैलरी" : "PHOTO GALLERY"}
+              </span>
+            </div>
+
+            {/* 2x2 Photo Grid */}
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {galleryPhotos.map((photo) => (
+                <div
+                  key={photo.alt}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-200 border border-white/80 shadow-md">
+                  <img
+                    src={photo.src}
+                    alt={photo.alt}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  {/* Gradient Overlay & Caption */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-90 transition-opacity" />
+
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <span className="inline-block rounded-sm bg-[#FBDD23] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-slate-900">
+                      HSCE Campus
+                    </span>
+                    <p className="mt-1 text-sm font-bold text-white line-clamp-1">
+                      {photo.caption}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </Container>
-
-      <style>{`
-        @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-          .gallery-image img {
-            transition: opacity 500ms ease, transform 700ms ease;
-          }
-
-          .gallery-image:hover img.opacity-100 {
-            transform: scale(1.035);
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .gallery-image img {
-            transition: none !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
+
+export default CampusGallerySection;

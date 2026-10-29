@@ -49,7 +49,7 @@ export const coursePageData = {
       hi: "प्रवेश गाइड",
     },
     syllabusPdf: "/syllabus",
-    admissionPath: "/admission-guide",
+    admissionPath: "/admissions",
   },
 
   enquiry: {

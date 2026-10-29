@@ -28,17 +28,53 @@
 html {
   min-width: 320px;
   scroll-behavior: smooth;
+  font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
+}
+
+body {
+  font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
+}
+
+/* Universal Typography - Exact Same Font Across Every Single Page */
+*,
+*::before,
+*::after {
+  font-family: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+button,
+input,
+select,
+textarea,
+blockquote,
+table,
+th,
+td,
+li,
+label {
+  font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
+}
+
+/* Force all utility font classes on EVERY page to universally resolve to the exact same font */
+.font-sans,
+.font-serif,
+.font-poppins,
+.font-heading {
+  font-family: "Manrope", "Noto Sans Devanagari", sans-serif !important;
 }
 
 .home-page {
   --home-motion-duration: 700ms;
   --home-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
-  font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
-}
-
-.home-page .font-poppins,
-.home-page .font-sans,
-.home-page .font-serif {
   font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
 }
 
@@ -265,4 +301,3 @@ img {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
-

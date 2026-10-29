@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { FileText, CalendarDays, FolderOpen, ArrowUpRight } from "lucide-react";
-import { Helmet } from "react-helmet-async";
 import AdobePdfIcon from "../components/common/AdobePdfIcon";
-import { Container } from "../components/common/Container";
-import { PageHeaderBanner } from "../components/common/PageHeaderBanner";
+import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout";
+import { getGovernanceSidebarConfig } from "../data/navigationConfig";
 import { useLanguage } from "../context/LanguageContext";
 import { usePublishedRecords } from "../hooks/usePublishedRecords";
 
@@ -46,10 +45,10 @@ const disclosureTitles = [
   "8. Stock Register",
   "9. Co-Curricular Activities Conducted by the Institution (Assessment Year)",
   "9) CCA Evidence",
-  "9 (e) SLCHE Value_Added_Courses_Report",
+  "9 (e) HSCE Value Added Courses Report",
   "10. Publications of the Institutions",
-  "10(b) Newsletter Latest SLCHE Chronicle 2023 - 24",
-  "10 (b) SLCHE Annual Magazine Reflections",
+  "10(b) Newsletter Latest HSCE Chronicle 2023 - 24",
+  "10 (b) HSCE Annual Magazine Reflections",
   "10 (b) Publication of Magazine",
   "11. Students’ Personality Development Activities",
   "11(a)Activities.pdf",
@@ -63,8 +62,6 @@ const disclosureTitles = [
   "14 (a) and (b) (1)",
 ];
 
-// Preserve identical titles and order for both sessions.
-// Add real PDF paths to documentUrls when they are available.
 const documentUrls = {};
 
 const createDisclosureDocuments = () =>
@@ -83,6 +80,8 @@ const fallbackSessions = ["2025-2026", "2024-2025"];
 
 export default function MandatoryDisclosurePage() {
   const { isHindi } = useLanguage();
+  const sidebarConfig = getGovernanceSidebarConfig(isHindi);
+
   const [selectedSession, setSelectedSession] = useState("");
   const publishedDocuments = usePublishedRecords("documents", [], {
     limitCount: 100,
@@ -116,194 +115,132 @@ export default function MandatoryDisclosurePage() {
     : disclosureData[session] || [];
 
   const labels = {
-    eyebrow: isHindi ? "सार्वजनिक दस्तावेज़" : "PUBLIC DOCUMENTS",
-    heading: isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosure",
+    eyebrow: isHindi ? "सार्वजनिक दस्तावेज़" : "PUBLIC DISCLOSURES",
+    heading: isHindi ? "अनिवार्य प्रकटीकरण (NCTE & GGSIPU)" : "Mandatory Disclosure (NCTE & GGSIPU)",
     description: isHindi
-      ? "शैक्षणिक सत्र के अनुसार संस्थान के दस्तावेज़ देखें।"
-      : "Access institutional disclosure documents organized by academic session.",
+      ? "राष्ट्रीय अध्यापक शिक्षा परिषद एवं विश्वविद्यालय के मानकों के अनुसार संस्थागत अनिवार्य प्रकटीकरण प्रपत्र।"
+      : "Official statutory disclosures, institutional compliance parameters, and regulatory reports organized by academic session.",
     session: isHindi ? "शैक्षणिक सत्र" : "Academic Session",
     documents: isHindi ? "दस्तावेज़" : "Documents",
-    listed: isHindi ? "दस्तावेज़ सूची" : "documents listed",
+    listed: isHindi ? "दस्तावेज़ उपलब्ध" : "documents listed",
     openDocument: isHindi ? "दस्तावेज़ खोलें" : "Open document",
-    noLink: isHindi ? "PDF लिंक अभी उपलब्ध नहीं है" : "PDF link not configured",
   };
 
   return (
-    <>
-      <Helmet>
-        <title>
-          {isHindi
-            ? "अनिवार्य प्रकटीकरण | हरियाणा शक्ति कॉलेज ऑफ एजुकेशन"
-            : "Mandatory Disclosure | Haryana Shakti College of Education"}
-        </title>
-        <meta
-          name="description"
-          content="Mandatory disclosure documents for Haryana Shakti College of Education, organized by academic session."
-        />
-      </Helmet>
+    <CollegiatePageLayout
+      bannerTitle={isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosure"}
+      bannerSubtitle={
+        isHindi
+          ? "राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE) के वैधानिक प्रकटीकरण नियम एवं संस्थागत अभिलेख।"
+          : "Regulatory transparency documents and annual institutional disclosures as prescribed by NCTE."
+      }
+      breadcrumbs={[
+        { label: isHindi ? "वैधानिक प्रकटीकरण" : "Governance" },
+        { label: isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosure" },
+      ]}
+      sidebarTitle={sidebarConfig.title}
+      sidebarItems={sidebarConfig.items}
+      quickActions={sidebarConfig.quickActions}>
+      <div className="space-y-6">
+        {/* Main Panel with Image 3 Style Lavender Bar */}
+        <div className="overflow-hidden rounded-md border border-gray-200/90 bg-white shadow-xs">
+          {/* Lavender Header Bar (Image 3 Style) */}
+          <div className="bg-[#E4E7F5] px-6 py-4 border-b border-gray-200/80">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#2E3A8C]">
+              {labels.eyebrow}
+            </span>
+            <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1E242C] tracking-tight">
+              {labels.heading}
+            </h3>
+            <p className="mt-1 text-xs sm:text-sm text-slate-600 font-sans">
+              {labels.description}
+            </p>
+          </div>
 
-      <PageHeaderBanner
-        title={isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosure"}
-        subtitle={
-          isHindi
-            ? "शैक्षणिक सत्र के अनुसार संस्थागत दस्तावेज़"
-            : "Institutional documents organized by academic session."
-        }
-        breadcrumbs={[
-          {
-            label: isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosure",
-          },
-        ]}
-      />
-
-      <main className="bg-[#F7F8FA] py-8 sm:py-12">
-        <Container>
-          <section
-            aria-labelledby="disclosure-heading"
-            className="mx-auto max-w-6xl">
-            {/* Page introduction */}
-            <div className="mb-7">
-              <div className="mb-3 flex items-center gap-2">
-                <span className="h-1 w-8 rounded-full bg-[#FBDD23]" />
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#363991]">
-                  {labels.eyebrow}
-                </p>
-              </div>
-
-              <h2
-                id="disclosure-heading"
-                className="text-2xl font-bold tracking-tight text-[#292C75] sm:text-3xl">
-                {labels.heading}
-              </h2>
-
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#626879] sm:text-base">
-                {labels.description}
-              </p>
+          {/* Session Selector */}
+          <div className="border-b border-gray-200/80 px-5 py-4 bg-slate-50/60 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <CalendarDays size={16} className="text-[#2E3A8C]" />
+              <span>{labels.session}:</span>
             </div>
 
-            {/* Main panel */}
-            <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
-              {/* Session selector */}
-              <div className="border-b border-[#E5E7EB] px-4 py-5 sm:px-6 sm:py-6">
-                <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#292C75]">
-                  <CalendarDays
-                    size={18}
-                    strokeWidth={1.8}
-                    aria-hidden="true"
-                  />
-                  <span>{labels.session}</span>
-                </div>
-
-                <div
-                  className="flex flex-wrap gap-2"
-                  role="group"
-                  aria-label={labels.session}>
-                  {sessions.map((item) => {
-                    const isActive = session === item;
-
-                    return (
-                      <button
-                        key={item}
-                        type="button"
-                        aria-pressed={isActive}
-                        onClick={() => setSelectedSession(item)}
-                        className={`min-h-10 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#363991] focus-visible:ring-offset-2 ${
-                          isActive
-                            ? "border-[#292C75] bg-[#292C75] text-white"
-                            : "border-[#E5E7EB] bg-white text-[#4B5263] hover:border-[#363991] hover:bg-[#F7F8FA] hover:text-[#292C75]"
-                        }`}>
-                        {item.replace("-", "–")}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Selected session summary */}
-              <div className="flex flex-col gap-3 border-b border-[#E5E7EB] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F0F1FB] text-[#363991]">
-                    <FolderOpen
-                      size={20}
-                      strokeWidth={1.8}
-                      aria-hidden="true"
-                    />
-                  </div>
-
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-[#25283A]">
-                      {session.replace("-", "–")}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-[#626879]">
-                      {labels.documents}
-                    </p>
-                  </div>
-                </div>
-
-                <span className="inline-flex w-fit shrink-0 items-center rounded-md bg-[#F7F8FA] px-3 py-2 text-xs font-semibold text-[#626879]">
-                  {sessionDocuments.length} {labels.listed}
-                </span>
-              </div>
-
-              {/* Documents */}
-              <ul
-                className="grid grid-cols-1 sm:grid-cols-2"
-                aria-label={`${labels.documents}: ${session}`}>
-                {sessionDocuments.map((document, index) => (
-                  <li
-                    key={document.id}
-                    className={`group flex min-w-0 items-center gap-3 border-b border-[#E5E7EB] px-4 py-4 transition-colors hover:bg-[#FAFAFC] sm:px-5 ${
-                      index % 2 === 0 ? "sm:border-r" : ""
+            <div className="flex flex-wrap items-center gap-2">
+              {sessions.map((item) => {
+                const isActive = item === session;
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setSelectedSession(item)}
+                    className={`rounded px-3.5 py-1.5 text-xs font-bold transition border cursor-pointer ${
+                      isActive
+                        ? "border-[#2E3A8C] bg-[#2E3A8C] text-white shadow-xs"
+                        : "border-gray-300 bg-white text-slate-700 hover:border-[#2E3A8C] hover:text-[#2E3A8C]"
                     }`}>
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 transition-colors group-hover:bg-red-100">
-                      <AdobePdfIcon size={22} />
-                    </span>
+                    {item.replace("-", "–")}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-                    <div className="min-w-0 flex-1">
-                      {document.url ? (
-                        <a
-                          href={document.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${labels.openDocument}: ${document.title}`}
-                          className="block break-words text-sm font-medium leading-6 text-[#25283A] transition-colors hover:text-[#363991] hover:underline">
-                          {document.title}
-                        </a>
-                      ) : (
-                        <p className="break-words text-sm font-medium leading-6 text-[#25283A]">
-                          {document.title}
-                        </p>
-                      )}
+          {/* Session Summary Pill */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-white text-xs">
+            <div className="flex items-center gap-2 font-bold text-slate-800">
+              <FolderOpen size={16} className="text-[#2E3A8C]" />
+              <span>Session {session.replace("-", "–")}</span>
+            </div>
+            <span className="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded font-bold">
+              {sessionDocuments.length} {labels.listed}
+            </span>
+          </div>
 
-                      <p className="mt-1 text-xs text-[#858A98]">
-                        {session.replace("-", "–")}
-                      </p>
-                    </div>
-
+          {/* Documents Grid / Zebra Rows */}
+          <ul className="grid grid-cols-1 divide-y divide-gray-100">
+            {sessionDocuments.map((document, index) => (
+              <li
+                key={document.id}
+                className={`group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-blue-50/40 ${
+                  index % 2 === 1 ? "bg-slate-50/50" : "bg-white"
+                }`}>
+                <div className="flex items-start gap-3 min-w-0">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-red-50 text-red-600 mt-0.5">
+                    <AdobePdfIcon size={18} />
+                  </span>
+                  <div className="min-w-0">
                     {document.url ? (
                       <a
                         href={document.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={`${labels.openDocument}: ${document.title}`}
-                        title={labels.openDocument}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#858A98] transition-colors hover:bg-[#F0F1FB] hover:text-[#363991] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#363991]">
-                        <ArrowUpRight size={17} aria-hidden="true" />
+                        className="block break-words text-xs sm:text-sm font-semibold text-slate-800 hover:text-[#2E3A8C] hover:underline">
+                        {document.title}
                       </a>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    ) : (
+                      <p className="break-words text-xs sm:text-sm font-semibold text-slate-800">
+                        {document.title}
+                      </p>
+                    )}
+                    <span className="text-[11px] text-slate-400">
+                      Session {session.replace("-", "–")} • NCTE Compliance Record
+                    </span>
+                  </div>
+                </div>
 
-            <p className="mt-4 text-xs leading-5 text-[#858A98]">
-              {isHindi
-                ? "नोट: दस्तावेज़ खोलने के लिए संबंधित PDF लिंक उपलब्ध होना आवश्यक है।"
-                : "Note: A valid PDF URL must be configured to open a document."}
-            </p>
-          </section>
-        </Container>
-      </main>
-    </>
+                {document.url && (
+                  <a
+                    href={document.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-100 text-slate-600 hover:bg-[#2E3A8C] hover:text-white transition">
+                    <ArrowUpRight size={15} />
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </CollegiatePageLayout>
   );
 }

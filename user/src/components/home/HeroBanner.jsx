@@ -101,48 +101,74 @@ export function HeroBanner({ slides = heroSlides }) {
     next: isHindi ? "अगला बैनर" : "Next banner",
   };
 
-  if (totalSlides === 0) return null;
-
   return (
     <section
-      aria-label="College banner"
-      className="w-full bg-[#F7F8FC] px-3 py-3 sm:px-5 sm:py-4 lg:px-8 lg:py-5">
+      aria-label="Campus Hero Carousel"
+      className="relative w-full bg-slate-100 sm:bg-[#2E3A8C] p-3 sm:p-0"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}>
       <div
-        className="relative isolate w-full rounded-xl border border-[#E6E9F0] bg-[#194178] shadow-md sm:rounded-2xl lg:rounded-[22px]"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        className="relative overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}>
-        {/* Banner slides */}
-        <div className="overflow-hidden rounded-[inherit]">
+        {/* Banner carousel container (Rounded floating card on mobile matching reference image) */}
+        <div className="relative h-[480px] sm:h-[520px] lg:h-[min(72svh,720px)] lg:min-h-[500px] w-full rounded-2xl sm:rounded-none overflow-hidden shadow-xl sm:shadow-none border border-slate-200/90 sm:border-0">
           <div
-            className="flex transition-transform duration-700 ease-in-out motion-reduce:transition-none"
+            className="flex h-full w-full transition-transform duration-700 ease-in-out"
             style={{
               transform: `translateX(-${currentIndex * 100}%)`,
             }}>
             {slides.map((slide, index) => (
               <div
-                key={slide.id ? `banner-slide-${slide.id}-${index}` : `banner-${index}`}
-                className="relative w-full shrink-0"
-                aria-hidden={currentIndex !== index}>
-                {/* Institutional Navy & Dark Gradient Overlays for Readability */}
-                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-[#0F2547]/90 via-[#194178]/45 to-transparent" />
-                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[#0B1B36]/90 via-black/15 to-transparent" />
+                key={slide.id || index}
+                aria-hidden={currentIndex !== index}
+                className="relative h-full w-full shrink-0 overflow-hidden">
+                {/* Visual gradient overlay for text readability */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-slate-950/40 md:bg-gradient-to-r md:from-black/85 md:via-black/40 md:to-transparent"
+                />
 
-                {/* TEXT CONTENT OVERLAY */}
-                <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 pb-20 pt-10 sm:px-10 lg:px-20">
-                  <div className="flex max-w-4xl items-center">
-                    {/* Vertical Gold Accent Line */}
-                    <div className="mr-5 h-20 w-2 shrink-0 rounded-sm bg-[#FBDD23] shadow-sm sm:mr-8 sm:h-28 sm:w-3" />
+                {/* Banner title */}
+                <div className="absolute inset-x-0 top-[40%] -translate-y-1/2 z-20 px-6 sm:px-12 md:top-16 lg:top-24 lg:translate-y-0 lg:px-16">
+                  {/* Mobile View: Badge + Title + Subtitle (Matching Reference Image 4) */}
+                  <div className="max-w-xl md:hidden">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FBDD23] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1A2254] shadow-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#1A2254]" />
+                      {isHindi
+                        ? "जीजीएसआईपीयू संबद्ध • एनसीटीई मान्यता"
+                        : "GGSIPU AFFILIATED • NCTE APPROVED"}
+                    </span>
 
-                    {/* Serif Heading */}
-                    <h2 className="font-serif text-3xl font-bold leading-tight text-white drop-shadow-sm sm:text-5xl sm:leading-tight md:text-6xl lg:text-7xl lg:leading-[1.1]">
-                      {slide.title ? (
-                        slide.title
-                      ) : isHindi ? (
+                    <h2 className="mt-2 text-[26px] sm:text-[30px] font-extrabold leading-[1.18] text-white drop-shadow-xl tracking-tight">
+                      {isHindi ? (
+                        <>व्यावसायिक शिक्षक शिक्षा के लिए आपकी पसंद</>
+                      ) : (
+                        <>Your Choice for Professional Career</>
+                      )}
+                    </h2>
+
+                    <p className="mt-2 text-xs leading-relaxed text-slate-100 font-medium drop-shadow-md">
+                      {isHindi
+                        ? "एनसीटीई द्वारा अनुमोदित एवं गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली से संबद्ध।"
+                        : "Approved by NCTE & Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi."}
+                    </p>
+                  </div>
+
+                  {/* Desktop View: Full Standard Desktop Badge + Heading + Subtitle */}
+                  <div className="hidden md:block max-w-2xl">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FBDD23] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#363991] shadow-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#363991]" />
+                      {isHindi
+                        ? "जीजीएसआईपीयू से संबद्ध • एनसीटीई मान्यता"
+                        : "GGSIPU Affiliated • NCTE Approved"}
+                    </span>
+
+                    <h2 className="mt-3 text-4xl md:text-5xl font-extrabold leading-[1.25] text-white drop-shadow-lg tracking-tight">
+                      {isHindi ? (
                         <>
-                          व्यावसायिक शिक्षण के लिए{" "}
+                          व्यावसायिक शिक्षक शिक्षा के लिए{" "}
                           <br className="hidden sm:block" />
                           आपकी सर्वोत्तम पसंद
                         </>
@@ -153,6 +179,12 @@ export function HeroBanner({ slides = heroSlides }) {
                         </>
                       )}
                     </h2>
+
+                    <p className="mt-2 text-sm text-slate-200 line-clamp-2 sm:line-clamp-none font-medium max-w-lg drop-shadow-sm leading-relaxed">
+                      {isHindi
+                        ? "एनसीटीई द्वारा अनुमोदित एवं गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली से संबद्ध।"
+                        : "Approved by NCTE & Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi."}
+                    </p>
                   </div>
                 </div>
 
@@ -167,13 +199,40 @@ export function HeroBanner({ slides = heroSlides }) {
                     fetchpriority={index === 0 ? "high" : "auto"}
                     loading={index === 0 ? "eager" : "lazy"}
                     draggable="false"
-                    className="block h-[460px] w-full select-none object-cover object-center sm:h-[520px] lg:h-[min(72svh,720px)] lg:min-h-[500px]"
+                    className="block h-full w-full select-none object-cover object-center"
                   />
                 </picture>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Mobile top slide indicators (Matching Reference Image) */}
+        {totalSlides > 1 && (
+          <div className="absolute inset-x-0 top-6 z-20 flex justify-center items-center gap-1.5 md:hidden">
+            {slides.map((slide, index) => (
+              <button
+                key={
+                  slide?.id
+                    ? `banner-dot-${slide.id}-${index}`
+                    : `banner-dot-${index}`
+                }
+                type="button"
+                onClick={() => setCurrentIndex(index)}
+                aria-label={`Go to banner ${index + 1}`}
+                aria-current={currentIndex === index ? "true" : undefined}
+                className="p-1 cursor-pointer">
+                <span
+                  className={`block h-1.5 rounded-full transition-all duration-300 ${
+                    currentIndex === index
+                      ? "w-6 bg-[#FBDD23]"
+                      : "w-1.5 bg-white/70"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Desktop previous/next controls */}
         {totalSlides > 1 && (
@@ -182,7 +241,7 @@ export function HeroBanner({ slides = heroSlides }) {
               type="button"
               onClick={goPrev}
               aria-label={text.prev}
-              className="absolute left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-[#194178]/70 text-white backdrop-blur-sm transition-colors hover:border-[#FBDD23] hover:bg-[#194178] hover:text-[#FBDD23] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:flex lg:left-5">
+              className="absolute left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-[#2E3A8C]/80 text-white backdrop-blur-sm transition-colors hover:border-[#FBDD23] hover:bg-[#2E3A8C] hover:text-[#FBDD23] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:flex lg:left-5 cursor-pointer">
               <ChevronLeft size={20} />
             </button>
 
@@ -190,24 +249,24 @@ export function HeroBanner({ slides = heroSlides }) {
               type="button"
               onClick={goNext}
               aria-label={text.next}
-              className="absolute right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-[#194178]/70 text-white backdrop-blur-sm transition-colors hover:border-[#FBDD23] hover:bg-[#194178] hover:text-[#FBDD23] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:flex lg:right-5">
+              className="absolute right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-[#2E3A8C]/80 text-white backdrop-blur-sm transition-colors hover:border-[#FBDD23] hover:bg-[#2E3A8C] hover:text-[#FBDD23] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:flex lg:right-5 cursor-pointer">
               <ChevronRight size={20} />
             </button>
           </>
         )}
 
         {/* Bottom actions bar */}
-        <div className="absolute inset-x-0 bottom-0 z-30 px-4 pb-5 sm:px-8 sm:pb-7 lg:px-12 lg:pb-10">
+        <div className="absolute inset-x-0 bottom-0 z-30 px-4 pb-4 sm:px-8 sm:pb-7 lg:px-12 lg:pb-10">
           <div className="mx-auto flex max-w-[1250px] flex-col items-stretch justify-between gap-3 md:flex-row md:items-center md:gap-4 lg:gap-6">
             {/* Campus tour: desktop/tablet */}
             <Link
               to="/book-a-tour"
-              className="group hidden min-h-[48px] w-full items-center justify-between gap-4 rounded-full border border-white/75 bg-[#194178]/80 py-1 pl-5 pr-1 text-white shadow-md backdrop-blur-md transition-all hover:border-[#FBDD23] hover:bg-[#194178] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:flex md:w-auto md:min-w-[215px]">
+              className="group hidden min-h-[48px] w-full items-center justify-between gap-4 rounded-full border border-white/75 bg-[#2E3A8C]/85 py-1 pl-5 pr-1 text-white shadow-md backdrop-blur-md transition-all hover:border-[#FBDD23] hover:bg-[#2E3A8C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:flex md:w-auto md:min-w-[215px]">
               <span className="text-xs font-bold tracking-wider">
                 {text.tour}
               </span>
 
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#194178] transition-transform group-hover:translate-x-0.5 group-hover:bg-[#FBDD23]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#2E3A8C] transition-transform group-hover:translate-x-0.5 group-hover:bg-[#FBDD23]">
                 <ArrowRight size={18} />
               </span>
             </Link>
@@ -221,7 +280,7 @@ export function HeroBanner({ slides = heroSlides }) {
                   if (!searchInput.trim()) navigate("/search");
                 }}
                 className="group flex min-h-[48px] w-full cursor-pointer items-center rounded-full border border-white/65 bg-white/95 px-5 py-1.5 shadow-lg backdrop-blur-md transition-all hover:border-[#FBDD23] focus-within:border-[#FBDD23] focus-within:ring-2 focus-within:ring-[#FBDD23]/40">
-                <Search size={18} className="mr-3 shrink-0 text-[#194178]" />
+                <Search size={18} className="mr-3 shrink-0 text-[#2E3A8C]" />
 
                 <input
                   type="text"
@@ -230,13 +289,13 @@ export function HeroBanner({ slides = heroSlides }) {
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder={text.placeholder}
                   aria-label="Search pages on this website"
-                  className="w-full min-w-0 cursor-pointer bg-transparent py-1 text-sm font-medium text-[#25283A] outline-none placeholder:text-[#68728A] focus:cursor-text"
+                  className="w-full min-w-0 cursor-pointer bg-transparent py-1 text-sm font-medium text-[#1F2937] outline-none placeholder:text-gray-400 focus:cursor-text"
                 />
 
                 <button
                   type="submit"
                   aria-label="Go to search page"
-                  className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#194178] text-[#FBDD23] transition-colors group-hover:bg-[#343B91]">
+                  className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2E3A8C] text-[#FBDD23] transition-colors group-hover:bg-[#202965] cursor-pointer">
                   <ArrowRight size={16} />
                 </button>
               </form>
@@ -246,33 +305,32 @@ export function HeroBanner({ slides = heroSlides }) {
             <button
               type="button"
               onClick={() => openAdmissionModal()}
-              className="group hidden min-h-[48px] w-full cursor-pointer items-center justify-between gap-4 rounded-full border-2 border-[#FBDD23] bg-[#0a4b8c] py-1 pl-5 pr-1 text-white shadow-lg transition-all hover:bg-[#073665] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:flex md:w-auto md:min-w-[210px]">
+              className="group hidden min-h-[48px] w-full cursor-pointer items-center justify-between gap-4 rounded-full border-2 border-[#FBDD23] bg-[#FBDD23] hover:bg-[#FFDC13] py-1 pl-6 pr-1 text-[#2E3A8C] font-bold shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E3A8C] md:flex md:w-auto md:min-w-[210px]">
               <span className="text-xs font-bold tracking-wider">
                 {text.admission}
               </span>
 
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] text-[#0a4b8c] transition-transform group-hover:translate-x-0.5">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2E3A8C] text-[#FBDD23] transition-transform group-hover:translate-x-0.5">
                 <ArrowRight size={18} strokeWidth={2.5} />
               </span>
             </button>
 
-            {/* Mobile: Direct redirect button to /search */}
-            <Link
-              to="/search"
-              aria-label="Go to search page"
-              className="flex min-h-[50px] w-full items-center gap-3 rounded-full border-2 border-[#FBDD23] bg-white/95 px-4 py-2 text-[#0a4b8c] shadow-lg backdrop-blur-md transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] md:hidden">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0a4b8c] text-[#FBDD23]">
-                <Search size={17} />
-              </span>
+            {/* Mobile: Dual CTA Buttons (Matching Reference Image 4) */}
+            <div className="w-full grid grid-cols-2 gap-2.5 md:hidden">
+              <button
+                type="button"
+                onClick={() => openAdmissionModal()}
+                className="flex min-h-[46px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#FBDD23] hover:bg-[#FFDC13] px-3 py-2 text-xs font-bold text-[#1A2254] shadow-lg transition-all active:scale-95 cursor-pointer">
+                <span>{isHindi ? "प्रवेश आवेदन" : "Apply for Admission"}</span>
+                <ArrowRight size={15} strokeWidth={2.5} />
+              </button>
 
-              <span className="flex-1 truncate text-left text-sm font-semibold text-[#25283A]">
-                {text.placeholder}
-              </span>
-
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] text-[#0a4b8c]">
-                <ArrowRight size={17} />
-              </span>
-            </Link>
+              <Link
+                to="/course"
+                className="flex min-h-[46px] w-full items-center justify-center gap-1.5 rounded-xl border border-white/30 bg-slate-900/60 hover:bg-slate-900/80 px-3 py-2 text-xs font-bold text-white shadow-lg backdrop-blur-md transition-all active:scale-95 text-center">
+                <span>{isHindi ? "बी.एड. विवरण" : "Explore B.Ed."}</span>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -281,40 +339,21 @@ export function HeroBanner({ slides = heroSlides }) {
           <div className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-3 sm:right-6 md:flex lg:right-20">
             {slides.map((slide, index) => (
               <button
-                key={slide?.id ? `banner-line-${slide.id}-${index}` : `banner-line-${index}`}
+                key={
+                  slide?.id
+                    ? `banner-line-${slide.id}-${index}`
+                    : `banner-line-${index}`
+                }
                 type="button"
                 onClick={() => setCurrentIndex(index)}
                 aria-label={`Go to banner ${index + 1}`}
                 aria-current={currentIndex === index ? "true" : undefined}
-                className="group rounded-full p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23]">
+                className="group rounded-full p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] cursor-pointer">
                 <span
                   className={`block h-[2px] rounded-full transition-all duration-300 ${
                     currentIndex === index
                       ? "w-8 bg-[#FBDD23]"
                       : "w-4 bg-white/65 group-hover:w-6 group-hover:bg-white"
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Mobile slide indicators */}
-        {totalSlides > 1 && (
-          <div className="absolute inset-x-0 top-3 z-20 flex justify-center gap-2 md:hidden">
-            {slides.map((slide, index) => (
-              <button
-                key={slide?.id ? `banner-dot-${slide.id}-${index}` : `banner-dot-${index}`}
-                type="button"
-                onClick={() => setCurrentIndex(index)}
-                aria-label={`Go to banner ${index + 1}`}
-                aria-current={currentIndex === index ? "true" : undefined}
-                className="p-1">
-                <span
-                  className={`block h-1.5 rounded-full transition-all ${
-                    currentIndex === index
-                      ? "w-6 bg-[#FBDD23]"
-                      : "w-1.5 bg-white/70"
                   }`}
                 />
               </button>

@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import { useAdmissionModal } from "../../context/AdmissionModalContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { submitStudentEnquiry } from "../../services/enquiryService";
 import { collegeInfo } from "../../data/siteData";
 import { admissionModalData } from "../../data/admissionModalData";
+import { submitStudentEnquiry } from "../../services/enquiryService";
 
 export function AdmissionModal() {
   const { isOpen, closeAdmissionModal, modalOptions } = useAdmissionModal();
@@ -278,6 +278,8 @@ export function AdmissionModal() {
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-none border border-blue-100 p-1 bg-white shadow-xs flex-shrink-0 flex items-center justify-center overflow-hidden">
                 <img
                   src={admissionModalData.logoSrc}
+                  width="432"
+                  height="432"
                   onError={(e) => {
                     e.currentTarget.src = admissionModalData.logoFallback;
                   }}

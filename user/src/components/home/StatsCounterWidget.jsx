@@ -164,6 +164,8 @@ export function StatsCounterWidget() {
               {stat.image && (
                 <img
                   src={stat.image}
+                  width="800"
+                  height="600"
                   alt=""
                   aria-hidden="true"
                   loading="lazy"

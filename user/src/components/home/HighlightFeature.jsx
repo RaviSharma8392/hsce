@@ -165,6 +165,8 @@ export function HighlightFeature() {
             <div className="relative h-[300px] w-full min-w-0 sm:h-[380px] md:h-[440px] lg:h-[460px] overflow-hidden rounded-2xl border-2 border-white/20 bg-slate-900/40 shadow-2xl">
               <img
                 src={highlightData.imageUrl}
+                width="1200"
+                height="800"
                 alt={
                   isHindi
                     ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन"

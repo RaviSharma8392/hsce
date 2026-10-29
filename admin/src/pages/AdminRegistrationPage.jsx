@@ -102,6 +102,8 @@ export default function AdminRegistrationPage() {
         <div className="mb-6 flex items-center gap-3.5 pb-4 border-b border-slate-100">
           <img
             src="/assets/brand/college-logo.png"
+            width="432"
+            height="432"
             alt="HSCE Crest"
             className="h-11 w-auto object-contain"
           />

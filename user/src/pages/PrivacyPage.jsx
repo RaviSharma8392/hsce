@@ -1,121 +1,84 @@
-import { Helmet } from "react-helmet-async";
-import { Container } from "../components/common/Container";
-import { PageHeaderBanner } from "../components/common/PageHeaderBanner";
-import { PageNavigationLinks } from "../components/common/PageNavigationLinks";
+import React from "react";
+import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout";
+import { getGovernanceSidebarConfig } from "../data/navigationConfig";
 import { useLanguage } from "../context/LanguageContext";
 
 export default function PrivacyPage() {
   const { isHindi } = useLanguage();
+  const sidebarConfig = getGovernanceSidebarConfig(isHindi);
 
   return (
-    <>
-      <Helmet>
-        <title>
-          {isHindi
-            ? "गोपनीयता नीति | हरियाणा शक्ति कॉलेज ऑफ एजुकेशन"
-            : "Privacy Policy | Haryana Shakti College of Education"}
-        </title>
-        <meta
-          name="description"
-          content={
-            isHindi
-            ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन वेबसाइट के फॉर्म में दी गई जानकारी, उसके उपयोग और Firebase सेवाओं के बारे में जानें।"
-            : "Learn what information may be submitted through Haryana Shakti College of Education website forms, how it is used, and which Firebase services are used."
-          }
-        />
-      </Helmet>
-      <PageHeaderBanner
-        title={isHindi ? "गोपनीयता नीति" : "Privacy Policy"}
-        subtitle={
-          isHindi
-            ? "वेबसाइट फॉर्म, जानकारी के उपयोग और विश्लेषिकी के बारे में जानकारी"
-            : "Information about website forms, data use and analytics"
-        }
-        breadcrumbs={[{ label: isHindi ? "गोपनीयता नीति" : "Privacy Policy" }]}
-      />
-      <Container className="py-10">
-        <div className="section-card space-y-6 text-[#555555] leading-relaxed">
-          <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-900">
-              {isHindi
-                ? "कौन-सी जानकारी ली जा सकती है"
-                : "Information you may provide"}
-            </h2>
-            <p>
-              {isHindi
-                ? "संपर्क, पूछताछ और चैटबॉट फॉर्म में नाम, फोन नंबर, ईमेल और संदेश मांगे जा सकते हैं। कैंपस भ्रमण अनुरोध में उम्मीदवार या अभिभावक के संपर्क विवरण, शहर, शैक्षणिक जानकारी, पसंदीदा तिथि/समय और भ्रमण संबंधी प्राथमिकताएं भी ली जा सकती हैं। कृपया फॉर्म में अनावश्यक संवेदनशील जानकारी न दें।"
-                : "Contact, enquiry and chatbot forms may ask for your name, phone number, email address and message. A campus-tour request may also ask for candidate or guardian contact details, city, academic information, a preferred date and time, and tour preferences. Please do not include sensitive information that is not needed for your request."}
-            </p>
-          </section>
-          <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-900">
-              {isHindi
-                ? "जानकारी का उपयोग और भंडारण"
-                : "How information is used and stored"}
-            </h2>
-            <p>
-              {isHindi
-                ? "फॉर्म में दी गई जानकारी का उपयोग आपके संदेश का उत्तर देने, प्रवेश संबंधी पूछताछ संभालने या भ्रमण अनुरोध का प्रबंधन करने के लिए किया जाता है। वेबसाइट फॉर्म सबमिशन को Firebase/Firestore सेवा में भेजती है और इस वेबसाइट के प्रशासनिक कार्यों के लिए ब्राउज़र के स्थानीय स्टोरेज में भी प्रति रख सकती है। स्थानीय प्रति आपके ब्राउज़र में तब तक रह सकती है जब तक वह वहां से हटाई न जाए।"
-                : "Information submitted through these forms is used to respond to your message, handle an admissions enquiry or manage a tour request. Form submissions are sent to Firebase/Firestore and may also be copied to this website's browser local storage for site administration. A local copy may remain in that browser until it is removed there."}
-            </p>
-          </section>
-          <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-900">
-              {isHindi ? "विश्लेषिकी और बाहरी सेवाएं" : "Analytics and service providers"}
-            </h2>
-            <p>
-              {isHindi
-                ? "यह वेबसाइट समर्थित ब्राउज़र और वातावरण में Firebase Analytics का उपयोग कर सकती है। Firebase/Google अपनी सेवाओं के संचालन के दौरान जानकारी संसाधित कर सकते हैं। उनकी गोपनीयता और डेटा प्रबंधन की जानकारी के लिए संबंधित सेवा प्रदाता की नीति देखें।"
-                : "This website may use Firebase Analytics where it is supported by the browser and environment. Firebase/Google may process information while providing these services. Refer to the service provider's policies for details about its privacy and data handling practices."}
-            </p>
-          </section>
-          <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-900">
-              {isHindi ? "प्रश्न या अनुरोध" : "Questions or requests"}
-            </h2>
-            <p>
-              {isHindi
-                ? "अपने फॉर्म सबमिशन से जुड़े प्रश्न या अनुरोध के लिए कॉलेज से hsce.kanjhawala@gmail.com पर या +91 99531 55054 पर संपर्क करें। गोपनीय या संवेदनशील जानकारी वेबसाइट फॉर्म के बजाय सीधे कॉलेज कार्यालय को दें।"
-                : "For questions or requests concerning a form submission, contact the college at hsce.kanjhawala@gmail.com or +91 99531 55054. Share confidential or sensitive information directly with the college office rather than through a website form."}
-            </p>
-          </section>
+    <CollegiatePageLayout
+      bannerTitle={isHindi ? "गोपनीयता नीति" : "Privacy Policy"}
+      bannerSubtitle={
+        isHindi
+          ? "वेबसाइट फॉर्म, जानकारी के उपयोग और विश्लेषिकी के बारे में जानकारी।"
+          : "Information about website forms, data security, usage, and institutional policies."
+      }
+      breadcrumbs={[{ label: isHindi ? "गोपनीयता नीति" : "Privacy Policy" }]}
+      sidebarTitle={sidebarConfig.title}
+      sidebarItems={sidebarConfig.items}
+      quickActions={sidebarConfig.quickActions}>
+      <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6 text-slate-700 leading-relaxed font-sans text-xs sm:text-sm">
+        {/* Header with Blue Underline */}
+        <div className="border-b border-gray-200 pb-3 mb-5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#2E3A8C]">
+            {isHindi ? "संस्थागत दिशानिर्देश" : "Institutional Policy"}
+          </span>
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            {isHindi ? "गोपनीयता एवं डेटा सुरक्षा नीति" : "Privacy & Data Protection Policy"}
+          </h2>
+          <div className="mt-2 h-1 w-16 bg-[#2E3A8C] rounded-full" />
         </div>
 
-        {/* Inter-linking Component */}
-        <PageNavigationLinks
-          previousPage={{
-            title: "Mandatory Disclosures",
-            hiTitle: "अनिवार्य प्रकटीकरण",
-            to: "/mandatory-disclosure",
-          }}
-          nextPage={{
-            title: "Contact Campus Office",
-            hiTitle: "कॉलेज कार्यालय संपर्क",
-            to: "/contact",
-          }}
-          relatedLinks={[
-            {
-              title: "About the College",
-              hiTitle: "कॉलेज परिचय",
-              description: "College profile, history and educational programme.",
-              hiDescription:
-                "कॉलेज परिचय, इतिहास एवं शैक्षणिक कार्यक्रम।",
-              to: "/about",
-              iconKey: "about",
-            },
-            {
-              title: "B.Ed. Admissions",
-              hiTitle: "बी.एड. प्रवेश",
-              description:
-                "Admission eligibility, procedure and document information.",
-              hiDescription:
-                "प्रवेश पात्रता, प्रक्रिया एवं दस्तावेज़ संबंधी जानकारी।",
-              to: "/admissions",
-              iconKey: "admissions",
-            },
-          ]}
-        />
-      </Container>
-    </>
+        <section>
+          <h3 className="mb-2 font-serif text-base font-bold text-slate-900">
+            {isHindi
+              ? "1. कौन-सी जानकारी ली जा सकती है"
+              : "1. Information You May Provide"}
+          </h3>
+          <p className="text-justify leading-relaxed">
+            {isHindi
+              ? "संपर्क, पूछताछ और चैटबॉट फॉर्म में नाम, फोन नंबर, ईमेल और संदेश मांगे जा सकते हैं। कैंपस भ्रमण अनुरोध में उम्मीदवार या अभिभावक के संपर्क विवरण, शहर, शैक्षणिक जानकारी, पसंदीदा तिथि/समय और भ्रमण संबंधी प्राथमिकताएं भी ली जा सकती हैं। कृपया फॉर्म में अनावश्यक संवेदनशील जानकारी न दें।"
+              : "Contact, admission enquiry, and helpline forms may ask for your name, phone number, email address, and query. A campus tour request may also record candidate details, preferred date and time, and academic stream preferences. Sensitive personal data is neither requested nor stored."}
+          </p>
+        </section>
+
+        <section>
+          <h3 className="mb-2 font-serif text-base font-bold text-slate-900">
+            {isHindi
+              ? "2. जानकारी का उपयोग और भंडारण"
+              : "2. How Information is Used & Secured"}
+          </h3>
+          <p className="text-justify leading-relaxed">
+            {isHindi
+              ? "फॉर्म में दी गई जानकारी का उपयोग आपके संदेश का उत्तर देने, प्रवेश संबंधी पूछताछ संभालने या भ्रमण अनुरोध का प्रबंधन करने के लिए किया जाता है। वेबसाइट फॉर्म सबमिशन को Firebase/Firestore सेवा में सुरक्षित रूप से भेजा जाता है।"
+              : "Information submitted through these forms is used solely to respond to your queries, process admission consultations, or schedule physical campus visits. All submissions are stored securely in official cloud databases in compliance with university standards."}
+          </p>
+        </section>
+
+        <section>
+          <h3 className="mb-2 font-serif text-base font-bold text-slate-900">
+            {isHindi ? "3. विश्लेषिकी और बाहरी सेवाएं" : "3. Analytics & Technical Logs"}
+          </h3>
+          <p className="text-justify leading-relaxed">
+            {isHindi
+              ? "यह वेबसाइट सुरक्षित ब्राउज़र वातावरण में बुनियादी प्रदर्शन विश्लेषिकी का उपयोग करती है ताकि उपयोगकर्ताओं को तेज एवं विश्वसनीय अनुभव प्राप्त हो सके।"
+              : "This website uses secure, standard diagnostic analytics to monitor uptime, performance, and accessibility across devices."}
+          </p>
+        </section>
+
+        <section>
+          <h3 className="mb-2 font-serif text-base font-bold text-slate-900">
+            {isHindi ? "4. प्रश्न या अनुरोध" : "4. Contact Academic Office"}
+          </h3>
+          <p className="text-justify leading-relaxed">
+            {isHindi
+              ? "यदि आपके पास इस नीति के बारे में कोई प्रश्न है, तो आप हमारे संपर्क पृष्ठ के माध्यम से कॉलेज प्रशासन से संपर्क कर सकते हैं।"
+              : "If you have any questions regarding this policy or data management, feel free to reach our administrative office via the official Contact page."}
+          </p>
+        </section>
+      </div>
+    </CollegiatePageLayout>
   );
 }

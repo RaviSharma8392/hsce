@@ -34,6 +34,7 @@ import {
   deleteFeedback,
   deleteGrievance,
 } from "../services/enquiryService";
+import { subscribeToTours } from "../services/tourService";
 
 const STATUS_CONFIG = {
   new: {
@@ -85,6 +86,7 @@ export default function EnquiriesPage({ role = "staff" }) {
   const [enquiries, setEnquiries] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [grievances, setGrievances] = useState([]);
+  const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -95,7 +97,7 @@ export default function EnquiriesPage({ role = "staff" }) {
   const [editingNotes, setEditingNotes] = useState({});
   const [savingNoteId, setSavingNoteId] = useState(null);
 
-  // Subscribe to real-time enquiries
+  // Subscribe to real-time form submissions across all 4 student channels
   useEffect(() => {
     setLoading(true);
     const unsubscribers = [
@@ -104,27 +106,42 @@ export default function EnquiriesPage({ role = "staff" }) {
         setLoading(false);
       }),
       subscribeToFeedback(setFeedback),
+      subscribeToGrievances(setGrievances),
+      subscribeToTours(setTours),
     ];
-    if (isPrincipal) unsubscribers.push(subscribeToGrievances(setGrievances));
 
     return () => {
       unsubscribers.forEach((unsubscribe) => {
         if (typeof unsubscribe === "function") unsubscribe();
       });
     };
-  }, [isPrincipal]);
+  }, []);
 
   const showToast = (msg) => {
     setNotification(msg);
     setTimeout(() => setNotification(""), 3500);
   };
 
+  const admissionFormEnquiries = useMemo(() => {
+    return enquiries.filter((item) => {
+      const src = (item.source || "").toLowerCase();
+      return !src.includes("chatbot");
+    });
+  }, [enquiries]);
+
+  const chatbotCount = useMemo(() => {
+    return enquiries.filter((item) => {
+      const src = (item.source || "").toLowerCase();
+      return src.includes("chatbot") || src === "chatbot_button_enquiry";
+    }).length;
+  }, [enquiries]);
+
   const activeRecords =
     activeInbox === "feedback"
       ? feedback
       : activeInbox === "grievances"
         ? grievances
-        : enquiries;
+        : admissionFormEnquiries;
 
   const filteredList = useMemo(() => {
     return activeRecords.filter((item) => {
@@ -340,14 +357,14 @@ export default function EnquiriesPage({ role = "staff" }) {
             <div>
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                 {activeInbox === "enquiries"
-                  ? "Student Enquiries & Chatbot Leads"
+                  ? "Admission Form Enquiries"
                   : activeInbox === "feedback"
                     ? "Contact Feedback"
                     : "Student Grievances"}
               </h2>
               <p className="text-xs text-slate-500">
                 {activeInbox === "enquiries"
-                  ? "Direct submissions from public admission and chatbot forms."
+                  ? "Direct submissions from public admission forms and website application modals."
                   : activeInbox === "feedback"
                     ? "Messages submitted through the public contact guestbook."
                     : "Confidential submissions to the public grievance portal."}
@@ -378,11 +395,11 @@ export default function EnquiriesPage({ role = "staff" }) {
         aria-label="Submission inboxes"
         className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
         {[
-          ["enquiries", "Student Enquiries", enquiries.length],
+          ["enquiries", "Admission Form Enquiries", admissionFormEnquiries.length],
+          ["chatbot-enquiries", "Chatbot Enquiries", chatbotCount],
           ["feedback", "Contact Feedback", feedback.length],
-          ...(isPrincipal
-            ? [["grievances", "Grievances", grievances.length]]
-            : []),
+          ["grievances", "Student Grievances", grievances.length],
+          ["tours", "Campus Visit Requests", tours.length],
         ].map(([inbox, label, count]) => (
           <button
             key={inbox}
@@ -394,12 +411,12 @@ export default function EnquiriesPage({ role = "staff" }) {
               setCourseFilter("all");
               setSearchQuery("");
             }}
-            className={`border px-3 py-2 text-xs font-semibold transition ${
+            className={`rounded-lg border px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
               activeInbox === inbox
-                ? "border-[#0066FF] bg-blue-50 text-[#0052cc]"
+                ? "border-[#363991] bg-indigo-50 text-[#363991] font-bold shadow-2xs"
                 : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
             }`}>
-            {label} <span className="ml-1 text-slate-400">{count}</span>
+            {label} <span className="ml-1 text-slate-400 font-bold">({count})</span>
           </button>
         ))}
       </nav>

@@ -1,7 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   ChevronDown,
-  HelpCircle,
   PhoneCall,
   ArrowRight,
   MessageCircle,
@@ -22,7 +21,7 @@ export function FaqWidget() {
         : "Is Haryana Shakti College of Education recognized by NCTE and affiliated to GGSIPU?",
       a: isHindi
         ? "हाँ, हरियाणा शक्ति कॉलेज ऑफ एजुकेशन (HSCE) राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE), भारत सरकार द्वारा विधिवत मान्यता प्राप्त है और गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU), दिल्ली से संबद्ध है। कॉलेज सभी वैधानिक नियामक मानकों का कड़ाई से पालन करता है।"
-        : "Yes, Haryana Shakti College of Education (HSCE), Kanjhawala is recognized by the National Council for Teacher Education (NCTE) Northern Regional Committee and affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi. Current approval orders and regulatory affidavits are publicly displayed in our Mandatory Disclosures section.",
+        : "Yes, Haryana Shakti College of Education (HSCE), Kanjhawala is recognized by the National Council for Teacher Education (NCTE) Northern Regional Committee and affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi (College Code: 147). Current approval orders and regulatory affidavits are publicly displayed in our Mandatory Disclosures section.",
     },
     {
       q: isHindi
@@ -59,73 +58,68 @@ export function FaqWidget() {
   ];
 
   return (
-    <section className="relative overflow-hidden border-b border-slate-200 bg-white py-10 font-sans sm:py-12 lg:py-16">
-      {/* Decorative Background */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-[#0a4b8c]/[0.035] sm:h-96 sm:w-96"
-      />
-
+    <section className="relative overflow-hidden border-b border-gray-200/90 bg-white py-14 font-sans sm:py-16 lg:py-20">
       <Container>
-        <div className="relative grid grid-cols-1 items-start gap-8 sm:gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12 xl:gap-16">
-          {/* LEFT: INTRODUCTION */}
+        <div className="relative grid grid-cols-1 items-start gap-8 sm:gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12 xl:gap-16">
+          {/* LEFT: INTRODUCTION & SOLID BLUE CONTACT BOX */}
           <div className="min-w-0 lg:sticky lg:top-24">
+            {/* Eyebrow */}
+            <div className="mb-2.5 flex items-center gap-2">
+              <span className="h-0.5 w-6 bg-[#FBDD23]" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#2E3A8C]">
+                {isHindi ? "प्रश्नोत्तरी एवं सहायता" : "FAQ & ADMISSION SUPPORT"}
+              </span>
+            </div>
+
             {/* Main Heading */}
-            <h2 className="max-w-lg text-2xl font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
+            <h2 className="max-w-lg text-2xl font-bold leading-tight tracking-tight text-[#2E3A8C] sm:text-3xl lg:text-4xl">
               {isHindi ? (
                 <>
                   आपके सवाल,
-                  <span className="mt-1 block text-[#0a4b8c]">हमारे जवाब।</span>
+                  <span className="mt-1 block text-[#2E3A8C]">हमारे जवाब।</span>
                 </>
               ) : (
                 <>
                   Got Questions?
-                  <span className="mt-1 block text-[#0a4b8c]">
+                  <span className="mt-1 block text-[#2E3A8C]">
                     We Have Answers.
                   </span>
                 </>
               )}
             </h2>
 
-            {/* Accent */}
-            <div className="mt-4 h-0.5 w-12 rounded-full bg-[#FBDD23]" />
-
             {/* Description */}
-            <p className="mt-5 max-w-md text-sm leading-6 text-gray-600 sm:text-base sm:leading-7">
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-600 sm:text-base font-normal">
               {isHindi
                 ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में प्रवेश, पाठ्यक्रम और शैक्षणिक सुविधाओं से जुड़े सामान्य प्रश्नों के उत्तर यहाँ पाएँ।"
                 : "Find answers to common questions about admissions, the B.Ed. programme, eligibility and academic life at Haryana Shakti College of Education."}
             </p>
 
-            {/* Desktop Contact Card */}
-            <div className="mt-8 hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6 lg:block">
+            {/* Desktop Contact Card (Matching upper solid blue & gold design) */}
+            <div className="mt-8 hidden rounded-2xl border border-[#232D70] bg-[#2E3A8C] p-6 sm:p-7 text-white shadow-md lg:block">
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0a4b8c]/[0.08] text-[#0a4b8c]">
-                  <PhoneCall size={21} />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#FBDD23] text-[#2E3A8C] shadow-xs">
+                  <PhoneCall size={22} strokeWidth={2.2} />
                 </div>
 
                 <div className="min-w-0">
-                  <h3 className="text-base font-bold leading-snug text-gray-900">
+                  <h3 className="text-base sm:text-lg font-bold leading-snug text-white">
                     {isHindi ? "अधिक जानकारी चाहिए?" : "Need more information?"}
                   </h3>
 
-                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                  <p className="mt-1 text-xs sm:text-[13px] leading-relaxed text-blue-100 font-normal">
                     {isHindi
-                      ? "हमारी टीम आपके प्रश्नों में सहायता करेगी।"
-                      : "Our team is here to help with your questions."}
+                      ? "हमारी टीम आपके सभी प्रश्नों में सहायता हेतु तत्पर है।"
+                      : "Our counseling team is here to assist you with every query."}
                   </p>
                 </div>
               </div>
 
               <Link
                 to="/contact"
-                className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#0a4b8c] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#08396c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] focus-visible:ring-offset-2">
-                {isHindi ? "हमसे संपर्क करें" : "Contact Us"}
-
-                <ArrowRight
-                  size={16}
-                  className="transition-transform duration-200 group-hover:translate-x-1"
-                />
+                className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-sm bg-[#FBDD23] hover:bg-[#FFDC13] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-900 transition-all shadow-xs hover:shadow-md cursor-pointer active:scale-[0.98]">
+                <span>{isHindi ? "हमसे संपर्क करें" : "Contact Us"}</span>
+                <ArrowRight size={14} strokeWidth={2.5} />
               </Link>
             </div>
           </div>
@@ -134,11 +128,11 @@ export function FaqWidget() {
           <div className="min-w-0">
             {/* FAQ Header */}
             <div className="mb-5 flex items-center justify-between gap-3 sm:mb-6">
-              <h3 className="text-base font-bold tracking-tight text-gray-900 sm:text-lg">
+              <h3 className="text-base font-bold tracking-tight text-[#2E3A8C] sm:text-lg">
                 {isHindi ? "सामान्य प्रश्न" : "Frequently Asked Questions"}
               </h3>
 
-              <span className="shrink-0 rounded-full bg-[#0a4b8c]/[0.08] px-3 py-1.5 text-xs font-semibold tabular-nums text-[#0a4b8c]">
+              <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold tabular-nums text-[#2E3A8C]">
                 {String(faqs.length).padStart(2, "0")}{" "}
                 {isHindi ? "प्रश्न" : "Questions"}
               </span>
@@ -154,10 +148,10 @@ export function FaqWidget() {
                 return (
                   <article
                     key={faq.q}
-                    className={`overflow-hidden rounded-xl border bg-white transition-all duration-300 ${
+                    className={`overflow-hidden rounded-xl border bg-white transition-all duration-200 ${
                       isOpen
-                        ? "border-[#0a4b8c]/25 shadow-[0_8px_24px_rgba(10,75,140,0.07)]"
-                        : "border-gray-200 hover:border-[#0a4b8c]/25 hover:shadow-sm"
+                        ? "border-[#2E3A8C] shadow-sm"
+                        : "border-gray-200/90 hover:border-gray-300"
                     }`}>
                     {/* Question Button */}
                     <button
@@ -166,32 +160,32 @@ export function FaqWidget() {
                       aria-expanded={isOpen}
                       aria-controls={answerId}
                       onClick={() => setOpenIndex(isOpen ? -1 : idx)}
-                      className="flex w-full items-start gap-3 p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0a4b8c] sm:gap-4 sm:p-5">
+                      className="flex w-full items-start gap-3 p-4 text-left focus-visible:outline-none sm:gap-4 sm:p-5 cursor-pointer">
                       {/* Question Number */}
                       <span
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold tabular-nums transition-colors duration-300 ${
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold tabular-nums transition-colors duration-200 ${
                           isOpen
-                            ? "bg-[#0a4b8c] text-white"
-                            : "bg-[#0a4b8c]/[0.08] text-[#0a4b8c]"
+                            ? "bg-[#2E3A8C] text-[#FBDD23]"
+                            : "bg-[#2E3A8C]/5 text-[#2E3A8C]"
                         }`}>
                         {String(idx + 1).padStart(2, "0")}
                       </span>
 
                       {/* Question Text */}
-                      <span className="min-w-0 flex-1 pt-1">
-                        <span className="block text-sm font-semibold leading-6 text-gray-900 sm:text-base sm:leading-7">
+                      <span className="min-w-0 flex-1 pt-0.5">
+                        <span className="block text-sm sm:text-[15px] font-bold leading-snug text-[#2E3A8C]">
                           {faq.q}
                         </span>
                       </span>
 
                       {/* Expand Icon */}
                       <span
-                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+                        className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
                           isOpen
-                            ? "rotate-180 bg-[#0a4b8c]/[0.08] text-[#0a4b8c]"
+                            ? "rotate-180 bg-[#2E3A8C]/10 text-[#2E3A8C]"
                             : "bg-gray-100 text-gray-500"
                         }`}>
-                        <ChevronDown size={18} />
+                        <ChevronDown size={16} />
                       </span>
                     </button>
 
@@ -201,14 +195,14 @@ export function FaqWidget() {
                       role="region"
                       aria-labelledby={questionId}
                       aria-hidden={!isOpen}
-                      className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                      className={`grid transition-[grid-template-rows,opacity] duration-200 ease-in-out ${
                         isOpen
                           ? "grid-rows-[1fr] opacity-100"
                           : "grid-rows-[0fr] opacity-0"
                       }`}>
                       <div className="overflow-hidden">
-                        <div className="ml-4 mr-4 border-t border-gray-100 pb-5 pt-4 sm:ml-[4.25rem] sm:mr-5 sm:pb-6">
-                          <p className="text-sm leading-6 text-gray-600 sm:text-base sm:leading-7">
+                        <div className="ml-4 mr-4 border-t border-gray-100 pb-5 pt-3.5 sm:ml-[3.75rem] sm:mr-5 sm:pb-6">
+                          <p className="text-xs sm:text-sm leading-relaxed text-slate-600 font-normal">
                             {faq.a}
                           </p>
                         </div>
@@ -220,18 +214,18 @@ export function FaqWidget() {
             </div>
 
             {/* Mobile Contact Card */}
-            <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-dashed border-gray-300 bg-white p-4 sm:p-5 lg:hidden">
+            <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-slate-50 p-4 sm:p-5 lg:hidden">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0a4b8c]/[0.08] text-[#0a4b8c]">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2E3A8C]/10 text-[#2E3A8C]">
                   <MessageCircle size={19} />
                 </span>
 
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900">
+                  <p className="text-sm font-bold text-[#2E3A8C]">
                     {isHindi ? "कोई और सवाल है?" : "Still have questions?"}
                   </p>
 
-                  <p className="mt-1 text-xs leading-5 text-gray-600">
+                  <p className="mt-0.5 text-xs leading-snug text-slate-500">
                     {isHindi ? "हमारी टीम से बात करें" : "Talk to our team"}
                   </p>
                 </div>
@@ -240,8 +234,8 @@ export function FaqWidget() {
               <Link
                 to="/contact"
                 aria-label={isHindi ? "संपर्क करें" : "Contact our team"}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0a4b8c] text-white transition-colors hover:bg-[#08396c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] focus-visible:ring-offset-2">
-                <ArrowRight size={18} />
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2E3A8C] text-white">
+                <ArrowRight size={16} />
               </Link>
             </div>
           </div>

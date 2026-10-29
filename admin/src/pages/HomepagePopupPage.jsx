@@ -17,7 +17,10 @@ import {
 import { doc, getDoc, onSnapshot, serverTimestamp, setDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, firebaseReady, storage } from "../config/firebase";
-import { uploadToCloudinary } from "../services/cloudinary";
+import {
+  optimizeCloudinaryImageUrl,
+  uploadToCloudinary,
+} from "../services/cloudinary";
 
 export default function HomepagePopupPage({ currentUser }) {
   const [loading, setLoading] = useState(true);
@@ -476,7 +479,7 @@ export default function HomepagePopupPage({ currentUser }) {
                 {displayedImage ? (
                   <div className="relative max-h-full max-w-full rounded-lg overflow-hidden shadow-2xl border border-white/10 group">
                     <img
-                      src={displayedImage}
+                      src={optimizeCloudinaryImageUrl(displayedImage, 1200)}
                       alt="Popup preview"
                       className="max-h-[380px] w-auto object-contain mx-auto"
                     />

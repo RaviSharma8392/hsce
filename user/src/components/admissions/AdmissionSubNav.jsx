@@ -64,8 +64,8 @@ export function AdmissionSubNav({ activeTabId = "overview" }) {
                   to={tab.to}
                   className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-[13px] font-semibold font-poppins transition whitespace-nowrap ${
                     isActive
-                      ? "bg-[#c8102e] text-white shadow-2xs font-bold"
-                      : "text-gray-700 hover:text-[#c8102e] hover:bg-red-50/70"
+                      ? "bg-[#363991] text-[#FBDD23] shadow-xs font-bold"
+                      : "text-gray-700 hover:text-[#363991] hover:bg-slate-100"
                   }`}>
                   <Icon size={15} />
                   <span>{text}</span>

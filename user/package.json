@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "check:seo": "node scripts/check-seo-output.js",
     "lint": "oxlint .",
     "preview": "vite preview --host 0.0.0.0 --port 4173"
   },

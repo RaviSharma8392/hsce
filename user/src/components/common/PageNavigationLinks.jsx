@@ -11,10 +11,9 @@ import {
   FileText,
   Phone,
   Award,
-  Sparkles,
+  Compass,
 } from "lucide-react";
 import { useLanguage } from "../../context/LanguageContext";
-import { Container } from "./Container";
 
 const iconMap = {
   about: Building,
@@ -42,7 +41,7 @@ export function PageNavigationLinks({
       {relatedLinks.length > 0 && (
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-6">
-            <Sparkles size={18} className="text-[#1c3274]" />
+            <Compass size={18} className="text-[#2E3A8C]" />
             <h3 className="font-poppins font-bold text-lg sm:text-xl text-gray-900">
               {isHindi
                 ? hiTitle || "संबंधित महत्वपूर्ण पृष्ठ"

@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   ChevronDown,
   ChevronRight,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Youtube,
   Search,
   Phone,
+  Smartphone,
   Mail,
+  MapPin,
+  Home,
+  GraduationCap,
+  Compass,
+  Menu,
 } from "lucide-react";
 
 import {
@@ -19,6 +20,7 @@ import {
   navItems,
 } from "../../data/siteData";
 import { seoPages } from "../../data/seoPages";
+import { createSeoStructuredData } from "../../data/seoStructuredData";
 
 import { usePublishedRecords } from "../../hooks/usePublishedRecords";
 import { useLanguage } from "../../context/LanguageContext";
@@ -34,14 +36,19 @@ import WebsiteWatermark from "../common/WebsiteWatermark";
 const LOGO_SRC = imageData.collegeLogo;
 const UNIVERSITY_LOGO_SRC = imageData.ggsipuLogo;
 
+const SITE_NAME = "Haryana Shakti College of Education";
+const SITE_URL = "https://hscekanjhawala.com";
+
 const COLORS = {
-  navy: "#194178",
-  blue: "#343B91",
-  yellow: "#FBDD23",
-  text: "#25283A",
-  muted: "#68728A",
-  border: "#E6E9F0",
-  background: "#F7F8FC",
+  navy: "#363991",
+  navyDark: "#282A70",
+  gold: "#FBDD23",
+  coral: "#E6646E",
+  ink: "#1F2937",
+  body: "#4B5563",
+  muted: "#6B7280",
+  line: "#E5E7EB",
+  canvas: "#F4F6FA",
 };
 
 const CANONICAL_PATH_ALIASES = {
@@ -69,6 +76,7 @@ const CANONICAL_PATH_ALIASES = {
   "/admission/eligibility": "/admissions/eligibility",
   "/admission/procedure": "/admissions/procedure",
   "/admission/documents": "/admissions/documents",
+  "/admission-guide": "/admissions",
   "/course/bed": "/course",
   "/course/syllabus": "/syllabus",
   "/notice": "/notices",
@@ -99,16 +107,15 @@ export function Layout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeNestedDropdown, setActiveNestedDropdown] = useState(null);
+  const [headerSearch, setHeaderSearch] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  const handleCloseMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
+  const navigate = useNavigate();
   const location = useLocation();
-  const pathname = location.pathname.replace(/\/+$/, "") || "/";
-  const canonicalPath =
-    CANONICAL_PATH_ALIASES[pathname] ||
-    (pathname.startsWith("/notices/") ? "/notices" : pathname);
-  const canonicalUrl = `https://hscekanjhawala.com${canonicalPath}`;
-  const isSearchPage = pathname === "/search";
-  const seoPage = seoPages.find((page) => page.path === canonicalPath);
-  const isNotFoundPage = !seoPage;
   const closeTimerRef = useRef(null);
 
   const { language, setLanguage, isHindi } = useLanguage();
@@ -121,10 +128,103 @@ export function Layout({ children }) {
     settings[0] ||
     defaultCollegeInfo;
 
+  const pathname = location.pathname.replace(/\/+$/, "") || "/";
+
+  const canonicalPath =
+    CANONICAL_PATH_ALIASES[pathname] ||
+    (pathname.startsWith("/notices/") ? "/notices" : pathname);
+
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+  const isSearchPage = pathname === "/search";
+  const seoPage = seoPages.find((page) => page.path === canonicalPath);
+
+  const pageTitle = seoPage?.title || SITE_NAME;
+
+  const pageDescription =
+    seoPage?.description ||
+    "Haryana Shakti College of Education, Kanjhawala, Delhi offers the Bachelor of Education (B.Ed.) programme affiliated to Guru Gobind Singh Indraprastha University.";
+
+  const shouldNoindex = isSearchPage || !seoPage;
+
+  const structuredData = seoPage
+    ? JSON.stringify(createSeoStructuredData(seoPage)).replace(/</g, "\\u003c")
+    : null;
+
+  const englishName = collegeInfo.name || SITE_NAME;
+
+  const displayedName = isHindi
+    ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन"
+    : englishName;
+
+  const phoneText =
+    collegeInfo.phone || collegeInfo.contactPhone || "+91-11-25951234";
+
+  const alternatePhoneText = collegeInfo.alternatePhone || "8056777077";
+
+  const phoneHref = `tel:${phoneText.replace(/[^\d+]/g, "")}`;
+  const alternatePhoneHref = `tel:${alternatePhoneText.replace(/[^\d+]/g, "")}`;
+
+  const formatPhone = (phone) =>
+    phone.startsWith("+") ? phone : `+91 ${phone}`;
+
+  const addressText = collegeInfo.address || "Kanjhawala, Delhi - 110081";
+
+  const emailText =
+    collegeInfo.email ||
+    collegeInfo.contactEmail ||
+    "info@haryanashaktibed.org";
+
+  const adminPortalHref =
+    import.meta.env.VITE_ADMIN_PORTAL_URL ||
+    (import.meta.env.DEV
+      ? "http://localhost:5175/admin/signin"
+      : "https://office.hscekanjhawala.com/admin/signin");
+
+  const displayedAffiliation = (() => {
+    const affiliation =
+      collegeInfo.affiliation ||
+      "Guru Gobind Singh Indraprastha University (GGSIPU)";
+
+    const clean = affiliation.replace(/^Affiliated to\s+/i, "").trim();
+
+    if (isHindi) {
+      return collegeInfo.affiliationHindi
+        ? collegeInfo.affiliationHindi.replace(/^Affiliated to\s+/i, "").trim()
+        : `${clean} से संबद्ध`;
+    }
+
+    return `Affiliated to ${clean}`;
+  })();
+
+  const displayedRecognition = isHindi
+    ? collegeInfo.recognitionHindi || collegeInfo.recognition || ""
+    : collegeInfo.recognition || "";
+
+  const handleHeaderSearch = (event) => {
+    event.preventDefault();
+
+    const query = headerSearch.trim();
+
+    navigate(query ? `/search?q=${encodeURIComponent(query)}` : "/search");
+
+    setHeaderSearch("");
+  };
+
   useEffect(() => {
-    setMobileMenuOpen(false);
-    setActiveDropdown(null);
-    setActiveNestedDropdown(null);
+    const handleScroll = () => setIsScrolled(window.scrollY > 70);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const prevPathnameRef = useRef(location.pathname);
+  useEffect(() => {
+    if (prevPathnameRef.current !== location.pathname) {
+      prevPathnameRef.current = location.pathname;
+      setMobileMenuOpen(false);
+      setActiveDropdown(null);
+      setActiveNestedDropdown(null);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
@@ -155,116 +255,32 @@ export function Layout({ children }) {
     }, 180);
   };
 
-  const hindiName = "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन";
-  const englishName = collegeInfo.name || "Haryana Shakti College of Education";
-
-  const hindiAddress = collegeInfo.addressHindi || "Kanjhawala, Delhi – 110081";
-  const displayedName = isHindi ? hindiName : englishName;
-
-  const phoneText =
-    collegeInfo.phone || collegeInfo.contactPhone || "+91-11-25951234";
-  const phoneHref = `tel:${phoneText.replace(/[^+\d]/g, "")}`;
-  const emailText =
-    collegeInfo.email ||
-    collegeInfo.contactEmail ||
-    "info@haryanashaktibed.org";
-  const adminPortalHref =
-    import.meta.env.VITE_ADMIN_PORTAL_URL ||
-    (import.meta.env.DEV
-      ? "http://localhost:5175/admin/signin"
-      : "https://office.hscekanjhawala.com/admin/signin");
-  const leftFloatingItems = [
-    {
-      name: "Phone",
-      label: `Call: ${phoneText}`,
-      href: phoneHref,
-      Icon: Phone,
-      className: "bg-[#0a4b8c] hover:bg-[#073665]",
-      isExternal: false,
-    },
-    {
-      name: "Email",
-      label: `Email: ${emailText}`,
-      href: `mailto:${emailText}`,
-      Icon: Mail,
-      className: "bg-[#EA4335] hover:bg-[#d93025]",
-      isExternal: false,
-    },
-    {
-      name: "Facebook",
-      label: "Facebook",
-      href: collegeInfo.facebook || "https://www.facebook.com",
-      Icon: Facebook,
-      className: "bg-[#1877F2] hover:bg-[#1464c9]",
-      isExternal: true,
-    },
-    {
-      name: "Instagram",
-      label: "Instagram",
-      href: collegeInfo.instagram || "https://www.instagram.com/hscekanjhawala/",
-      Icon: Instagram,
-      className: "bg-[#E1306C] hover:bg-[#c1275b]",
-      isExternal: true,
-    },
-    {
-      name: "LinkedIn",
-      label: "LinkedIn",
-      href: collegeInfo.linkedin || "https://www.linkedin.com",
-      Icon: Linkedin,
-      className: "bg-[#0077B5] hover:bg-[#005f93]",
-      isExternal: true,
-    },
-  ];
-
-  const getCleanAffiliation = () => {
-    const raw =
-      collegeInfo.affiliation ||
-      "Guru Gobind Singh Indraprastha University (GGSIPU)";
-
-    const stripped = raw.replace(/^Affiliated to\s+/i, "").trim();
-
-    if (isHindi) {
-      if (collegeInfo.affiliationHindi) {
-        return collegeInfo.affiliationHindi
-          .replace(/^Affiliated to\s+/i, "")
-          .trim();
-      }
-
-      return `${stripped} से संबद्ध`;
-    }
-
-    return `Affiliated to ${stripped}`;
-  };
-
-  const displayedAffiliation = getCleanAffiliation();
-
-  const displayedRecognition = isHindi
-    ? collegeInfo.recognitionHindi || collegeInfo.recognition || ""
-    : collegeInfo.recognition || "";
-
-  const displayedAccreditation = isHindi
-    ? collegeInfo.accreditationNoteHindi || collegeInfo.accreditationNote || ""
-    : collegeInfo.accreditationNote || "";
-
   const isItemActive = (item) => {
-    if (item.to === "/" && location.pathname === "/") {
+    if (item.to === "/" && pathname === "/") {
       return true;
     }
 
+    const itemBase = item.to ? item.to.split("?")[0] : "";
     if (
-      item.to &&
-      item.to !== "/" &&
-      (location.pathname === item.to ||
-        location.pathname.startsWith(`${item.to}/`))
+      itemBase &&
+      itemBase !== "/" &&
+      (pathname === itemBase || pathname.startsWith(`${itemBase}/`))
     ) {
       return true;
     }
 
     return Boolean(
       item.subLinks?.some(
-        (sub) =>
-          (sub.to && location.pathname === sub.to) ||
-          sub.subLinks?.some((nested) => location.pathname === nested.to),
+        (sub) => {
+          const subBase = sub.to ? sub.to.split("?")[0] : "";
+          return (
+            (subBase && pathname === subBase) ||
+            sub.subLinks?.some((nested) => {
+              const nestedBase = nested.to ? nested.to.split("?")[0] : "";
+              return nestedBase && pathname === nestedBase;
+            })
+          );
+        },
       ),
     );
   };
@@ -274,11 +290,12 @@ export function Layout({ children }) {
     const isActive = isItemActive(item);
     const isOpen = activeDropdown === item.label;
     const label = getLabel(item, isHindi);
+    const isHome = item.isHome || item.label === "Home";
 
-    const linkClass = `relative flex min-h-[48px] shrink-0 items-center gap-1.5 px-3 py-3 text-[13px] font-semibold tracking-normal transition-colors duration-200 xl:px-4 ${
+    const linkClass = `relative flex h-11 shrink-0 items-center gap-1.5 px-3 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FBDD23] xl:px-3.5 ${
       isActive || isOpen
-        ? "bg-[#252E79] text-[#FBDD23]"
-        : "text-white hover:bg-white/10 hover:text-[#FBDD23]"
+        ? "text-[#FBDD23] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[3px] after:bg-[#FBDD23]"
+        : "text-white hover:text-[#FBDD23]"
     }`;
 
     return (
@@ -298,41 +315,52 @@ export function Layout({ children }) {
               )
             }
             className={linkClass}>
-            {label}
-            <ChevronDown
-              size={14}
-              className={`shrink-0 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
+            {isHome && <Home size={14} />}
+            <span>{label}</span>
+
+            {item.badge && (
+              <span className="rounded bg-[#E6646E] px-1.5 py-0.5 text-[9px] font-bold text-white">
+                {item.badge}
+              </span>
+            )}
+
+            <ChevronDown size={13} className={isOpen ? "rotate-180" : ""} />
           </button>
         ) : (
           <NavLink
             to={item.to}
             end={item.to === "/"}
             className={({ isActive: linkActive }) =>
-              `${linkClass} ${
-                linkActive || isActive ? "bg-[#252E79] text-[#FBDD23]" : ""
-              }`
+              `${linkClass} ${linkActive ? "text-[#FBDD23]" : ""}`
             }>
-            {label}
+            {isHome && <Home size={14} />}
+            <span>{label}</span>
+
+            {item.badge && (
+              <span className="rounded bg-[#E6646E] px-1.5 py-0.5 text-[9px] font-bold text-white">
+                {item.badge}
+              </span>
+            )}
           </NavLink>
         )}
 
-        {/* DROPDOWN */}
-        {hasSub && isOpen && (
-          <div className="absolute left-0 top-full z-[80] min-w-[240px] overflow-visible rounded-b-md border border-[#E6E9F0] border-t-[3px] border-t-[#FBDD23] bg-white py-1.5 shadow-[0_12px_28px_rgba(25,45,90,0.16)]">
+        {hasSub && (
+          <div
+            className={`absolute left-0 top-[calc(100%+8px)] z-[80] min-w-[250px] overflow-visible rounded-md border border-[#e6eaf0] bg-white py-2 shadow-[0_14px_35px_rgba(54,57,145,0.18)] ring-1 ring-black/5 transition duration-150 ${
+              item.label === "Contact Us" ? "left-auto right-0" : ""
+            } ${
+              isOpen
+                ? "visible opacity-100"
+                : "invisible pointer-events-none opacity-0"
+            }`}>
             {item.subLinks.map((sub) => {
               const hasNested = Boolean(sub.subLinks?.length);
               const nestedOpen = activeNestedDropdown === sub.label;
 
               const subActive =
-                location.pathname === sub.to ||
-                Boolean(
-                  sub.subLinks?.some(
-                    (nested) => location.pathname === nested.to,
-                  ),
-                );
+                sub.to === (pathname + location.search) ||
+                (pathname === sub.to && !location.search) ||
+                Boolean(sub.subLinks?.some((nested) => pathname === nested.to));
 
               return (
                 <div
@@ -350,51 +378,58 @@ export function Layout({ children }) {
                     <button
                       type="button"
                       aria-expanded={nestedOpen}
-                      aria-haspopup="true"
                       onClick={() =>
                         setActiveNestedDropdown((current) =>
                           current === sub.label ? null : sub.label,
                         )
                       }
-                      className={`flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-[13px] transition-colors ${
+                      className={`flex w-full items-center justify-between gap-4 border-l-2 px-4 py-3 text-left text-[13px] transition-colors ${
                         nestedOpen || subActive
-                          ? "bg-[#F2F4FC] font-semibold text-[#194178]"
-                          : "text-[#343747] hover:bg-[#F7F8FC] hover:text-[#194178]"
+                          ? "border-[#FBDD23] bg-[#f6f8fc] font-semibold text-[#363991]"
+                          : "border-transparent text-gray-700 hover:border-[#FBDD23] hover:bg-[#f8fafc]"
                       }`}>
                       {getLabel(sub, isHindi)}
-                      <ChevronRight size={15} />
+                      <ChevronRight size={14} />
                     </button>
                   ) : (
                     <Link
                       to={sub.to}
-                      className={`block px-4 py-3 text-[13px] transition-colors ${
+                      onClick={() => {
+                        setActiveDropdown(null);
+                        setActiveNestedDropdown(null);
+                      }}
+                      className={`block border-l-2 px-4 py-3 text-[13px] transition-colors ${
                         subActive
-                          ? "bg-[#F2F4FC] font-semibold text-[#194178]"
-                          : "text-[#343747] hover:bg-[#F7F8FC] hover:text-[#194178]"
+                          ? "border-[#FBDD23] bg-[#f6f8fc] font-semibold text-[#363991]"
+                          : "border-transparent text-gray-700 hover:border-[#FBDD23] hover:bg-[#f8fafc]"
                       }`}>
                       {getLabel(sub, isHindi)}
                     </Link>
                   )}
 
-                  {/* NESTED DROPDOWN */}
-                  {hasNested && nestedOpen && (
-                    <div className="absolute left-full top-0 z-[90] min-w-[225px] rounded-r-md border border-[#E6E9F0] border-t-[3px] border-t-[#FBDD23] bg-white py-1.5 shadow-xl">
-                      {sub.subLinks.map((nested) => {
-                        const nestedActive = location.pathname === nested.to;
-
-                        return (
-                          <Link
-                            key={nested.label}
-                            to={nested.to}
-                            className={`block border-b border-gray-100 px-4 py-3 text-[13px] last:border-b-0 ${
-                              nestedActive
-                                ? "bg-[#F2F4FC] font-semibold text-[#194178]"
-                                : "text-[#343747] hover:bg-[#F7F8FC] hover:text-[#194178]"
-                            }`}>
-                            {getLabel(nested, isHindi)}
-                          </Link>
-                        );
-                      })}
+                  {hasNested && (
+                    <div
+                      className={`absolute top-0 z-[90] min-w-[235px] rounded-md border border-[#e6eaf0] bg-white py-2 shadow-[0_14px_35px_rgba(54,57,145,0.18)] ring-1 ring-black/5 ${item.label === "Contact Us" ? "right-[calc(100%+6px)]" : "left-[calc(100%+6px)]"} ${
+                        nestedOpen
+                          ? "visible opacity-100"
+                          : "invisible pointer-events-none opacity-0"
+                      }`}>
+                      {sub.subLinks.map((nested) => (
+                        <Link
+                          key={nested.label}
+                          to={nested.to}
+                          onClick={() => {
+                            setActiveDropdown(null);
+                            setActiveNestedDropdown(null);
+                          }}
+                          className={`block border-b border-gray-100 px-4 py-2.5 text-[12px] last:border-0 ${
+                            pathname === nested.to
+                              ? "bg-gray-100 font-semibold text-[#363991]"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}>
+                          {getLabel(nested, isHindi)}
+                        </Link>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -409,310 +444,342 @@ export function Layout({ children }) {
   return (
     <>
       <Helmet>
+        <html lang={isHindi ? "hi" : "en"} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         <link rel="canonical" href={canonicalUrl} />
+
+        <meta name="theme-color" content={COLORS.navy} />
+
+        <meta property="og:locale" content={isHindi ? "hi_IN" : "en_IN"} />
         <meta
-          property="og:title"
-          content={seoPage?.title || "Page Not Found | Haryana Shakti College of Education"}
+          property="og:locale:alternate"
+          content={isHindi ? "en_IN" : "hi_IN"}
         />
-        <meta
-          property="og:description"
-          content={
-            seoPage?.description ||
-            "The requested page could not be found on the Haryana Shakti College of Education website."
-          }
-        />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:site_name"
-          content="Haryana Shakti College of Education"
-        />
+        <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:url" content={canonicalUrl} />
-        <meta name="twitter:card" content="summary" />
+
+        {seoPage?.image && (
+          <>
+            <meta property="og:image" content={seoPage.image} />
+            <meta property="og:image:alt" content={seoPage.imageAlt} />
+            <meta name="twitter:image" content={seoPage.image} />
+          </>
+        )}
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+
         <meta
-          name="twitter:title"
-          content={seoPage?.title || "Page Not Found | Haryana Shakti College of Education"}
-        />
-        <meta
-          name="twitter:description"
+          name="robots"
           content={
-            seoPage?.description ||
-            "The requested page could not be found on the Haryana Shakti College of Education website."
+            shouldNoindex
+              ? "noindex, follow"
+              : "index, follow, max-image-preview:large"
           }
         />
-        {(isSearchPage || isNotFoundPage) && (
-          <meta name="robots" content="noindex, follow" />
+
+        {structuredData && (
+          <script type="application/ld+json">{structuredData}</script>
         )}
       </Helmet>
+
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[9999] focus:bg-[#FBDD23] focus:p-3 focus:text-[#363991]">
+        Skip to main content
+      </a>
+
+      <style>{`
+        /* Restrained heritage texture: very faint, with plenty of whitespace */
+        .hsce-floral-paper {
+          background-color: #fff;
+          background-image:
+            radial-gradient(ellipse 8px 13px at 50% 25%, rgba(54, 57, 145, .03) 0 40%, transparent 47%),
+            radial-gradient(ellipse 8px 13px at 50% 75%, rgba(54, 57, 145, .03) 0 40%, transparent 47%),
+            radial-gradient(ellipse 13px 8px at 25% 50%, rgba(54, 57, 145, .025) 0 40%, transparent 47%),
+            radial-gradient(ellipse 13px 8px at 75% 50%, rgba(54, 57, 145, .025) 0 40%, transparent 47%);
+          background-size: 118px 118px;
+        }
+        .hsce-floral-nav {
+          background: #363991;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+          .hsce-nav-link { transition: color .18s ease, background-color .18s ease; }
+        }
+      `}</style>
       <div
-        className="flex min-h-screen flex-col font-sans antialiased"
+        className="flex min-h-screen flex-col antialiased"
         style={{
-          backgroundColor: COLORS.background,
-          color: COLORS.text,
+          backgroundColor: COLORS.canvas,
+          color: COLORS.ink,
           fontFamily:
-            '"Inter", "Noto Sans Devanagari", "Mangal", "Segoe UI", sans-serif',
+            '"Manrope", "Noto Sans Devanagari", sans-serif',
         }}>
-      {/* ==========================================
-          FLOATING LEFT SIDEBAR: CONTACT & SOCIAL
-      =========================================== */}
-      <div className="fixed left-0 top-1/2 z-[100] hidden -translate-y-1/2 flex-col shadow-2xl lg:flex rounded-r-lg overflow-hidden border-y border-r border-white/20">
-        {leftFloatingItems.map(({ name, label, href, Icon, className, isExternal }) => (
-          <a
-            key={name}
-            href={href}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noopener noreferrer" : undefined}
-            className={`flex h-[44px] w-[44px] items-center justify-center ${className} text-white transition-all duration-200 hover:w-[50px] shadow-sm`}
-            title={label}
-            aria-label={label}>
-            <Icon size={19} strokeWidth={2} />
-          </a>
-        ))}
-      </div>
+        {/* Desktop header */}
+        <div className="relative z-50 hidden lg:block">
+          {/* Compact contact bar - HFCON Delhi Blue (#363991) */}
+          <div className="border-b border-[#FBDD23]/70 bg-[#363991] text-white">
+            <div className="mx-auto flex min-h-10 max-w-[1400px] items-center justify-between gap-5 px-6 lg:px-8 text-[11px]">
+              <div className="flex items-center gap-5">
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={13} className="shrink-0 text-[#FBDD23]" />
+                  {addressText}
+                </span>
 
-      {/* ==========================================
-          FLOATING RIGHT ACTION BUTTONS
-      =========================================== */}
-      <div className="fixed right-0 top-1/2 z-[100] hidden -translate-y-1/2 flex-col gap-1 shadow-xl lg:flex">
-        <Link
-          to="/campus-tour"
-          className="flex items-center justify-center rounded-l-md bg-[#003366] px-2.5 py-6 text-[14px] font-bold tracking-wide text-white transition-colors hover:bg-[#002244]"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-          Campus Tour
-        </Link>
-        <button
-          onClick={openAdmissionModal}
-          className="flex items-center justify-center rounded-l-md bg-[#E62B20] px-2.5 py-6 text-[14px] font-bold tracking-wide text-white transition-colors hover:bg-[#C52018]"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-          For Admission Apply Here
-        </button>
-      </div>
+                <a
+                  href={phoneHref}
+                  className="flex items-center gap-1.5 hover:text-[#FBDD23]">
+                  <Phone size={13} className="text-[#FBDD23]" />
+                  {formatPhone(phoneText)}
+                </a>
 
-      {/* ==========================================
-          DESKTOP HEADER
-      =========================================== */}
-      <div className="relative z-50 hidden lg:sticky lg:top-0 lg:block">
-        {/* TOP UTILITY BAR */}
-        <div
-          className="border-b-[3px] border-b-[#FBDD23] text-white"
-          style={{ backgroundColor: COLORS.navy }}>
-          <div className="mx-auto flex min-h-[42px] max-w-[1400px] items-center justify-between px-5 xl:px-8">
-            {/* LEFT: LANGUAGE & DIRECT CONTACT */}
-            <div className="flex items-center gap-4 xl:gap-5">
-              <div className="flex items-center gap-2 text-[12px] font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setLanguage("hi")}
-                  className={`transition-colors hover:text-[#FBDD23] ${
-                    language === "hi" ? "text-[#FBDD23]" : ""
-                  }`}>
-                  हिंदी
-                </button>
-                <span className="text-white/35">|</span>
-                <button
-                  type="button"
-                  onClick={() => setLanguage("en")}
-                  className={`transition-colors hover:text-[#FBDD23] ${
-                    language === "en" ? "text-[#FBDD23]" : ""
-                  }`}>
-                  English
-                </button>
+                <a
+                  href={alternatePhoneHref}
+                  className="flex items-center gap-1.5 hover:text-[#FBDD23]">
+                  <Smartphone size={13} className="text-[#FBDD23]" />
+                  {formatPhone(alternatePhoneText)}
+                </a>
+
+                <a
+                  href={`mailto:${emailText}`}
+                  className="flex items-center gap-1.5 hover:text-[#FBDD23]">
+                  <Mail size={13} className="text-[#FBDD23]" />
+                  {emailText}
+                </a>
               </div>
 
-              <span className="h-4 w-px bg-white/30" />
+              <div className="flex shrink-0 items-center gap-2.5">
+                <a href={adminPortalHref} className="hover:text-[#FBDD23]">
+                  Staff Login
+                </a>
 
-              <a
-                href={phoneHref}
-                className="flex items-center gap-1.5 text-[12px] font-semibold tracking-wide transition-colors hover:text-[#FBDD23]">
-                <Phone size={13} className="shrink-0 text-[#FBDD23]" />
-                <span>{phoneText}</span>
-              </a>
+                <span className="text-white/30">|</span>
 
-              <span className="h-4 w-px bg-white/30" />
+                <Link
+                  to="/mandatory-disclosure"
+                  className="hover:text-[#FBDD23]">
+                  IQAC
+                </Link>
 
-              <a
-                href={`mailto:${emailText}`}
-                className="flex items-center gap-1.5 text-[12px] font-semibold tracking-wide transition-colors hover:text-[#FBDD23]">
-                <Mail size={13} className="shrink-0 text-[#FBDD23]" />
-                <span>{emailText}</span>
-              </a>
-            </div>
-
-            {/* RIGHT: INSTITUTIONAL LINKS, SEARCH & ADMIN */}
-            <div className="flex shrink-0 items-center gap-4 text-[12px] font-bold tracking-[0.04em] xl:gap-5">
-              <Link
-                to="/iqac"
-                className="hidden transition-colors hover:text-[#FBDD23] xl:inline">
-                IQAC
-              </Link>
-              <span className="hidden h-4 w-px bg-white/30 xl:inline" />
-              <Link
-                to="/mandatory-disclosure"
-                className="hidden transition-colors hover:text-[#FBDD23] 2xl:inline">
-                MANDATORY DISCLOSURE
-              </Link>
-              <span className="hidden h-4 w-px bg-white/30 2xl:inline" />
-              <Link
-                to="/contact"
-                className="transition-colors hover:text-[#FBDD23]">
-                CONTACT US
-              </Link>
-              <span className="h-4 w-px bg-white/30" />
-              <Link
-                to="/search"
-                className="flex items-center gap-1.5 transition-colors hover:text-[#FBDD23]"
-                aria-label="Search">
-                <Search size={15} />
-                <span className="hidden xl:inline">SEARCH</span>
-              </Link>
-              {adminPortalHref && (
-                <>
-                  <span className="h-4 w-px bg-white/30" />
-                  <a
-                    href={adminPortalHref}
-                    className="transition-colors hover:text-[#FBDD23]">
-                    OFFICE LOGIN
-                  </a>
-                </>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setLanguage(language === "en" ? "hi" : "en")}
+                  className="ml-1 border border-white/40 px-2.5 py-1 hover:border-[#FBDD23] hover:text-[#FBDD23]"
+                  aria-label="Switch language">
+                  {language === "hi" ? "🇮🇳 हिंदी" : "🇺🇸 English"}
+                  <ChevronDown size={11} className="ml-1 inline" />
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Clean branding area */}
+          <header className="hsce-floral-paper relative overflow-hidden border-b border-[#E8D9B4]">
+            <div className="relative z-[1] mx-auto grid min-h-[112px] max-w-[1400px] grid-cols-[minmax(0,1.05fr)_minmax(190px,.62fr)_minmax(250px,.78fr)] items-center gap-5 px-6 py-3 xl:gap-7 lg:px-8">
+              {/* College identity */}
+              <Link to="/" className="flex min-w-0 items-center gap-4">
+                <img
+                  src={LOGO_SRC}
+                  width="432"
+                  height="432"
+                  alt={`${englishName} logo`}
+                  className="h-[74px] w-[74px] shrink-0 object-contain"
+                />
+
+                <div className="min-w-0">
+                  <h1 className="max-w-[390px] text-[16px] font-bold leading-[1.25] text-[#363991] xl:text-[18px] 2xl:text-[19px]">
+                    {englishName}
+                  </h1>
+
+                  <p className="mt-1.5 text-[12px] font-medium text-[#66758a]">
+                    Kanjhawala, Delhi - 110081
+                  </p>
+
+                  <p className="mt-1.5 max-w-[390px] text-[11px] leading-[1.45] text-[#596779]">
+                    {displayedAffiliation}
+                  </p>
+                </div>
+              </Link>
+
+              {/* Clearly visible university identity */}
+              <div className="flex h-[76px] items-center justify-center border-x border-[#e7e8ef] px-5 xl:px-6">
+                <img
+                  src={UNIVERSITY_LOGO_SRC}
+                  width="897"
+                  height="278"
+                  alt="Guru Gobind Singh Indraprastha University logo"
+                  className="h-[64px] w-[205px] max-w-full shrink-0 object-contain"
+                />
+              </div>
+
+              {/* Search and admissions */}
+              <div className="flex min-w-0 flex-col items-end gap-3.5">
+                <form
+                  onSubmit={handleHeaderSearch}
+                  role="search"
+                  className="flex w-full max-w-[320px] items-center rounded-sm border border-[#cbd5e1] bg-white/90 shadow-[0_3px_12px_rgba(54,57,145,0.06)] transition focus-within:border-[#363991] focus-within:shadow-[0_0_0_3px_rgba(54,57,145,0.1)]">
+                  <input
+                    type="search"
+                    value={headerSearch}
+                    onChange={(event) => setHeaderSearch(event.target.value)}
+                    placeholder="Search the website..."
+                    aria-label="Search the website"
+                    className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-[12px] text-gray-800 outline-none placeholder:text-gray-400"
+                  />
+
+                  <button
+                    type="submit"
+                    aria-label="Submit search"
+                    className="px-3 py-2.5 text-[#363991] hover:text-[#282A70]">
+                    <Search size={17} />
+                  </button>
+                </form>
+
+                <button
+                  type="button"
+                  onClick={openAdmissionModal}
+                  className="group relative flex min-h-[40px] items-center justify-center overflow-hidden rounded-md bg-[#FBDD23] px-6 py-2.5 text-[12px] font-bold tracking-[0.01em] text-[#363991] shadow-[0_4px_12px_rgba(251,221,35,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#FFDC13] hover:shadow-[0_7px_18px_rgba(251,221,35,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#363991] focus-visible:ring-offset-2">
+                  <span className="absolute inset-x-3 top-0 h-px bg-white/70" />
+                  Apply for Admission
+                  <span
+                    aria-hidden="true"
+                    className="ml-1 transition-transform duration-200 group-hover:translate-x-1">
+                    →
+                  </span>
+                </button>
+              </div>
+            </div>
+          </header>
         </div>
 
-        {/* BRANDING SECTION */}
-        <header className="relative border-b border-[#E7EAF2] bg-white">
-          <div className="mx-auto grid min-h-[126px] max-w-[1400px] grid-cols-[minmax(0,1.2fr)_minmax(340px,1.5fr)_minmax(0,1fr)] items-center gap-4 px-5 py-3 xl:px-8">
+        {/* Desktop navigation remains sticky while scrolling */}
+        <nav
+          aria-label="Main navigation"
+          className={`hsce-floral-nav sticky top-0 z-[60] hidden border-b-2 border-[#FBDD23] shadow-[0_4px_14px_rgba(54,57,145,0.12)] transition-all duration-200 lg:block ${isScrolled ? "py-0" : ""}`}>
+          <div
+            className={`mx-auto flex max-w-[1400px] items-center justify-between gap-2 px-6 transition-all duration-200 lg:px-8 ${isScrolled ? "min-h-[44px]" : "min-h-[50px]"}`}>
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-1">
+              {navItems.map(renderDesktopNavItem)}
+            </div>
+          </div>
+        </nav>
+
+        {/* Mobile Header — Matching App Reference Header */}
+        <header className="sticky top-0 z-40 border-t-2 border-[#363991] border-b border-[#E5E7EB] bg-white shadow-xs lg:hidden">
+          <div className="flex min-h-[64px] items-center justify-between gap-2.5 px-3.5 py-2">
+            {/* College Logo + Name + Affiliation Subtitle */}
             <Link
               to="/"
               aria-label="College home"
-              className="group flex shrink-0 items-center justify-start gap-4">
-              <div className="flex h-[80px] w-[80px] shrink-0 items-center justify-center rounded-full border border-[#E5D57B] bg-white p-1 shadow-sm transition-transform duration-200 group-hover:scale-[1.03] xl:h-[90px] xl:w-[90px]">
-                <img
-                  src={LOGO_SRC}
-                  alt="Logo"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-              <div className="flex flex-col justify-center">
-                <h2 className="break-words font-serif text-[clamp(14px,1.1vw,18px)] font-bold leading-tight tracking-wide text-[#DC2626]">
-                  {hindiName}
-                </h2>
-                <p className="mt-1 text-[11px] font-medium text-[#68728A] xl:text-[12px]">
-                  {hindiAddress}
+              className="flex min-w-0 flex-1 items-center gap-2.5">
+              <img
+                src={LOGO_SRC}
+                width="432"
+                height="432"
+                alt={`${englishName} logo`}
+                className="h-10 w-10 shrink-0 object-contain"
+              />
+
+              <div className="min-w-0">
+                <h1 className="line-clamp-1 text-[13px] sm:text-[14px] font-bold leading-tight text-[#2E3A8C]">
+                  {displayedName}
+                </h1>
+                <p className="line-clamp-1 text-[10px] sm:text-[11px] font-medium text-slate-500 leading-tight mt-0.5">
+                  {isHindi
+                    ? "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) संबद्ध"
+                    : "Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU)"}
                 </p>
               </div>
             </Link>
 
-            <div className="flex min-w-0 flex-col items-center justify-center px-2 text-center">
-              <span className="mb-2 h-[3px] w-12 rounded-full bg-[#FBDD23]" />
+            {/* Mobile Header Actions: Search + Language + Menu Drawer Toggle */}
+            <div className="flex shrink-0 items-center gap-1.5">
               <Link
-                to="/"
-                className="group flex max-w-full flex-col items-center text-center">
-                <h1 className="break-words font-serif text-[clamp(18px,1.6vw,26px)] font-extrabold leading-tight tracking-normal text-[#194178] transition-colors group-hover:text-[#343B91]">
-                  {englishName}
-                </h1>
-
-                <p className="mt-2 break-words text-[11px] font-semibold leading-snug text-[#303B58] xl:text-[12px]">
-                  {displayedAffiliation}
-                </p>
-                {displayedRecognition && (
-                  <p className="mt-0.5 break-words text-[10px] font-medium leading-snug text-[#68728A] xl:text-[11px]">
-                    {displayedRecognition}
-                  </p>
-                )}
+                to="/search"
+                aria-label="Search pages"
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">
+                <Search size={15} />
               </Link>
-            </div>
 
-            <div className="flex min-w-0 items-center justify-end">
-              {UNIVERSITY_LOGO_SRC && (
-                <img
-                  src={UNIVERSITY_LOGO_SRC}
-                  alt="University Logo"
-                  className="h-20 object-contain xl:h-24"
-                />
-              )}
+              <button
+                type="button"
+                onClick={() => setLanguage(language === "en" ? "hi" : "en")}
+                aria-label="Switch language"
+                className="rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-[#363991] hover:bg-slate-50">
+                {language === "hi" ? "EN" : "हिंदी"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open mobile navigation menu"
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100 cursor-pointer">
+                <Menu size={16} />
+              </button>
             </div>
           </div>
         </header>
 
-        {/* MAIN NAVIGATION */}
-        <nav
-          aria-label="Main navigation"
-          className="relative border-b-[3px] border-b-[#FBDD23] bg-[#343B91] shadow-sm">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap justify-center overflow-visible px-3 xl:px-5">
-            {navItems.map(renderDesktopNavItem)}
-          </div>
-        </nav>
-      </div>
+        {/* Floating desktop actions */}
+        <div className="fixed right-0 top-1/2 z-[100] hidden -translate-y-1/2 flex-col gap-1.5 lg:flex">
+          <button
+            type="button"
+            onClick={openAdmissionModal}
+            title="Apply Now"
+            className="flex w-16 flex-col items-center gap-1 rounded-l-sm bg-[#FBDD23] px-2 py-3 text-[#363991] hover:bg-[#FFDC13]">
+            <GraduationCap size={20} />
+            <span className="text-[10px] font-bold leading-tight">
+              Apply
+              <br />
+              Now
+            </span>
+          </button>
 
-      {/* ==========================================
-          MOBILE HEADER (Matched to reference layout)
-      =========================================== */}
-      <header className="sticky top-0 z-40 w-full border-b border-[#E7EAF2] border-t-[4px] border-t-[#252E79] bg-[#F7F5FC] shadow-md lg:hidden">
-        <div className="mx-auto flex items-center gap-3 px-3 py-3">
-          {/* COLLEGE LOGO */}
           <Link
-            to="/"
-            aria-label="College home"
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#E5D57B] bg-white p-1 shadow-sm sm:h-14 sm:w-14">
-            <img
-              src={LOGO_SRC}
-              alt="College logo"
-              className="h-full w-full object-contain"
-            />
-          </Link>
-
-          {/* COLLEGE NAME & AFFILIATION */}
-          <Link
-            to="/"
-            className="flex min-w-0 flex-1 flex-col justify-center"
-            aria-label="College home">
-            <h1
-              className="break-words font-serif text-[15px] font-bold leading-tight text-[#252E79] sm:text-[17px]"
-              style={{
-                fontFamily: '"Noto Sans Devanagari", "Mangal", sans-serif',
-              }}>
-              {displayedName}
-            </h1>
-            <p className="mt-1 break-words text-[10px] font-medium leading-tight text-[#4A5568] sm:text-[11px]">
-              {displayedAffiliation}
-            </p>
+            to="/book-a-tour"
+            title="Campus Tour"
+            className="flex w-16 flex-col items-center gap-1 rounded-l-sm bg-[#363991] px-2 py-3 text-white hover:bg-[#282A70]">
+            <Compass size={19} />
+            <span className="text-center text-[10px] font-medium leading-tight">
+              Campus
+              <br />
+              Tour
+            </span>
           </Link>
         </div>
-      </header>
 
-      {/* MOBILE MENU DRAWER */}
-      <MobileMenuDrawer
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        phoneNumber={phoneText}
-      />
+        <MobileMenuDrawer
+          isOpen={mobileMenuOpen}
+          onClose={handleCloseMobileMenu}
+          phoneNumber={phoneText}
+        />
 
-      {/* PAGE CONTENT */}
-      <main className="min-w-0 flex-1 bg-transparent pb-20 lg:pb-0">
-        {children}
-      </main>
+        <main
+          id="main-content"
+          className="min-w-0 flex-1 scroll-mt-28 pb-24 lg:pb-0">
+          {children}
+        </main>
 
-      {/* FOOTER */}
-      <Footer
-        collegeInfo={collegeInfo}
-        displayedName={displayedName}
-        displayedAffiliation={displayedAffiliation}
-        displayedRecognition={displayedRecognition}
-        displayedAccreditation={displayedAccreditation}
-      />
+        <Footer
+          collegeInfo={collegeInfo}
+          displayedName={displayedName}
+          displayedAffiliation={displayedAffiliation}
+          displayedRecognition={displayedRecognition}
+        />
 
-      {/* WEBSITE WATERMARK */}
-      <WebsiteWatermark />
+        <EnquireNowTab />
+        <AdmissionModal />
 
-      {/* FLOATING ACTIONS */}
-      <EnquireNowTab />
-      <AdmissionModal />
-
-      {/* MOBILE BOTTOM NAVIGATION */}
-      <MobileBottomNav
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
+        <MobileBottomNav
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+        <WebsiteWatermark />
       </div>
     </>
   );

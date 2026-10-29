@@ -1,26 +1,35 @@
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { HeroBanner } from "../components/home/HeroBanner";
-import { NoticeEventsSection } from "../components/home/NoticeEventsSection";
+import { QuickAccessSection } from "../components/home/QuickAccessSection";
+import { HomeFeaturedOverview } from "../components/home/HomeFeaturedOverview";
 import { AdmissionCTA } from "../components/home/AdmissionCTA";
 import { CampusGallerySection } from "../components/home/CampusGallerySection";
 import { PrincipalMessageSection } from "../components/home/PrincipalMessageSection";
 import { FaqWidget } from "../components/home/FaqWidget";
 import StarAlumni from "../components/home/StarAlumni";
-import { Helmet } from "react-helmet-async";
-import { useLanguage } from "../context/LanguageContext";
 
-import ProgrammeHighlights from "../components/common/ProgrammeHighlights";
-import CampusLifeSection from "../components/home/geu/CampusLifeSection";
 import { WhyChooseSection } from "../components/home/HomepageFeatureSections";
 import { AffiliationTrustBarWidget } from "../components/home/AffiliationTrustBarWidget";
-import { UniversityAffiliationSection } from "../components/home/UniversityAffiliationSection";
 import { LatestUpdatesMarquee } from "../components/home/LatestUpdatesMarquee";
 import { SgtStatsBentoSection } from "../components/home/SgtStatsBentoSection";
-import HomepagePopup from "../components/home/HomepagePopup";
+import UniversityAffiliationSection from "../components/home/UniversityAffiliationSection";
+import { AdmissionHelplineStrip } from "../components/home/AdmissionHelplineStrip";
+
+const NoticeEventsSection = lazy(() =>
+  import("../components/home/NoticeEventsSection").then((module) => ({
+    default: module.NoticeEventsSection,
+  })),
+);
+const HomepagePopup = lazy(() => import("../components/home/HomepagePopup"));
 
 export default function HomePage() {
-  const { isHindi } = useLanguage();
   const homeRef = useRef(null);
+  const [popupReady, setPopupReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setPopupReady(true), 2500);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const sections = homeRef.current?.querySelectorAll(
@@ -66,66 +75,61 @@ export default function HomePage() {
 
   return (
     <>
-      <Helmet>
-        <title>
-          {isHindi
-            ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन, कंझावला | बी.एड."
-            : "Haryana Shakti College of Education, Kanjhawala, Delhi | B.Ed."}
-        </title>
-
-        <meta
-          name="description"
-          content={
-            isHindi
-              ? "कंझावला, दिल्ली स्थित हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में दो वर्षीय बी.एड. कार्यक्रम, प्रवेश, पात्रता, परिसर सुविधाओं और सूचनाओं की जानकारी प्राप्त करें।"
-              : "Explore Haryana Shakti College of Education, Kanjhawala, Delhi. Find B.Ed. course information, admission details, eligibility, campus facilities, college notices and contact information."
-          }
-        />
-      </Helmet>
-
       <main ref={homeRef} className="home-page bg-white text-[#222222]">
-        {/* 1. Hero Banner */}
+        {/* 1. Hero Banner with Campus Slides, Search & Virtual Tour */}
         <HeroBanner />
-        {/* 3. SGT-Style Live Announcement Marquee Bar */}
-        <LatestUpdatesMarquee />
 
-        {/* 2. Affiliating University (GGSIPU): Campus, Statutory Profile, Vision, Mission & Quality Policy */}
+        {/* 2. Quick Access Row (6 Solid Action Cards - immediate navigation) */}
+        <QuickAccessSection />
+
+        {/* 4. Institutional Overview & Stats Bento (Reference Design with 3 Action Cards & 2x2 Illustrated Avatars) */}
+        <HomeFeaturedOverview />
+        {/* 6. GGSIPU Affiliation Showcase & Principles */}
         <UniversityAffiliationSection />
 
-        {/* 4. Statutory Approvals & Accreditations (NCTE & GGSIPU) */}
-        <AffiliationTrustBarWidget />
-
-        {/* 5. SGT-Style Colorful Bento Statistics & Impact Grid */}
-        <SgtStatsBentoSection />
-
-        {/* 6. B.Ed. Programme (2-Year Regular Degree - 3 Step Pathway) */}
-        <ProgrammeHighlights />
-
-        {/* 7. Leadership & Institution: Chairman's Desk (Left), Principal's Desk (Right) & About HSCE (Below) */}
+        {/* 5. Leadership Messages from Chairman & Principal */}
         <PrincipalMessageSection />
 
-        {/* 8. Campus Notices & Events Highlights */}
-        <NoticeEventsSection />
+        {/* 5. Institutional Associations & Statutory Trust Bar */}
+        <AffiliationTrustBarWidget />
 
-        {/* 9. Why Choose HSCE (6 Colorful Institutional Pillars) */}
+        {/* 7. Practical Pedagogy in Action (4-Step Teacher Training) */}
+        <SgtStatsBentoSection />
+
+        {/* 8. Published Notices & Campus Highlights */}
+        <Suspense
+          fallback={
+            <div
+              className="min-h-[28rem] animate-pulse bg-slate-50"
+              aria-hidden="true"
+            />
+          }>
+          <NoticeEventsSection />
+        </Suspense>
+
+        {/* 9. Key Reasons to Study at HSCE (6 Core Pillars) */}
         <WhyChooseSection />
 
-        {/* 10. Campus Life Beyond the Classroom (Immersive Navy Feature) */}
-        <CampusLifeSection />
-
-        {/* 11. Campus Moments & Facilities Gallery */}
+        {/* 10. Campus Life & Activities Gallery Bento */}
         <CampusGallerySection />
 
-        {/* 12. Pupil-Teacher Voice & Student Spotlight */}
+        {/* 11. Pupil-Teacher Voice / Student Spotlight */}
         <StarAlumni />
 
-        {/* 13. Admission Call to Action & Helplines */}
+        {/* 12. Admission Helpline & Services Action Strip (Matching user screenshot 3) */}
+        <AdmissionHelplineStrip />
+
+        {/* 13. Admission Enquiry CTA Banner */}
         <AdmissionCTA />
 
-        {/* 14. Frequently Asked Questions */}
+        {/* 13. Frequently Asked Questions & Admission Support */}
         <FaqWidget />
       </main>
-      <HomepagePopup />
+      {popupReady && (
+        <Suspense fallback={null}>
+          <HomepagePopup />
+        </Suspense>
+      )}
     </>
   );
 }

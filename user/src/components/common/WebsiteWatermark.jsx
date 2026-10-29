@@ -26,8 +26,8 @@ export default function WebsiteWatermark() {
         </div>
       </div>
 
-      {/* 2. Sleek Floating Signature Watermark Badge (Non-obstructive) */}
-      <div className="fixed bottom-[74px] left-3 sm:bottom-3 sm:left-3 z-30 pointer-events-auto select-none print:hidden">
+      {/* 2. Sleek Floating Signature Watermark Badge (Desktop only, hidden on mobile) */}
+      <div className="hidden sm:block fixed sm:bottom-3 sm:left-3 z-30 pointer-events-auto select-none print:hidden">
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/85 hover:bg-slate-950 backdrop-blur-md text-[11px] font-sans text-slate-300 border border-white/15 shadow-md transition-all duration-200">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
           <span className="tracking-wide">
@@ -37,7 +37,7 @@ export default function WebsiteWatermark() {
       </div>
 
       {/* 3. Official Print Watermark (Visible only when user prints any page) */}
-      <div className="hidden print:block fixed bottom-2 inset-x-0 text-center text-[9px] font-mono text-gray-400 select-none pointer-events-none">
+      <div className="hidden print:block fixed bottom-2 inset-x-0 text-center text-[9px] font-mono text-gray-600 select-none pointer-events-none">
         Haryana Shakti College of Education • Official Portal • Made by Ravi Sharma
       </div>
     </>

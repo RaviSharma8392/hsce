@@ -14,6 +14,17 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/gif",
 ]);
 
+export function optimizeCloudinaryImageUrl(url, width = 1200) {
+  if (typeof url !== "string" || !url.startsWith("https://res.cloudinary.com/")) {
+    return url;
+  }
+
+  return url.replace(
+    /\/image\/upload\/(?:f_auto,q_auto,w_\d+\/)?/,
+    `/image/upload/f_auto,q_auto,w_${width}/`,
+  );
+}
+
 /**
  * Client-side high-efficiency image compression
  * Resizes large camera/phone photos to max dimension (e.g. 1400px)

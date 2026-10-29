@@ -7,28 +7,20 @@ import {
   Phone,
   Mail,
   MapPin,
-  Sparkles,
+  Target,
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
 
-import { Container } from "../components/common/Container";
-import { SectionHeading } from "../components/common/SectionHeading";
-
-import {
-  AboutSubNav,
-  AboutBottomCTA,
-  AboutPageNavigator,
-} from "../components/about/AboutSubNav";
-
+import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout";
+import { getAboutSidebarConfig } from "../data/navigationConfig";
 import { aboutOverviewContent } from "../data/aboutBilingualData";
 import { collegeInfo as defaultCollegeInfo } from "../data/siteData";
 import { usePublishedRecords } from "../hooks/usePublishedRecords";
 import { useLanguage } from "../context/LanguageContext";
-
 import { imageData, imageFallbacks } from "../data/imagesData";
 
-const BLUE = "#0a4b8c";
+const BLUE = "#2E3A8C";
 const YELLOW = "#FBDD23";
 
 const quickLinks = [
@@ -53,24 +45,22 @@ const quickLinks = [
     hi: "प्राचार्या का संदेश",
   },
   {
-    to: "/about/facilities",
-    en: "Campus & Labs",
-    hi: "परिसर एवं प्रयोगशालाएं",
+    to: "/about/recognition",
+    en: "Recognition & Affiliation",
+    hi: "मान्यता एवं संबद्धता",
   },
   {
-    to: "/about/campus-life",
-    en: "Campus Life",
-    hi: "महाविद्यालय का जीवन",
+    to: "/about/facts",
+    en: "Fact Sheet",
+    hi: "तथ्य विवरण",
   },
 ];
 
 export default function AboutPage() {
   const { language, isHindi } = useLanguage();
-
   const content = aboutOverviewContent[language] || aboutOverviewContent.en;
 
   const siteSettings = usePublishedRecords("siteContent", [defaultCollegeInfo]);
-
   const collegeInfo =
     siteSettings.find((record) => record.id === "settings") ||
     siteSettings[0] ||
@@ -84,290 +74,215 @@ export default function AboutPage() {
     }
   };
 
+  const sidebarConfig = getAboutSidebarConfig(isHindi);
+
   return (
     <>
       <Helmet>
-        <title>
-          {isHindi
-            ? "कॉलेज अवलोकन | हरियाणा शक्ति कॉलेज ऑफ एजुकेशन"
-            : "About the College | Haryana Shakti College of Education (HSCE)"}
-        </title>
-
-        <meta
-          name="description"
-          content={
-            isHindi
-              ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन, कंझावला, दिल्ली के परिसर, शैक्षणिक वातावरण, छात्र जीवन और संस्थागत सुविधाओं के बारे में जानें।"
-              : "Discover Haryana Shakti College of Education (HSCE), Kanjhawala, Delhi, its campus, academic environment, student life, institutional facilities and educational approach."
-          }
-        />
-
         <meta name="theme-color" content={BLUE} />
       </Helmet>
 
-      {/* Page header and About navigation */}
-      <AboutSubNav
-        activeTabId="overview"
-        title={content.title}
-        subtitle={content.subtitle}
-      />
+      <CollegiatePageLayout
+        bannerTitle={content.title}
+        bannerSubtitle={content.subtitle}
+        breadcrumbs={[{ label: isHindi ? "कॉलेज परिचय" : "About" }]}
+        sidebarTitle={sidebarConfig.title}
+        sidebarItems={sidebarConfig.items}
+        quickActions={sidebarConfig.quickActions}>
+        <div className="space-y-8">
+          {/* Main Card with Image 4 Style Header */}
+          <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 shadow-xs">
+            {/* Header with Blue Underline (Image 4 Style) */}
+            <div className="border-b border-gray-200 pb-4 mb-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#2E3A8C]">
+                {content.eyebrow}
+              </span>
+              <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                {content.mainHeading}
+              </h2>
+              <div className="mt-3 h-1 w-20 bg-[#2E3A8C] rounded-full" />
+            </div>
 
-      <main className="overflow-hidden bg-white font-sans text-gray-800">
-        {/* MAIN OVERVIEW */}
-        <section className="py-10 sm:py-12 lg:py-16">
-          <Container>
-            <div className="grid items-start gap-8 lg:grid-cols-12 lg:gap-10">
-              {/* LEFT: COLLEGE INTRODUCTION */}
-              <div className="min-w-0 space-y-6 lg:col-span-7">
-                <SectionHeading
-                  eyebrow={content.eyebrow}
-                  title={content.mainHeading}
-                />
+            {/* Paragraph Narrative */}
+            <div className="space-y-4 font-sans text-sm sm:text-base leading-relaxed text-slate-700">
+              {content.paragraphs.map((para, idx) => (
+                <p key={idx} className="break-words text-justify">
+                  {para}
+                </p>
+              ))}
+            </div>
 
-                <div className="space-y-4 font-sans text-sm leading-7 text-gray-600 sm:text-base sm:leading-8">
-                  {content.paragraphs.map((para, idx) => (
-                    <p key={idx} className="break-words">
-                      {para}
+            {/* Explore Subsections Grid */}
+            <div className="mt-8 pt-6 border-t border-gray-100">
+              <h3 className="font-serif text-lg font-bold text-slate-900 mb-4">
+                {isHindi
+                  ? "महाविद्यालय के अन्य महत्वपूर्ण अनुभाग"
+                  : "Explore Institutional Sections"}
+              </h3>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {quickLinks.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="group flex min-h-12 items-center justify-between gap-3 rounded-md border border-gray-200 bg-slate-50/70 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-[#2E3A8C] hover:bg-white hover:text-[#2E3A8C]">
+                    <span>{isHindi ? item.hi : item.en}</span>
+                    <ArrowRight
+                      size={16}
+                      aria-hidden="true"
+                      className="shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-[#2E3A8C]"
+                    />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Campus Hero Card & Contact Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Campus Image Card */}
+            <div className="group relative isolate overflow-hidden rounded-md border border-gray-200/90 bg-gray-100 shadow-xs">
+              <img
+                src={campusImage}
+                width="800"
+                height="500"
+                alt="Haryana Shakti College of Education Campus"
+                onError={handleCampusImageError}
+                loading="lazy"
+                decoding="async"
+                className="aspect-[16/10] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-950/85 via-gray-950/20 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                <span className="mb-1.5 inline-block rounded bg-[#FBDD23] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-900">
+                  {isHindi ? "हमारा परिसर" : "Our Campus"}
+                </span>
+                <h3 className="font-serif text-lg font-bold">
+                  {isHindi
+                    ? "सीखने और आगे बढ़ने का वातावरण"
+                    : "A Place to Learn, Grow and Lead"}
+                </h3>
+                <p className="mt-1 text-xs text-white/90">
+                  {isHindi
+                    ? "शिक्षा, सहयोग और भावी शिक्षकों के विकास के लिए समर्पित।"
+                    : "Dedicated to pedagogical excellence, innovation and mentoring."}
+                </p>
+              </div>
+            </div>
+
+            {/* Governance & Contact Card */}
+            <div className="rounded-md border border-gray-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 border-b border-gray-100 pb-3 mb-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#2E3A8C] text-white">
+                    <Building2 size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-base font-bold text-slate-900 leading-snug">
+                      {content.governanceTitle}
+                    </h3>
+                    <p className="text-xs font-semibold text-[#2E3A8C]">
+                      {content.governanceSubtitle}
                     </p>
-                  ))}
+                  </div>
                 </div>
 
-                {/* QUICK LINKS */}
-                <div className="mt-8 rounded-2xl border border-gray-200 bg-[#fafcff] p-4 sm:p-6">
-                  <div className="mb-4">
-                    <span
-                      className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em]"
-                      style={{ color: BLUE }}>
-                      {isHindi ? "और जानें" : "Explore HSCE"}
+                <div className="space-y-3.5 text-xs sm:text-sm">
+                  <InfoRow icon={MapPin} label={content.campusAddressLabel}>
+                    <span className="break-words text-slate-600">{collegeInfo.address}</span>
+                  </InfoRow>
+
+                  <InfoRow icon={Phone} label={content.contactLabel}>
+                    <div className="flex flex-wrap gap-x-2 text-slate-600">
+                      {collegeInfo.phone && (
+                        <a
+                          href={`tel:${String(collegeInfo.phone).replace(/[^\d+]/g, "")}`}
+                          className="hover:text-[#2E3A8C] hover:underline">
+                          {collegeInfo.phone}
+                        </a>
+                      )}
+                      {collegeInfo.alternatePhone && (
+                        <span>/ {collegeInfo.alternatePhone}</span>
+                      )}
+                    </div>
+                  </InfoRow>
+
+                  <InfoRow icon={Mail} label={content.emailLabel}>
+                    {collegeInfo.email && (
+                      <a
+                        href={`mailto:${collegeInfo.email}`}
+                        className="break-all text-slate-600 hover:text-[#2E3A8C] hover:underline">
+                        {collegeInfo.email}
+                      </a>
+                    )}
+                  </InfoRow>
+
+                  <InfoRow icon={GraduationCap} label={content.principalLabel}>
+                    <span className="font-semibold text-slate-800">
+                      {collegeInfo.principal}
                     </span>
-
-                    <h3 className="text-base font-bold tracking-tight text-gray-900 sm:text-lg">
-                      {isHindi
-                        ? "महाविद्यालय के अन्य महत्वपूर्ण अनुभाग"
-                        : "Explore More Institutional Sections"}
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {quickLinks.map((item) => (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        className="group flex min-h-12 items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#0a4b8c]/40 hover:bg-blue-50/60 hover:text-[#0a4b8c] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4b8c]/40 sm:px-4">
-                        <span>{isHindi ? item.hi : item.en}</span>
-
-                        <ArrowRight
-                          size={16}
-                          aria-hidden="true"
-                          className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
-                        />
-                      </Link>
-                    ))}
-                  </div>
+                  </InfoRow>
                 </div>
               </div>
 
-              {/* RIGHT: CAMPUS AND COLLEGE INFORMATION */}
-              <aside className="min-w-0 space-y-5 lg:col-span-5">
-                {/* CAMPUS HERO IMAGE */}
-                <div className="group relative isolate overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-black/5">
-                  <img
-                    src={campusImage}
-                    alt={
-                      isHindi
-                        ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन का परिसर"
-                        : "Haryana Shakti College of Education campus"
-                    }
-                    onError={handleCampusImageError}
-                    loading="lazy"
-                    decoding="async"
-                    className="aspect-[16/10] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03] sm:aspect-[16/9] lg:aspect-[5/4]"
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-gray-950/10 to-transparent" />
-
-                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                    <span
-                      className="mb-2 inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-900 sm:text-xs"
-                      style={{ backgroundColor: YELLOW }}>
-                      {isHindi ? "हमारा परिसर" : "Our Campus"}
-                    </span>
-
-                    <h2 className="max-w-md text-xl font-bold leading-tight tracking-tight text-white sm:text-2xl">
-                      {isHindi
-                        ? "सीखने और आगे बढ़ने का वातावरण"
-                        : "A Place to Learn, Grow and Lead"}
-                    </h2>
-
-                    <p className="mt-1.5 max-w-md text-xs leading-5 text-white/90 sm:text-sm sm:leading-6">
-                      {isHindi
-                        ? "शिक्षा, सहयोग और भावी शिक्षकों के विकास के लिए समर्पित।"
-                        : "An educational environment focused on learning, collaboration and future educators."}
-                    </p>
-                  </div>
+              {/* Educational Focus Callout */}
+              <div className="mt-4 rounded-md border border-blue-100 bg-blue-50/70 p-3.5">
+                <div className="flex items-center gap-2 mb-1">
+                  <Target size={15} className="text-[#2E3A8C]" />
+                  <h4 className="text-xs font-bold text-[#2E3A8C]">
+                    {content.focusTitle}
+                  </h4>
                 </div>
-
-                {/* COLLEGE INFORMATION CARD */}
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-                  <div className="flex items-start gap-3 border-b border-gray-100 pb-4 sm:gap-4">
-                    <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white sm:h-12 sm:w-12"
-                      style={{ backgroundColor: BLUE }}>
-                      <Building2 size={23} aria-hidden="true" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-bold leading-snug tracking-tight text-gray-900 sm:text-lg">
-                        {content.governanceTitle}
-                      </h3>
-
-                      <p
-                        className="mt-1 text-xs font-semibold leading-5 sm:text-sm"
-                        style={{ color: BLUE }}>
-                        {content.governanceSubtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-5">
-                    {/* ADDRESS */}
-                    <InfoRow icon={MapPin} label={content.campusAddressLabel}>
-                      <span className="break-words">{collegeInfo.address}</span>
-                    </InfoRow>
-
-                    {/* PHONE */}
-                    <InfoRow icon={Phone} label={content.contactLabel}>
-                      <div className="flex flex-wrap gap-x-2 gap-y-1">
-                        {collegeInfo.phone && (
-                          <a
-                            href={`tel:${String(collegeInfo.phone).replace(
-                              /[^\d+]/g,
-                              "",
-                            )}`}
-                            className="transition-colors hover:text-[#0a4b8c] hover:underline">
-                            {collegeInfo.phone}
-                          </a>
-                        )}
-
-                        {collegeInfo.alternatePhone && (
-                          <>
-                            {collegeInfo.phone && (
-                              <span aria-hidden="true">/</span>
-                            )}
-
-                            <a
-                              href={`tel:${String(
-                                collegeInfo.alternatePhone,
-                              ).replace(/[^\d+]/g, "")}`}
-                              className="transition-colors hover:text-[#0a4b8c] hover:underline">
-                              {collegeInfo.alternatePhone}
-                            </a>
-                          </>
-                        )}
-                      </div>
-                    </InfoRow>
-
-                    {/* EMAIL */}
-                    <InfoRow icon={Mail} label={content.emailLabel}>
-                      {collegeInfo.email && (
-                        <a
-                          href={`mailto:${collegeInfo.email}`}
-                          className="break-all transition-colors hover:text-[#0a4b8c] hover:underline">
-                          {collegeInfo.email}
-                        </a>
-                      )}
-                    </InfoRow>
-
-                    {/* PRINCIPAL */}
-                    <InfoRow
-                      icon={GraduationCap}
-                      label={content.principalLabel}>
-                      <span className="font-semibold text-gray-800">
-                        {collegeInfo.principal}
-                      </span>
-                    </InfoRow>
-                  </div>
-
-                  {/* EDUCATIONAL FOCUS */}
-                  <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      <Sparkles
-                        size={16}
-                        className="shrink-0"
-                        style={{ color: BLUE }}
-                        aria-hidden="true"
-                      />
-
-                      <h4 className="text-sm font-bold" style={{ color: BLUE }}>
-                        {content.focusTitle}
-                      </h4>
-                    </div>
-
-                    <p className="text-sm leading-6 text-gray-600">
-                      {content.focusDesc}
-                    </p>
-                  </div>
-                </div>
-
-                {/* INSTITUTIONAL PILLARS */}
-                <div className="space-y-3">
-                  {content.pillars.map((pillar, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 transition hover:border-[#0a4b8c]/30 hover:shadow-sm">
-                      <CheckCircle2
-                        size={19}
-                        className="mt-0.5 shrink-0"
-                        style={{ color: BLUE }}
-                        aria-hidden="true"
-                      />
-
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-bold leading-5 text-gray-900 sm:text-base">
-                          {pillar.title}
-                        </h4>
-
-                        <p className="mt-1 text-sm leading-6 text-gray-600">
-                          {pillar.desc}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </aside>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {content.focusDesc}
+                </p>
+              </div>
             </div>
-          </Container>
-        </section>
+          </div>
 
-        {/* PREVIOUS / NEXT NAVIGATION */}
-        <AboutPageNavigator nextTabId="history" />
-
-        {/* BOTTOM CALL TO ACTION */}
-        <AboutBottomCTA />
-      </main>
+          {/* Institutional Pillars */}
+          <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 shadow-xs">
+            <h3 className="font-serif text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-gray-100">
+              {isHindi ? "संस्थागत स्तंभ एवं प्राथमिकताएं" : "Institutional Pillars & Values"}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {content.pillars.map((pillar, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-start gap-3 rounded-md border border-gray-200/80 bg-slate-50/50 p-4 transition hover:border-[#2E3A8C]/50 hover:bg-white">
+                  <CheckCircle2
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[#2E3A8C]"
+                  />
+                  <div>
+                    <h4 className="font-serif text-sm font-bold text-slate-900">
+                      {pillar.title}
+                    </h4>
+                    <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+                      {pillar.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </CollegiatePageLayout>
     </>
   );
 }
 
-/**
- * Consistent icon, label and body typography
- * for college information.
- */
 function InfoRow({ icon: Icon, label, children }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-        <Icon size={17} style={{ color: BLUE }} aria-hidden="true" />
+    <div className="flex items-start gap-2.5">
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded bg-slate-100 text-[#2E3A8C]">
+        <Icon size={14} />
       </div>
-
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold leading-5 text-gray-900 sm:text-sm">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
           {label}
         </p>
-
-        <div className="mt-0.5 break-words text-sm leading-6 text-gray-600">
-          {children}
-        </div>
+        <div className="mt-0.5 break-words font-medium">{children}</div>
       </div>
     </div>
   );

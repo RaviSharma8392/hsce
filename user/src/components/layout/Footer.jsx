@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Phone,
@@ -7,8 +7,6 @@ import {
   Facebook,
   Linkedin,
 } from "lucide-react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db, firebaseReady } from "../../config/firebase";
 import { useLanguage } from "../../context/LanguageContext";
 import { imageData } from "../../data/imagesData";
 import { collegeInfo as defaultCollegeInfo } from "../../data/siteData";
@@ -43,6 +41,8 @@ function CollegeLogo() {
   return (
     <img
       src={logoSrc}
+      width="432"
+      height="432"
       onError={handleLogoError}
       alt="Haryana Shakti College of Education logo"
       className="block h-16 w-auto max-w-full object-contain"
@@ -55,27 +55,51 @@ export function Footer({
   displayedName,
   displayedAffiliation,
 }) {
-  const { t, isHindi } = useLanguage();
+  const { t } = useLanguage();
 
   // Real-time synchronization state with Firestore siteContent/settings document
   const [liveInfo, setLiveInfo] = useState({ ...defaultCollegeInfo, ...collegeInfo });
+  const prevCollegeInfoRef = useRef(collegeInfo);
 
   useEffect(() => {
-    setLiveInfo((prev) => ({ ...prev, ...collegeInfo }));
+    if (prevCollegeInfoRef.current !== collegeInfo) {
+      prevCollegeInfoRef.current = collegeInfo;
+      setLiveInfo((prev) => ({ ...prev, ...collegeInfo }));
+    }
   }, [collegeInfo]);
 
   useEffect(() => {
-    if (!firebaseReady) return undefined;
-    const unsub = onSnapshot(
-      doc(db, "siteContent", "settings"),
-      (snap) => {
-        if (snap.exists()) {
-          setLiveInfo((prev) => ({ ...prev, ...snap.data() }));
-        }
-      },
-      (err) => console.warn("Footer live settings sync:", err)
-    );
-    return () => unsub();
+    let active = true;
+    let unsubscribe;
+
+    const subscribe = async () => {
+      const [{ getLazyFirestore }, { firebaseReady }] = await Promise.all([
+        import("../../config/firebaseLazy"),
+        import("../../config/firebaseOptions"),
+      ]);
+      if (!active || !firebaseReady) return;
+
+      const { db, firestore } = await getLazyFirestore();
+      if (!active) return;
+      unsubscribe = firestore.onSnapshot(
+        firestore.doc(db, "siteContent", "settings"),
+        (snap) => {
+          if (snap.exists()) {
+            setLiveInfo((prev) => ({ ...prev, ...snap.data() }));
+          }
+        },
+        (err) => console.warn("Footer live settings sync:", err),
+      );
+    };
+
+    subscribe().catch((err) => {
+      console.warn("Could not initialize footer settings sync:", err);
+    });
+
+    return () => {
+      active = false;
+      unsubscribe?.();
+    };
   }, []);
 
   const primaryPhone = liveInfo.phone || "9953155054";
@@ -125,23 +149,23 @@ export function Footer({
   const socialLinks = [
     {
       name: "Facebook",
-      url: liveInfo.facebook || "https://www.facebook.com",
+      url: liveInfo.facebook,
       Icon: Facebook,
       className: "text-[#1877F2]",
     },
     {
       name: "Instagram",
-      url: liveInfo.instagram || "https://www.instagram.com/hscekanjhawala/",
+      url: liveInfo.instagram,
       Icon: Instagram,
       className: "text-[#E1306C]",
     },
     {
       name: "LinkedIn",
-      url: liveInfo.linkedin || "https://www.linkedin.com",
+      url: liveInfo.linkedin,
       Icon: Linkedin,
       className: "text-[#0077B5]",
     },
-  ];
+  ].filter((socialLink) => Boolean(socialLink.url));
 
   const renderLink = ([path, key, fallback]) => (
     <Link
@@ -154,7 +178,7 @@ export function Footer({
 
   return (
     <footer className="bg-[#1f2026] font-sans text-white border-t border-slate-800">
-      <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+      <div className="mx-auto max-w-[1400px] px-6 py-10 sm:py-12 lg:px-8 lg:py-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:gap-12">
           {/* College information */}
           <div className="w-full lg:w-1/4 lg:max-w-[300px]">
