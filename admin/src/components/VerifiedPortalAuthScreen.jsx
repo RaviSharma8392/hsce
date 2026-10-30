@@ -186,11 +186,6 @@ export default function VerifiedPortalAuthScreen({
                 />
                 Remember email
               </label>
-              <Link
-                to="/forgot-password"
-                className="font-medium text-[#0066FF] hover:text-[#0052cc]">
-                Forgot password?
-              </Link>
             </div>
             <button
               type="submit"

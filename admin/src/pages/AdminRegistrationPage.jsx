@@ -80,7 +80,7 @@ export default function AdminRegistrationPage() {
       console.error("Registration error:", registrationError);
       const errors = {
         "auth/email-already-in-use":
-          "An account with this email already exists. Sign in or use Forgot password.",
+          "An account with this email already exists. Please sign in or contact administration.",
         "auth/invalid-email": "Please enter a valid email address.",
         "auth/weak-password":
           "Choose a stronger password with at least 8 characters.",

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import {
@@ -308,7 +307,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
+            <div className="flex items-center text-xs sm:text-sm pt-1">
               <label className="flex items-center gap-2 cursor-pointer text-slate-600 select-none">
                 <input
                   type="checkbox"
@@ -319,13 +318,6 @@ export default function LoginPage() {
                 />
                 <span>Remember me</span>
               </label>
-
-              <Link
-                to="/forgot-password"
-                className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
-              >
-                Forgot password?
-              </Link>
             </div>
 
             <button

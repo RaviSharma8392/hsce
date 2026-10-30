@@ -32,6 +32,7 @@ import { Footer } from "./Footer";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileMenuDrawer } from "./MobileMenuDrawer";
 import WebsiteWatermark from "../common/WebsiteWatermark";
+import WelcomeSplashScreen from "../common/WelcomeSplashScreen";
 
 const LOGO_SRC = imageData.collegeLogo;
 const UNIVERSITY_LOGO_SRC = imageData.ggsipuLogo;
@@ -443,6 +444,7 @@ export function Layout({ children }) {
 
   return (
     <>
+      <WelcomeSplashScreen />
       <Helmet>
         <html lang={isHindi ? "hi" : "en"} />
         <title>{pageTitle}</title>

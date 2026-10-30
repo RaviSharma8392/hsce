@@ -22,7 +22,6 @@ import PortalWatermark from "./components/common/PortalWatermark";
 import AdminMobileNav from "./components/layout/AdminMobileNav";
 import { useAuthState, SUPER_ADMIN_EMAIL } from "./hooks/useAuthState";
 const LoginPage = lazy(() => import("./pages/LoginPage"));
-const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const FacultyPage = lazy(() => import("./pages/FacultyPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const HomepagePopupPage = lazy(() => import("./pages/HomepagePopupPage"));
@@ -647,7 +646,7 @@ export default function App() {
       />
       <Route
         path="/forgot-password"
-        element={user ? <Navigate to="/" replace /> : <ForgotPasswordPage />}
+        element={<Navigate to="/admin/signin" replace />}
       />
 
       {/* AUTHENTICATED WORKSPACES */}
