@@ -272,14 +272,13 @@ export default function AddNoticeModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-stretch justify-stretch p-0 bg-white sm:bg-slate-900/60 sm:backdrop-blur-xs sm:items-center sm:justify-center sm:p-4 animate-in fade-in"
       onClick={onClose}>
       <div
-        className="relative w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-h-[92vh] flex flex-col animate-in slide-in-from-bottom sm:slide-in-from-bottom-0"
+        className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-w-lg sm:max-h-[90vh] bg-white rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}>
         {/* Simple Clean Header */}
-        <div className="bg-[#0066FF] text-white px-5 sm:px-6 pt-3 pb-3.5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between">
-          <div className="w-10 h-1 bg-white/40 rounded-full mx-auto mb-2.5 sm:hidden" />
+        <div className="bg-[#0066FF] text-white px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2.5">
               <FileText size={18} className="shrink-0" />
@@ -302,7 +301,7 @@ export default function AddNoticeModal({
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-700 text-xs px-5 sm:px-6 py-2.5 border-b border-red-100 font-medium">
+          <div className="bg-red-50 text-red-700 text-xs px-5 sm:px-6 py-2.5 border-b border-red-100 font-medium shrink-0">
             {error}
           </div>
         )}
@@ -310,7 +309,7 @@ export default function AddNoticeModal({
         {/* Simple Form */}
         <form
           onSubmit={handleSubmit}
-          className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+          className="p-4 sm:p-6 space-y-4 overflow-y-auto overscroll-contain flex-1 -webkit-overflow-scrolling-touch">
           {/* Title */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -457,18 +456,20 @@ export default function AddNoticeModal({
           </div>
 
           {/* Actions */}
-          <div className="pt-3 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
+          <div className="shrink-0 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-slate-100 bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:shadow-none -mx-4 -mb-4 sm:mx-0 sm:mb-0 px-4 sm:px-0 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+              className="w-full sm:w-auto px-4 py-3 sm:py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors text-center"
+            >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || uploadingFile}
-              className="w-full sm:w-auto px-5 py-2.5 sm:py-2 rounded-xl bg-[#0066FF] hover:bg-[#0052cc] text-white text-xs font-bold shadow-xs transition-colors">
+              className="w-full sm:w-auto px-5 py-3 sm:py-2 rounded-xl bg-[#0066FF] hover:bg-[#0052cc] text-white text-xs sm:text-sm font-bold shadow-xs transition-colors text-center"
+            >
               {submitting
                 ? isEditing
                   ? "Saving Changes..."

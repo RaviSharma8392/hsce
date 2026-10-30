@@ -16,8 +16,7 @@ import {
   CheckCircle2,
   HelpCircle,
 } from "lucide-react";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db, firebaseReady } from "../config/firebase";
+import { fetchPublishedRecords } from "../hooks/usePublishedRecords";
 import { Container } from "../components/common/Container";
 import { CollegiateWatermarkBg } from "../components/common/CollegiateWatermarkBg";
 import { PageHeaderBanner } from "../components/common/PageHeaderBanner";
@@ -147,55 +146,27 @@ export default function SearchPage() {
     setSearchParams(nextParams, { replace: true });
   };
 
-  // Live Firestore collections state
+  // Published Firestore collections loaded once for the search session.
   const [liveNotices, setLiveNotices] = useState([]);
   const [liveFaculty, setLiveFaculty] = useState([]);
   const [liveSyllabus, setLiveSyllabus] = useState([]);
-  const [isLiveConnected, setIsLiveConnected] = useState(false);
-
-  // 1. Subscribe to live published notices
   useEffect(() => {
-    if (!firebaseReady) return undefined;
-    const unsub = onSnapshot(
-      collection(db, "notices"),
-      (snapshot) => {
-        const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setLiveNotices(list.filter((item) => item.isPublished !== false));
-        setIsLiveConnected(true);
-      },
-      (err) => console.warn("Live notices sync warning:", err)
-    );
-    return () => unsub();
-  }, []);
+    let active = true;
 
-  // 2. Subscribe to live faculty records
-  useEffect(() => {
-    if (!firebaseReady) return undefined;
-    const unsub = onSnapshot(
-      collection(db, "faculty"),
-      (snapshot) => {
-        const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setLiveFaculty(list.filter((item) => item.isPublished !== false));
-        setIsLiveConnected(true);
-      },
-      (err) => console.warn("Live faculty sync warning:", err)
-    );
-    return () => unsub();
-  }, []);
+    Promise.all([
+      fetchPublishedRecords("notices", { limitCount: null }),
+      fetchPublishedRecords("faculty", { limitCount: null }),
+      fetchPublishedRecords("syllabus", { limitCount: null }),
+    ]).then(([notices, faculty, syllabus]) => {
+      if (!active) return;
+      setLiveNotices(notices);
+      setLiveFaculty(faculty);
+      setLiveSyllabus(syllabus);
+    });
 
-  // 3. Subscribe to live syllabus records
-  useEffect(() => {
-    if (!firebaseReady) return undefined;
-    const unsub = onSnapshot(
-      collection(db, "syllabus"),
-      (snapshot) => {
-        const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setLiveSyllabus(list.filter((item) => item.isPublished !== false));
-        setIsLiveConnected(true);
-      },
-      (err) => console.warn("Live syllabus sync warning:", err)
-    );
-    return () => unsub();
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Combine site pages with records currently published in Firestore.

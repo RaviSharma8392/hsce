@@ -26,7 +26,7 @@ import {
   uploadToCloudinary,
 } from "../services/cloudinary";
 import AdobePdfIcon from "./common/AdobePdfIcon";
-import { Upload, ExternalLink } from "lucide-react";
+import { Upload, ExternalLink, X, PlusCircle, Pencil, Check, RefreshCw } from "lucide-react";
 
 const emptyValue = (field) => field.defaultValue ?? "";
 const PAGE_SIZE = 20;
@@ -414,17 +414,17 @@ export default function ContentManager({
     )
       return;
     setError("");
+    const previous = [...records];
+    setRecords((prev) => prev.filter((item) => item.id !== record.id));
+    setNotice("Record deleted.");
     try {
       await deleteDoc(doc(db, collectionName, record.id));
-      setRecords((previous) =>
-        previous.filter((item) => item.id !== record.id),
-      );
       const filePath = record[`${fileField}Path`];
       if (filePath) {
         await deleteObject(ref(storage, filePath)).catch(() => {});
       }
-      setNotice("Record deleted.");
     } catch (deleteError) {
+      setRecords(previous);
       setError(deleteError.message || "Unable to delete this record.");
     }
   };
@@ -530,9 +530,9 @@ export default function ContentManager({
             aria-labelledby="manager-modal-title">
             <div className="manager-form-heading">
               <div>
-                <span className="admin-kicker">{title}</span>
+                <span className="admin-kicker" style={{ textTransform: "uppercase", fontSize: "10px", letterSpacing: "0.08em" }}>{title}</span>
                 <h2 id="manager-modal-title">
-                  {editingId ? "Edit record" : "New record"}
+                  {editingId ? `Edit ${title}` : `Create New ${title}`}
                 </h2>
               </div>
               <button
@@ -541,7 +541,7 @@ export default function ContentManager({
                 type="button"
                 disabled={saving}
                 aria-label="Close form">
-                Close
+                <X size={18} />
               </button>
             </div>
             {error && (
@@ -1017,7 +1017,7 @@ export default function ContentManager({
                     </svg>
                   </div>
                 ) : null}
-                <div className="manager-row-main">
+                <div className="manager-row-main" style={{ minWidth: 0, flex: 1 }}>
                   <div
                     className="manager-row-title"
                     style={{
@@ -1025,10 +1025,60 @@ export default function ContentManager({
                       alignItems: "center",
                       gap: "8px",
                       flexWrap: "wrap",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      color: "#0f172a",
                     }}>
                     <span>
-                      {record.title || record.name || "Untitled record"}
+                      {record.name || record.title || "Untitled record"}
                     </span>
+                    {/* Faculty staffType badge */}
+                    {record.staffType && (
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          padding: "2px 8px",
+                          borderRadius: "9999px",
+                          backgroundColor: String(record.staffType).toLowerCase().includes("non") ? "#f1f5f9" : "#eff6ff",
+                          color: String(record.staffType).toLowerCase().includes("non") ? "#475569" : "#1d4ed8",
+                          border: String(record.staffType).toLowerCase().includes("non") ? "1px solid #cbd5e1" : "1px solid #bfdbfe",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.025em",
+                        }}>
+                        {record.staffType}
+                      </span>
+                    )}
+                    {/* Category or Designation badge */}
+                    {(record.category || record.designation) && (
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 600,
+                          padding: "2px 8px",
+                          borderRadius: "6px",
+                          backgroundColor: "#eef2ff",
+                          color: "#363991",
+                          border: "1px solid #e0e7ff",
+                        }}>
+                        {record.designation || record.category}
+                      </span>
+                    )}
+                    {/* Pinned badge */}
+                    {record.isPinned && (
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          backgroundColor: "#fef2f2",
+                          color: "#dc2626",
+                          border: "1px solid #fecaca",
+                        }}>
+                        ★ PINNED
+                      </span>
+                    )}
                     {pdfLink && (
                       <a
                         href={pdfLink}
@@ -1056,10 +1106,170 @@ export default function ContentManager({
                       </a>
                     )}
                   </div>
-                  <div className="manager-row-detail">
-                    {record.category ||
-                      record.designation ||
-                      displayValue(record.description)}
+
+                  {/* Multi-field metadata tags and details */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      gap: "6px 12px",
+                      marginTop: "6px",
+                      fontSize: "11px",
+                      color: "#475569",
+                      lineHeight: 1.4,
+                    }}>
+                    {/* Department */}
+                    {record.department && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Dept:</span>
+                        <span>{record.department}</span>
+                      </span>
+                    )}
+
+                    {/* Subject */}
+                    {record.subject && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Subject:</span>
+                        <span>{record.subject}</span>
+                      </span>
+                    )}
+
+                    {/* Qualifications */}
+                    {(record.qualification || record.qualifications) && (
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          backgroundColor: "#f8fafc",
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid #e2e8f0",
+                        }}>
+                        <span>🎓</span>
+                        <span style={{ fontWeight: 600, color: "#1e293b" }}>
+                          {record.qualification || record.qualifications}
+                        </span>
+                      </span>
+                    )}
+
+                    {/* Email */}
+                    {record.email && (
+                      <a
+                        href={"mailto:" + record.email}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          color: "#2563eb",
+                          textDecoration: "none",
+                        }}>
+                        <span>✉️</span>
+                        <span>{record.email}</span>
+                      </a>
+                    )}
+
+                    {/* Phone / Mobile */}
+                    {(record.phone || record.mobile) && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span>📞</span>
+                        <span>{record.phone || record.mobile}</span>
+                      </span>
+                    )}
+
+                    {/* Experience */}
+                    {record.experience && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span>⭐</span>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Exp:</span>
+                        <span>{record.experience}</span>
+                      </span>
+                    )}
+
+                    {/* Date of Joining */}
+                    {record.dateOfJoining && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span>📅</span>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Joined:</span>
+                        <span>{record.dateOfJoining}</span>
+                      </span>
+                    )}
+
+                    {/* Occupation / Profile */}
+                    {record.occupation && record.occupation !== record.designation && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Profile:</span>
+                        <span>{record.occupation}</span>
+                      </span>
+                    )}
+
+                    {/* Publication Date (for notices) */}
+                    {record.publicationDate && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span>📅</span>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Published:</span>
+                        <span>{record.publicationDate}</span>
+                      </span>
+                    )}
+
+                    {/* Reference Number (for notices) */}
+                    {record.referenceNumber && (
+                      <span
+                        style={{
+                          fontFamily: "monospace",
+                          fontSize: "10px",
+                          backgroundColor: "#f1f5f9",
+                          padding: "1px 5px",
+                          borderRadius: "4px",
+                          color: "#475569",
+                        }}>
+                        Ref: {record.referenceNumber}
+                      </span>
+                    )}
+
+                    {/* Important Date (for notices) */}
+                    {record.importantDate && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", color: "#b45309" }}>
+                        <span style={{ fontWeight: 600 }}>Due:</span>
+                        <span>{record.importantDate}</span>
+                      </span>
+                    )}
+
+                    {/* Course & Semester (for syllabus) */}
+                    {record.course && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Course:</span>
+                        <span>{record.course}</span>
+                      </span>
+                    )}
+                    {record.academicYear && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Year:</span>
+                        <span>{record.academicYear}</span>
+                      </span>
+                    )}
+                    {record.semester && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                        <span style={{ fontWeight: 600, color: "#334155" }}>Sem:</span>
+                        <span>{record.semester}</span>
+                      </span>
+                    )}
+
+                    {/* Description preview (if not faculty and has description) */}
+                    {!isFacultyCollection && record.description && (
+                      <div
+                        style={{
+                          width: "100%",
+                          color: "#64748b",
+                          fontSize: "11px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}>
+                        {displayValue(record.description)}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <span

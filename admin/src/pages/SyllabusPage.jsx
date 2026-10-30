@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ExternalLink,
   RefreshCw,
+  ChevronLeft,
   X,
   Copy,
   Check,
@@ -68,14 +69,14 @@ const BUTTON_SECONDARY =
 
 function StatCard({ label, value, icon: Icon }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 border border-slate-200 bg-white p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-slate-100 text-[#363991]">
-        <Icon size={19} />
+    <div className="flex min-w-0 items-center gap-2.5 sm:gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+      <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[#363991]">
+        <Icon size={18} />
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs font-medium text-slate-500">{label}</p>
-        <p className="mt-1 text-2xl font-semibold leading-none text-slate-900">
+        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 truncate">{label}</p>
+        <p className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-black leading-none text-slate-900">
           {value}
         </p>
       </div>
@@ -86,15 +87,13 @@ function StatCard({ label, value, icon: Icon }) {
 function StatusBadge({ published }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1 text-xs font-medium ${
-        published
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1 text-xs font-medium ${published
           ? "bg-emerald-50 text-emerald-700"
           : "bg-amber-50 text-amber-700"
-      }`}>
+        }`}>
       <span
-        className={`h-1.5 w-1.5 rounded-full ${
-          published ? "bg-emerald-500" : "bg-amber-500"
-        }`}
+        className={`h-1.5 w-1.5 rounded-full ${published ? "bg-emerald-500" : "bg-amber-500"
+          }`}
       />
       {published ? "Published" : "Draft"}
     </span>
@@ -108,11 +107,10 @@ function IconButton({ title, onClick, children, danger = false }) {
       title={title}
       aria-label={title}
       onClick={onClick}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white transition ${
-        danger
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white transition ${danger
           ? "text-rose-600 hover:border-rose-200 hover:bg-rose-50"
           : "text-slate-600 hover:bg-slate-100 hover:text-[#363991]"
-      }`}>
+        }`}>
       {children}
     </button>
   );
@@ -494,11 +492,10 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed right-3 top-3 z-[100] flex max-w-[calc(100vw-24px)] items-start gap-2 border px-4 py-3 text-sm shadow-lg sm:right-5 sm:top-5 ${
-            toastMessage.type === "error"
+          className={`fixed right-3 top-3 z-[100] flex max-w-[calc(100vw-24px)] items-start gap-2 border px-4 py-3 text-sm shadow-lg sm:right-5 sm:top-5 ${toastMessage.type === "error"
               ? "border-rose-200 bg-white text-rose-700"
               : "border-emerald-200 bg-white text-emerald-700"
-          }`}>
+            }`}>
           {toastMessage.type === "error" ? (
             <AlertCircle size={18} className="mt-0.5 shrink-0" />
           ) : (
@@ -556,7 +553,7 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
         </div>
 
         {/* Statistics */}
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 sm:mt-5 grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           <StatCard
             label="Total documents"
             value={stats.total}
@@ -916,7 +913,7 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
 
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-950/50 sm:items-center sm:p-4"
+          className="fixed inset-0 z-[80] flex items-stretch justify-stretch p-0 bg-white sm:bg-slate-950/50 sm:items-center sm:justify-center sm:p-4 animate-in fade-in duration-200"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               closeUploadModal();
@@ -926,23 +923,31 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="syllabus-modal-title"
-            className="flex max-h-[95dvh] w-full flex-col overflow-hidden bg-white shadow-xl sm:max-h-[90vh] sm:max-w-2xl sm:border sm:border-slate-200">
-            <header className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-6">
-              <div className="flex min-w-0 items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-slate-100 text-[#363991]">
+            className="flex h-[100dvh] min-h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden rounded-none sm:rounded-2xl bg-white shadow-none sm:shadow-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-2xl border-0 sm:border sm:border-slate-200">
+            <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-4 sm:px-6 bg-white sm:bg-slate-50/50 shrink-0">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={closeUploadModal}
+                  className="sm:hidden p-2 -ml-1 text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-[#363991] border border-indigo-100">
                   {editingItem ? <Pencil size={19} /> : <Upload size={19} />}
                 </div>
 
                 <div className="min-w-0">
                   <h2
                     id="syllabus-modal-title"
-                    className="text-base font-semibold text-slate-900 sm:text-lg">
+                    className="text-base font-bold text-slate-900 leading-tight">
                     {editingItem
                       ? "Edit syllabus document"
                       : "Add syllabus document"}
                   </h2>
 
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                  <p className="mt-0.5 text-xs text-slate-500">
                     Add the PDF link and academic details below.
                   </p>
                 </div>
@@ -953,14 +958,14 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
                 onClick={closeUploadModal}
                 disabled={isSubmitting}
                 aria-label="Close syllabus form"
-                className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50">
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50">
                 <X size={19} />
               </button>
             </header>
 
             <form
               onSubmit={handleFormSubmit}
-              className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-6">
+              className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 -webkit-overflow-scrolling-touch">
               {uploadError && (
                 <div
                   role="alert"
@@ -1068,7 +1073,7 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
                 </label>
               </div>
 
-              <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
+              <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 p-4 sm:px-6 sm:py-4 bg-white sm:bg-slate-50/50 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:shadow-none pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-end shrink-0">
                 <button
                   type="button"
                   disabled={isSubmitting}
@@ -1100,12 +1105,12 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
       )}
 
       {/* =====================================================
-          PDF PREVIEW MODAL
+          PDF PREVIEW MODAL - FULLSCREEN ON MOBILE
       ===================================================== */}
 
       {previewTarget && (
         <div
-          className="fixed inset-0 z-[90] flex items-end justify-center bg-slate-950/70 sm:items-center sm:p-4"
+          className="fixed inset-0 z-[90] flex items-stretch justify-stretch p-0 bg-white sm:bg-slate-950/70 sm:items-center sm:justify-center sm:p-4 animate-in fade-in duration-200"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setPreviewTarget(null);
@@ -1115,21 +1120,31 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="preview-title"
-            className="flex h-[94dvh] w-full flex-col overflow-hidden bg-white sm:h-[85vh] sm:max-w-5xl">
-            <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-3 py-3 sm:px-5">
-              <div className="min-w-0">
-                <p className="text-xs text-slate-500">
-                  {previewTarget.year || "Academic syllabus"}
-                  {previewTarget.publicationDate
-                    ? ` · Published ${previewTarget.publicationDate}`
-                    : ""}
-                </p>
+            className="flex h-[100dvh] min-h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden rounded-none sm:rounded-2xl bg-white sm:h-[85vh] sm:max-w-5xl border-0 sm:border border-slate-200">
+            <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-3 sm:px-5 bg-white sm:bg-slate-50/50 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setPreviewTarget(null)}
+                  className="sm:hidden p-1.5 text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="min-w-0">
+                  <p className="text-xs text-slate-500">
+                    {previewTarget.year || "Academic syllabus"}
+                    {previewTarget.publicationDate
+                      ? ` · Published ${previewTarget.publicationDate}`
+                      : ""}
+                  </p>
 
-                <h2
-                  id="preview-title"
-                  className="mt-1 break-words text-sm font-semibold text-slate-900 sm:text-base">
-                  {previewTarget.title}
-                </h2>
+                  <h2
+                    id="preview-title"
+                    className="mt-0.5 truncate text-sm font-semibold text-slate-900 sm:text-base">
+                    {previewTarget.title}
+                  </h2>
+                </div>
               </div>
 
               <div className="flex shrink-0 items-center gap-2">

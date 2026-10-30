@@ -27,6 +27,9 @@ export default function NoticesPage({ currentUser, role, permissions }) {
             "Holiday",
             "Circular",
             "Important Announcement",
+            "Admissions",
+            "Disclosure",
+            "General",
           ],
         },
         {

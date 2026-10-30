@@ -7,18 +7,19 @@ import {
   Clock,
   ExternalLink,
   GraduationCap,
+  LayoutDashboard,
   Images,
   Megaphone,
   MessageSquareText,
   PanelsTopLeft,
   RefreshCw,
-  Settings,
   ShieldAlert,
   ShieldCheck,
   UserCheck,
   UsersRound,
 } from "lucide-react";
 import PortalWatermark from "./components/common/PortalWatermark";
+import AdminMobileNav from "./components/layout/AdminMobileNav";
 import { useAuthState, SUPER_ADMIN_EMAIL } from "./hooks/useAuthState";
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
@@ -26,10 +27,12 @@ const FacultyPage = lazy(() => import("./pages/FacultyPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const HomepagePopupPage = lazy(() => import("./pages/HomepagePopupPage"));
 const NoticesPage = lazy(() => import("./pages/NoticesPage"));
-const CommitteesPage = lazy(() => import("./pages/CommitteesPage"));
 const SiteSettingsPage = lazy(() => import("./pages/SiteSettingsPage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const EnquiriesPage = lazy(() => import("./pages/EnquiriesPage"));
 const ChatbotEnquiriesPage = lazy(() => import("./pages/ChatbotEnquiriesPage"));
+const FeedbackPage = lazy(() => import("./pages/FeedbackPage"));
+const GrievancesPage = lazy(() => import("./pages/GrievancesPage"));
 const CampusToursPage = lazy(() => import("./pages/CampusToursPage"));
 const SyllabusPage = lazy(() => import("./pages/SyllabusPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
@@ -91,7 +94,9 @@ function PendingVerificationNotice({ user, logout, checkAuth }) {
           <div className="rounded-lg bg-blue-50/70 p-3.5 border border-blue-200/70 text-xs text-blue-950 flex items-start gap-2.5">
             <Clock size={16} className="text-blue-700 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong>User self-verification is not required.</strong> Principal Ravi Sharma reviews all account requests directly from the Access Governance console and allocates your permissions.
+              <strong>You do not need to verify your own account.</strong>{" "}
+              The principal reviews your request and chooses which areas you
+              can manage.
             </p>
           </div>
 
@@ -122,79 +127,109 @@ function PendingVerificationNotice({ user, logout, checkAuth }) {
 
 const navigationGroups = [
   {
-    label: "Access Governance",
+    label: "Start here",
+    links: [
+      {
+        path: "/manage/home",
+        label: "Home",
+        description: "See the tasks available to you",
+        Icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    label: "Manage accounts",
     principalOnly: true,
     links: [
       {
         path: "/manage/admin-users",
-        label: "Admin access & approvals",
+        label: "Staff accounts",
+        description: "Approve access and assign work",
         Icon: UserCheck,
       },
     ],
   },
   {
-    label: "Admissions & student services",
+    label: "Student and visitor messages",
     links: [
       {
         path: "/manage/enquiries",
-        label: "Admission form enquiries",
+        label: "Admission requests",
+        description: "Review submitted admission forms",
+        permission: "enquiries",
         Icon: GraduationCap,
       },
       {
         path: "/manage/chatbot-enquiries",
-        label: "Chatbot enquiries",
+        label: "Website chat questions",
+        description: "Read questions sent through the website chat",
+        permission: "chatbotEnquiries",
         Icon: Bot,
       },
       {
         path: "/manage/feedback",
-        label: "Contact & feedback",
+        label: "Contact messages",
+        description: "Read messages sent from Contact Us",
+        permission: "feedback",
         Icon: MessageSquareText,
       },
       {
         path: "/manage/grievances",
-        label: "Student grievances",
+        label: "Student concerns",
+        description: "Review and respond to student concerns",
+        permission: "grievances",
         Icon: ShieldAlert,
       },
       {
         path: "/manage/tours",
         label: "Campus visit requests",
+        description: "Confirm or update requested visits",
+        permission: "tours",
         Icon: CalendarDays,
       },
     ],
   },
   {
-    label: "Website content",
+    label: "Update the website",
     links: [
       {
         path: "/manage/notices",
-        label: "Notices & circulars",
+        label: "Notices and circulars",
+        description: "Add, update, or remove a notice",
+        permission: "notices",
         Icon: Megaphone,
       },
       {
         path: "/manage/homepage-popup",
-        label: "Homepage popup",
+        label: "Homepage announcement",
+        description: "Show or hide the homepage announcement",
+        permission: "homepagePopup",
         Icon: PanelsTopLeft,
       },
-      { path: "/manage/gallery", label: "Campus gallery", Icon: Images },
       {
-        path: "/manage/committees",
-        label: "Committees & cells",
-        Icon: ShieldAlert,
-      },
-      {
-        path: "/manage/settings",
-        label: "Institutional settings",
-        Icon: Settings,
+        path: "/manage/gallery",
+        label: "Campus photos",
+        description: "Add or update campus photos",
+        permission: "gallery",
+        Icon: Images,
       },
     ],
   },
   {
-    label: "Academic records",
+    label: "College information",
     links: [
-      { path: "/manage/faculty", label: "Faculty & staff", Icon: UsersRound },
+      {
+        path: "/manage/faculty",
+        label: "Faculty and staff",
+        description: "Update the public staff directory",
+        permission: "faculty",
+        Icon: UsersRound,
+      },
       {
         path: "/manage/syllabus",
-        label: "Course syllabus",
+        label: "Course documents",
+        description: "Update published syllabus files",
+        permission: "syllabus",
         Icon: BookOpenCheck,
       },
     ],
@@ -207,17 +242,39 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
   const isPrincipalUser =
     role === "principal" ||
     (user?.email || "").toLowerCase() === SUPER_ADMIN_EMAIL;
+  const canAccess = (permission) =>
+    isPrincipalUser ||
+    permissions.all === true ||
+    permissions[permission] === true;
+  const visibleNavigationGroups = navigationGroups
+    .filter((group) => !group.principalOnly || isPrincipalUser)
+    .map((group) => ({
+      ...group,
+      links: group.links.filter(
+        (link) => !link.permission || canAccess(link.permission),
+      ),
+    }))
+    .filter((group) => group.links.length > 0);
+  const defaultPath =
+    visibleNavigationGroups.flatMap((group) => group.links)[0]?.path ??
+    "/manage/home";
+  const requirePermission = (permission, page) =>
+    canAccess(permission) ? page : <Navigate to={defaultPath} replace />;
 
   return (
     <div className="admin-frame relative font-sans">
-      {/* Background Institutional Security Watermark for Administrative Workspace */}
-      <div className="pointer-events-none fixed inset-0 lg:left-[260px] z-0 overflow-hidden flex items-center justify-center">
-        <PortalWatermark isDark={false} showRepeatingPattern={true} />
-      </div>
+      {/* Mobile-Only App Experience (App Top Bar, Bottom Bar, and Slide-up Navigation Drawer) */}
+      <AdminMobileNav
+        user={user}
+        isPrincipalUser={isPrincipalUser}
+        visibleNavigationGroups={visibleNavigationGroups}
+        logout={logout}
+      />
 
-      <aside className="admin-rail z-10 relative">
+      {/* Desktop-Only Sidebar Rail (Kept 100% same as desktop design) */}
+      <aside className="admin-rail z-10 relative hidden lg:flex">
         <NavLink
-          to="/manage/notices"
+          to="/manage/home"
           className="admin-brand group"
           aria-label="HSCE Admin home">
           <div className="relative p-1 rounded-xl bg-slate-50 border border-slate-200/90 shadow-2xs group-hover:border-blue-300 transition-colors shrink-0">
@@ -239,25 +296,23 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
             <ShieldCheck size={13} />
             <span>COLLEGE MANAGEMENT</span>
           </div>
-          <small>Manage campus services and website content</small>
+          <small>Choose a task from the list</small>
         </div>
-        <nav aria-label="College administration" className="admin-navigation">
-          {navigationGroups
-            .filter((group) => !group.principalOnly || isPrincipalUser)
-            .map((group) => (
+        <nav aria-label="College administration tasks" className="admin-navigation">
+          {visibleNavigationGroups.map((group) => (
               <section
                 key={group.label}
                 className="admin-navigation-group"
                 aria-label={group.label}>
                 <h2>{group.label}</h2>
-                {group.links.map(({ path, label, Icon }) => (
-                  <NavLink key={path} to={path} end>
+                {group.links.map(({ path, label, description, Icon }) => (
+                  <NavLink key={path} to={path} end title={description}>
                     <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
                     <span>{label}</span>
                   </NavLink>
                 ))}
               </section>
-            ))}
+          ))}
         </nav>
         <div className="admin-rail-foot">
           <div className="flex items-center gap-2.5">
@@ -266,26 +321,18 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
             <div className="min-w-0">
-              <strong className="truncate">Administrator Session</strong>
-              <small className="truncate">256-Bit SSL Encrypted</small>
+              <strong className="truncate">You are signed in</strong>
+              <small className="truncate">College administration</small>
             </div>
           </div>
         </div>
       </aside>
-      <section className="admin-workspace flex flex-col justify-between min-h-screen relative z-10">
+
+      <section className="admin-workspace flex flex-col justify-between min-h-screen relative z-10 pb-20 lg:pb-0">
         <div>
-          <header className="admin-topbar">
+          {/* Desktop-Only Topbar (Kept 100% same as desktop design) */}
+          <header className="admin-topbar hidden lg:flex">
             <div className="admin-topbar-brand">
-              {/* Only show logo in topbar on mobile screens where sidebar is hidden */}
-              <div className="bg-white p-1 rounded-lg border border-slate-200/80 shadow-2xs shrink-0 lg:hidden">
-                <img
-                  src="/assets/brand/college-logo.png"
-                  width="432"
-                  height="432"
-                  alt="Haryana Shakti College of Education logo"
-                  className="admin-college-logo"
-                />
-              </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="admin-kicker font-bold tracking-wider text-xs text-blue-900">
@@ -308,7 +355,7 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span>Live Sync Active</span>
+                <span>Admin portal</span>
               </div>
 
               {/* View Public Website Link */}
@@ -332,7 +379,7 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
                     {user.email}
                   </span>
                   <span className="text-[10px] font-semibold text-blue-700 tracking-wide">
-                    Principal / Admin
+                    {isPrincipalUser ? "Principal" : "Staff account"}
                   </span>
                 </div>
                 <button
@@ -352,95 +399,89 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
               <Route
                 path="enquiries"
                 element={
-                  <EnquiriesPage
+                  requirePermission("enquiries", <EnquiriesPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
-                  />
+                  />)
                 }
               />
               <Route
                 path="chatbot-enquiries"
                 element={
-                  <ChatbotEnquiriesPage
+                  requirePermission("chatbotEnquiries", <ChatbotEnquiriesPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
-                  />
+                  />)
                 }
               />
               <Route
                 path="feedback"
                 element={
-                  <EnquiriesPage
+                  requirePermission("feedback", <FeedbackPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
-                  />
+                  />)
                 }
               />
               <Route
                 path="grievances"
                 element={
-                  <EnquiriesPage
+                  requirePermission("grievances", <GrievancesPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
-                  />
+                  />)
                 }
               />
               <Route
                 path="tours"
                 element={
-                  <CampusToursPage
+                  requirePermission("tours", <CampusToursPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
-                  />
+                  />)
                 }
               />
               <Route
                 path="notices"
                 element={
-                  <NoticesPage
+                  requirePermission("notices", <NoticesPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
                     permissions={permissions}
-                  />
+                  />)
                 }
               />
               <Route
                 path="gallery"
                 element={
-                  <GalleryPage
+                  requirePermission("gallery", <GalleryPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
                     permissions={permissions}
-                  />
+                  />)
                 }
               />
               <Route
                 path="syllabus"
                 element={
-                  <SyllabusPage
+                  requirePermission("syllabus", <SyllabusPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
                     permissions={permissions}
-                  />
+                  />)
                 }
               />
               <Route
                 path="documents"
-                element={<Navigate to="/manage/notices" replace />}
+                element={<Navigate to="/manage/home" replace />}
               />
               <Route
                 path="homepage-messages"
-                element={<Navigate to="/manage/notices" replace />}
+                element={<Navigate to="/manage/home" replace />}
               />
               <Route
                 path="committees"
-                element={
-                  <CommitteesPage
-                    currentUser={user}
-                    role={isPrincipalUser ? "principal" : "staff"}
-                    permissions={permissions}
-                  />
-                }
+                element={<Navigate to="/manage/home" replace />}
               />
               <Route
                 path="settings"
@@ -455,21 +496,21 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
               <Route
                 path="homepage-popup"
                 element={
-                  <HomepagePopupPage
+                  requirePermission("homepagePopup", <HomepagePopupPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
                     permissions={permissions}
-                  />
+                  />)
                 }
               />
               <Route
                 path="faculty"
                 element={
-                  <FacultyPage
+                  requirePermission("faculty", <FacultyPage
                     currentUser={user}
                     role={isPrincipalUser ? "principal" : "staff"}
                     permissions={permissions}
-                  />
+                  />)
                 }
               />
               <Route
@@ -478,14 +519,22 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
                   isPrincipalUser ? (
                     <AdminUsersPage currentUser={user} />
                   ) : (
-                    <Navigate to="/manage/notices" replace />
+                    <Navigate to="/manage/home" replace />
                   )
                 }
               />
               <Route
-                path="*"
-                element={<Navigate to="/manage/notices" replace />}
+                path="home"
+                element={
+                  <DashboardPage
+                    user={user}
+                    logout={logout}
+                    role={isPrincipalUser ? "principal" : "staff"}
+                    permissions={permissions}
+                  />
+                }
               />
+              <Route path="*" element={<Navigate to={defaultPath} replace />} />
             </Routes>
             </Suspense>
           </div>
@@ -501,7 +550,7 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
           </div>
           <div className="flex flex-col sm:items-end gap-0.5 text-[11px] text-slate-400">
             <span className="font-semibold text-blue-700">
-              Official Administration Suite &bull; SSL 256-Bit Encrypted
+              College administration
             </span>
             <span>
               Restricted computer system &bull; Managed by Ravi Sharma
@@ -530,13 +579,13 @@ function AuthenticatedWorkspace({ user, role, permissions, logout }) {
       />
       <Route
         path="/dashboard"
-        element={<Navigate to="/manage/notices" replace />}
+        element={<Navigate to="/manage/home" replace />}
       />
       <Route
         path="/principal/*"
-        element={<Navigate to="/manage/notices" replace />}
+        element={<Navigate to="/manage/home" replace />}
       />
-      <Route path="*" element={<Navigate to="/manage/notices" replace />} />
+      <Route path="*" element={<Navigate to="/manage/home" replace />} />
     </Routes>
     </Suspense>
   );
@@ -573,19 +622,19 @@ export default function App() {
       <Route
         path="/admin/signin"
         element={
-          user ? <Navigate to="/manage/notices" replace /> : <LoginPage />
+          user ? <Navigate to="/manage/home" replace /> : <LoginPage />
         }
       />
       <Route
         path="/"
         element={
-          <Navigate to={user ? "/manage/notices" : "/admin/signin"} replace />
+          <Navigate to={user ? "/manage/home" : "/admin/signin"} replace />
         }
       />
       <Route
         path="/login"
         element={
-          <Navigate to={user ? "/manage/notices" : "/admin/signin"} replace />
+          <Navigate to={user ? "/manage/home" : "/admin/signin"} replace />
         }
       />
       <Route

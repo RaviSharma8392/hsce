@@ -1,51 +1,46 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import {
-  MessageSquare,
+  GraduationCap,
   Search,
   Filter,
   Phone,
   Mail,
   MapPin,
-  GraduationCap,
   Calendar,
   CheckCircle2,
   Clock,
-  UserCheck,
   Download,
   Trash2,
   RefreshCw,
   AlertCircle,
   FileSpreadsheet,
   ChevronDown,
+  ChevronLeft,
   Save,
   ExternalLink,
   MessageCircle,
   Eye,
   EyeOff,
+  X,
+  Building,
+  UserCheck,
 } from "lucide-react";
 import {
   subscribeToEnquiries,
-  subscribeToFeedback,
-  subscribeToGrievances,
   updateEnquiry,
-  updateGrievanceStatus,
   deleteEnquiry,
-  deleteFeedback,
-  deleteGrievance,
 } from "../services/enquiryService";
-import { subscribeToTours } from "../services/tourService";
 
 const STATUS_CONFIG = {
   new: {
     label: "New Lead",
-    badgeClass: "bg-blue-100 text-blue-800 border-blue-200",
-    dotClass: "bg-blue-500",
+    badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
+    dotClass: "bg-amber-500",
   },
   "in-progress": {
     label: "In Progress",
-    badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
-    dotClass: "bg-amber-500",
+    badgeClass: "bg-blue-100 text-blue-800 border-blue-200",
+    dotClass: "bg-blue-500",
   },
   contacted: {
     label: "Contacted",
@@ -62,58 +57,39 @@ const STATUS_CONFIG = {
     badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
     dotClass: "bg-slate-400",
   },
-  "under-review": {
-    label: "Under Review",
-    badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
-    dotClass: "bg-amber-500",
-  },
-  resolved: {
-    label: "Resolved",
-    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    dotClass: "bg-emerald-500",
-  },
 };
 
 export default function EnquiriesPage({ role = "staff" }) {
   const isPrincipal = role === "principal";
-  const location = useLocation();
-  const navigate = useNavigate();
-  const activeInbox = location.pathname.endsWith("/feedback")
-    ? "feedback"
-    : location.pathname.endsWith("/grievances")
-      ? "grievances"
-      : "enquiries";
   const [enquiries, setEnquiries] = useState([]);
-  const [feedback, setFeedback] = useState([]);
-  const [grievances, setGrievances] = useState([]);
-  const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [courseFilter, setCourseFilter] = useState("all");
   const [notification, setNotification] = useState("");
 
-  // Editing notes state per card: { [id]: string }
+  // Modal for Viewing Full Enquiry Details
+  const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+
+  // Per-enquiry staff note editing: { [id]: string }
   const [editingNotes, setEditingNotes] = useState({});
   const [savingNoteId, setSavingNoteId] = useState(null);
 
-  // Subscribe to real-time form submissions across all 4 student channels
+  // Subscribe to real-time admission form enquiries
   useEffect(() => {
     setLoading(true);
-    const unsubscribers = [
-      subscribeToEnquiries((list) => {
-        setEnquiries(list);
-        setLoading(false);
-      }),
-      subscribeToFeedback(setFeedback),
-      subscribeToGrievances(setGrievances),
-      subscribeToTours(setTours),
-    ];
+    const unsubscribe = subscribeToEnquiries((list) => {
+      // Filter out chatbot messages - chatbot has its own dedicated page
+      const admissionOnly = list.filter((item) => {
+        const src = (item.source || "").toLowerCase();
+        return !src.includes("chatbot");
+      });
+      setEnquiries(admissionOnly);
+      setLoading(false);
+    });
 
     return () => {
-      unsubscribers.forEach((unsubscribe) => {
-        if (typeof unsubscribe === "function") unsubscribe();
-      });
+      if (typeof unsubscribe === "function") unsubscribe();
     };
   }, []);
 
@@ -122,138 +98,102 @@ export default function EnquiriesPage({ role = "staff" }) {
     setTimeout(() => setNotification(""), 3500);
   };
 
-  const admissionFormEnquiries = useMemo(() => {
-    return enquiries.filter((item) => {
-      const src = (item.source || "").toLowerCase();
-      return !src.includes("chatbot");
-    });
-  }, [enquiries]);
-
-  const chatbotCount = useMemo(() => {
-    return enquiries.filter((item) => {
-      const src = (item.source || "").toLowerCase();
-      return src.includes("chatbot") || src === "chatbot_button_enquiry";
-    }).length;
-  }, [enquiries]);
-
-  const activeRecords =
-    activeInbox === "feedback"
-      ? feedback
-      : activeInbox === "grievances"
-        ? grievances
-        : admissionFormEnquiries;
-
+  // Filtered List
   const filteredList = useMemo(() => {
-    return activeRecords.filter((item) => {
-      // Status filter
-      if (activeInbox === "enquiries") {
-        if (
-          statusFilter === "unread" &&
-          (item.isRead === true || item.read === true)
-        ) {
-          return false;
-        }
-        if (
-          statusFilter === "read" &&
-          item.isRead !== true &&
-          item.read !== true
-        ) {
-          return false;
-        }
-      } else if (statusFilter !== "all" && item.status !== statusFilter) {
+    return enquiries.filter((item) => {
+      // Status Filter
+      if (statusFilter !== "all" && item.status !== statusFilter) {
         return false;
       }
-      // Course filter
-      if (activeInbox === "enquiries" && courseFilter !== "all") {
-        if (
-          !item.course ||
-          !item.course.toLowerCase().includes(courseFilter.toLowerCase())
-        ) {
+
+      // Course Filter
+      if (courseFilter !== "all") {
+        if (!item.course || !item.course.toLowerCase().includes(courseFilter.toLowerCase())) {
           return false;
         }
       }
-      // Text search
+
+      // Text Search
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchName = item.name?.toLowerCase().includes(query);
-        const matchPhone = item.phone?.toLowerCase().includes(query);
-        const matchEmail = item.email?.toLowerCase().includes(query);
-        const matchCity = item.city?.toLowerCase().includes(query);
-        const matchMsg = item.query?.toLowerCase().includes(query);
-        const matchSubject = item.subject?.toLowerCase().includes(query);
-        const matchMessage = item.message?.toLowerCase().includes(query);
-        const matchDescription = item.description
-          ?.toLowerCase()
-          .includes(query);
-        return (
-          matchName ||
-          matchPhone ||
-          matchEmail ||
-          matchCity ||
-          matchMsg ||
-          matchSubject ||
-          matchMessage ||
-          matchDescription
-        );
+        const q = searchQuery.toLowerCase();
+        return [
+          item.name,
+          item.phone,
+          item.email,
+          item.city,
+          item.state,
+          item.course,
+          item.query,
+          item.id,
+        ].some((val) => val && String(val).toLowerCase().includes(q));
       }
+
       return true;
     });
-  }, [activeRecords, activeInbox, statusFilter, courseFilter, searchQuery]);
+  }, [enquiries, statusFilter, courseFilter, searchQuery]);
 
-  // Statistics
+  // Statistics Counts
   const stats = useMemo(() => {
     const total = enquiries.length;
-    const readCount = enquiries.filter(
-      (enquiry) => enquiry.isRead === true || enquiry.read === true,
-    ).length;
-    return { total, readCount, unreadCount: total - readCount };
+    const newLeads = enquiries.filter((e) => e.status === "new" || !e.status).length;
+    const inProgress = enquiries.filter((e) => e.status === "in-progress" || e.status === "contacted").length;
+    const enrolled = enquiries.filter((e) => e.status === "enrolled").length;
+    return { total, newLeads, inProgress, enrolled };
   }, [enquiries]);
 
-  const handleReadChange = async (item) => {
-    const isRead = !(item.isRead === true || item.read === true);
-    try {
-      await updateEnquiry(item.id, { isRead });
-      showToast(isRead ? "Enquiry marked as read." : "Enquiry marked as unread.");
-    } catch (error) {
-      console.error("Read status update error:", error);
-      showToast("Failed to update read status.");
-    }
-  };
-
-  // Handle status update
+  // Handle status update (Optimistic UI)
   const handleStatusChange = async (id, newStatus) => {
+    const previous = [...enquiries];
+    setEnquiries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, status: newStatus } : e))
+    );
+    if (selectedEnquiry && selectedEnquiry.id === id) {
+      setSelectedEnquiry((prev) => ({ ...prev, status: newStatus }));
+    }
+    showToast(`Status updated to "${STATUS_CONFIG[newStatus]?.label || newStatus}"`);
+
     try {
-      if (activeInbox === "grievances") {
-        const notes =
-          editingNotes[id] ??
-          grievances.find((item) => item.id === id)?.adminNotes ??
-          "";
-        await updateGrievanceStatus(id, newStatus, notes);
-      } else {
-        await updateEnquiry(id, { status: newStatus });
-      }
-      showToast(
-        `Status updated to ${STATUS_CONFIG[newStatus]?.label || newStatus}`,
-      );
+      await updateEnquiry(id, { status: newStatus });
     } catch (e) {
       console.error("Status update error:", e);
+      setEnquiries(previous);
       showToast("Failed to update status.");
     }
   };
 
-  // Handle note save
-  const handleSaveNote = async (id) => {
-    const noteText = editingNotes[id] ?? "";
-    setSavingNoteId(id);
+  // Handle read toggle (Optimistic UI)
+  const handleReadToggle = async (item) => {
+    const isRead = !(item.isRead === true || item.read === true);
+    setEnquiries((prev) =>
+      prev.map((e) => (e.id === item.id ? { ...e, isRead, read: isRead } : e))
+    );
+    if (selectedEnquiry && selectedEnquiry.id === item.id) {
+      setSelectedEnquiry((prev) => ({ ...prev, isRead, read: isRead }));
+    }
+    showToast(isRead ? "Marked as read." : "Marked as unread.");
+
     try {
-      if (activeInbox === "grievances") {
-        const status =
-          grievances.find((item) => item.id === id)?.status || "new";
-        await updateGrievanceStatus(id, status, noteText);
-      } else {
-        await updateEnquiry(id, { staffNotes: noteText });
-      }
-      showToast("Staff notes saved successfully.");
+      await updateEnquiry(item.id, { isRead });
+    } catch (e) {
+      console.error("Read status error:", e);
+      showToast("Failed to update read status.");
+    }
+  };
+
+  // Handle staff note save (Optimistic UI)
+  const handleSaveNotes = async (id) => {
+    setSavingNoteId(id);
+    const noteText = editingNotes[id] ?? "";
+    setEnquiries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, staffNotes: noteText } : e))
+    );
+    if (selectedEnquiry && selectedEnquiry.id === id) {
+      setSelectedEnquiry((prev) => ({ ...prev, staffNotes: noteText }));
+    }
+    showToast("Counseling notes saved successfully.");
+
+    try {
+      await updateEnquiry(id, { staffNotes: noteText });
     } catch (e) {
       console.error("Notes save error:", e);
       showToast("Failed to save note.");
@@ -262,62 +202,60 @@ export default function EnquiriesPage({ role = "staff" }) {
     }
   };
 
-  // Handle delete
-  const handleDelete = async (id, studentName) => {
-    const submissionType =
-      activeInbox === "feedback"
-        ? "feedback from"
-        : activeInbox === "grievances"
-          ? "grievance from"
-          : "enquiry from";
-    if (
-      window.confirm(
-        `Are you sure you want to delete the ${submissionType} "${studentName}"?`,
-      )
-    ) {
-      try {
-        if (activeInbox === "feedback") await deleteFeedback(id);
-        else if (activeInbox === "grievances") await deleteGrievance(id);
-        else await deleteEnquiry(id);
-        showToast("Submission deleted.");
-      } catch (e) {
-        console.error("Delete error:", e);
-        showToast("Failed to delete enquiry.");
-      }
+  // Handle delete (Optimistic UI)
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this admission enquiry?")) {
+      return;
+    }
+    const previous = [...enquiries];
+    setEnquiries((prev) => prev.filter((e) => e.id !== id));
+    if (selectedEnquiry && selectedEnquiry.id === id) {
+      setSelectedEnquiry(null);
+    }
+    showToast("Admission enquiry deleted.");
+
+    try {
+      await deleteEnquiry(id);
+    } catch (e) {
+      console.error("Delete enquiry error:", e);
+      setEnquiries(previous);
+      showToast("Failed to delete enquiry.");
     }
   };
 
-  // Export to CSV
-  const handleExportCSV = () => {
-    if (activeRecords.length === 0) {
-      alert("No enquiries to export.");
+  // Export CSV
+  const exportToCSV = () => {
+    if (enquiries.length === 0) {
+      alert("No admission enquiries to export.");
       return;
     }
 
     const headers = [
-      "Student Name",
+      "Enquiry ID",
+      "Date Received",
+      "Candidate Name",
       "Phone",
       "Email",
-      "Course",
-      "City",
-      "Query / Message",
+      "Course of Interest",
+      "City / Location",
+      "Query Details",
+      "Source",
       "Status",
       "Staff Notes",
-      "Submitted At",
-      "Source",
     ];
 
-    const rows = activeRecords.map((item) => [
+    const rows = filteredList.map((item) => [
+      `"${item.id || ""}"`,
+      `"${item.createdAtFormatted || ""}"`,
       `"${(item.name || "").replace(/"/g, '""')}"`,
       `"${item.phone || ""}"`,
       `"${item.email || ""}"`,
       `"${(item.course || "").replace(/"/g, '""')}"`,
       `"${(item.city || "").replace(/"/g, '""')}"`,
       `"${(item.query || "").replace(/"/g, '""')}"`,
+      `"${item.source || "admission_form"}"`,
       `"${item.status || "new"}"`,
       `"${(item.staffNotes || "").replace(/"/g, '""')}"`,
-      `"${item.createdAtFormatted || ""}"`,
-      `"${item.source || "website_chatbot"}"`,
     ]);
 
     const csvContent =
@@ -329,7 +267,7 @@ export default function EnquiriesPage({ role = "staff" }) {
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `HSCE_Student_Enquiries_${new Date().toISOString().slice(0, 10)}.csv`,
+      `HSCE_Admission_Enquiries_${new Date().toISOString().split("T")[0]}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -338,224 +276,119 @@ export default function EnquiriesPage({ role = "staff" }) {
   };
 
   return (
-    <div className="academic-admin-page min-w-0 space-y-5 font-sans">
+    <div className="academic-admin-page space-y-5 font-sans">
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-4 right-4 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-          <CheckCircle2 size={15} className="text-emerald-400" />
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-xl animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
           <span>{notification}</span>
         </div>
       )}
 
-      {/* TOP BANNER & ACTIONS */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Page Header (Matching CampusToursPage design) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-200 bg-white p-4 sm:p-6 rounded-none sm:rounded-xl shadow-xs">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-blue-50 text-[#0066FF] rounded-xl border border-blue-200">
-              <MessageSquare size={20} />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                {activeInbox === "enquiries"
-                  ? "Admission Form Enquiries"
-                  : activeInbox === "feedback"
-                    ? "Contact Feedback"
-                    : "Student Grievances"}
-              </h2>
-              <p className="text-xs text-slate-500">
-                {activeInbox === "enquiries"
-                  ? "Direct submissions from public admission forms and website application modals."
-                  : activeInbox === "feedback"
-                    ? "Messages submitted through the public contact guestbook."
-                    : "Confidential submissions to the public grievance portal."}
-              </p>
-            </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
+              <GraduationCap className="text-[#363991]" size={26} />
+              <span>Admission Form Enquiries</span>
+            </h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
+              B.Ed. Academic Session 2026-27
+            </span>
           </div>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Real-time prospective student admission applications and website course enquiries.
+          </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          {activeInbox === "enquiries" && (
-            <button
-              type="button"
-              onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition border border-slate-200">
-              <Download size={14} className="text-slate-600" />
-              <span>Export CSV</span>
-            </button>
-          )}
-
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Live Sync Active</span>
-          </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={exportToCSV}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition cursor-pointer">
+            <FileSpreadsheet size={15} className="text-emerald-600" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 
-      <nav
-        aria-label="Submission inboxes"
-        className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-        {[
-          ["enquiries", "Admission Form Enquiries", admissionFormEnquiries.length],
-          ["chatbot-enquiries", "Chatbot Enquiries", chatbotCount],
-          ["feedback", "Contact Feedback", feedback.length],
-          ["grievances", "Student Grievances", grievances.length],
-          ["tours", "Campus Visit Requests", tours.length],
-        ].map(([inbox, label, count]) => (
-          <button
-            key={inbox}
-            type="button"
-            aria-current={activeInbox === inbox ? "page" : undefined}
-            onClick={() => {
-              navigate(`/manage/${inbox}`);
-              setStatusFilter("all");
-              setCourseFilter("all");
-              setSearchQuery("");
-            }}
-            className={`rounded-lg border px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              activeInbox === inbox
-                ? "border-[#363991] bg-indigo-50 text-[#363991] font-bold shadow-2xs"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-            }`}>
-            {label} <span className="ml-1 text-slate-400 font-bold">({count})</span>
-          </button>
-        ))}
-      </nav>
-
-      {/* METRIC CARDS */}
-      {activeInbox === "enquiries" && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-              Total Leads
-            </span>
-            <div className="text-2xl font-bold text-slate-900 mt-1 font-poppins">
-              {stats.total}
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-              Unread
-            </span>
-            <div className="text-2xl font-bold text-slate-900 mt-1 font-poppins">
-              {stats.unreadCount}
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-              Read
-            </span>
-            <div className="text-2xl font-bold text-slate-900 mt-1 font-poppins">
-              {stats.readCount}
-            </div>
-          </div>
+      {/* KPI Stats Cards (Matching CampusToursPage) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Form Leads</div>
+          <div className="text-xl sm:text-3xl font-black text-slate-900 mt-0.5 sm:mt-1">{stats.total}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Direct admission inquiries</div>
         </div>
-      )}
 
-      {/* FILTER & SEARCH BAR */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative w-full md:w-80">
-          <Search
-            size={15}
-            className="absolute left-3 top-2.5 text-slate-400"
-          />
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">New / Fresh Leads</div>
+          <div className="text-xl sm:text-3xl font-black text-amber-600 mt-0.5 sm:mt-1">{stats.newLeads}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Awaiting counselor callback</div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">In Contact / Follow-up</div>
+          <div className="text-xl sm:text-3xl font-black text-blue-600 mt-0.5 sm:mt-1">{stats.inProgress}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Counseled or in progress</div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Enrolled Candidates</div>
+          <div className="text-xl sm:text-3xl font-black text-emerald-600 mt-0.5 sm:mt-1">{stats.enrolled}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Confirmed B.Ed. registration</div>
+        </div>
+      </div>
+
+      {/* Search & Filter Toolbar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+        <div className="relative flex-1 max-w-md">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search by name, phone, email, query..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0066FF] focus:ring-1 focus:ring-[#0066FF] text-xs"
+            placeholder="Search candidate name, phone, email, city..."
+            className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-md outline-none focus:bg-white focus:border-[#363991] focus:ring-1 focus:ring-[#363991]"
           />
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
-          {/* Status Filter */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-600">
-            <Filter size={13} className="text-slate-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:outline-none focus:border-[#0066FF]">
-              <option value="all">
-                {activeInbox === "enquiries" ? "Read & Unread" : "All Statuses"}
-              </option>
-              {(activeInbox === "enquiries"
-                ? ["unread", "read"]
-                : activeInbox === "grievances"
-                  ? ["new", "under-review", "resolved"]
-                  : ["new", "in-progress", "contacted", "enrolled", "closed"]
-              ).map((status) => (
-                <option key={status} value={status}>
-                  {activeInbox === "enquiries"
-                    ? status === "unread"
-                      ? "Unread"
-                      : "Read"
-                    : STATUS_CONFIG[status]?.label || status}
-                </option>
-              ))}
-            </select>
+        <div className="flex items-center gap-2 overflow-x-auto max-w-full">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 shrink-0">
+            <Filter size={14} className="text-slate-400" />
+            <span>Status:</span>
           </div>
-
-          {/* Course Filter */}
-          {activeInbox === "enquiries" && (
-            <select
-              value={courseFilter}
-              onChange={(e) => setCourseFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:outline-none focus:border-[#0066FF]">
-              <option value="all">All Courses</option>
-              <option value="b.ed">B.Ed.</option>
-              <option value="d.el.ed">D.El.Ed.</option>
-            </select>
-          )}
-
-          {(searchQuery ||
-            statusFilter !== "all" ||
-            courseFilter !== "all") && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery("");
-                setStatusFilter("all");
-                setCourseFilter("all");
-              }}
-              className="text-xs text-blue-600 hover:underline font-medium">
-              Reset Filters
-            </button>
-          )}
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg shrink-0">
+            {["all", "new", "in-progress", "contacted", "enrolled", "closed"].map((st) => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer ${statusFilter === st
+                    ? "bg-white text-slate-900 shadow-xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                  }`}>
+                {st === "all" ? "All" : STATUS_CONFIG[st]?.label || st}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* ENQUIRIES LIST / GRID */}
+      {/* Enquiries List */}
       {loading ? (
-        <div className="py-16 text-center text-slate-400 text-xs flex flex-col items-center gap-2">
-          <RefreshCw size={22} className="animate-spin text-[#0066FF]" />
-          <span>Loading enquiries...</span>
+        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-slate-200">
+          <div className="h-8 w-8 rounded-full border-3 border-indigo-100 border-t-[#363991] animate-spin mb-3" />
+          <p className="text-sm font-semibold text-slate-600">Loading admission form enquiries...</p>
         </div>
       ) : filteredList.length === 0 ? (
-        <div className="py-16 bg-white rounded-2xl border border-slate-200/80 text-center p-6 space-y-3">
-          <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
-            <MessageSquare size={22} />
+        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-slate-200 text-center px-4">
+          <div className="p-3 bg-indigo-50 text-[#363991] rounded-md mb-3">
+            <GraduationCap size={28} />
           </div>
-          <h3 className="text-base font-bold text-slate-800">
-            {activeRecords.length === 0
-              ? activeInbox === "feedback"
-                ? "No Contact Feedback Yet"
-                : activeInbox === "grievances"
-                  ? "No Grievances Yet"
-                  : "No Student Enquiries Yet"
-              : "No Matching Submissions"}
-          </h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            {activeRecords.length === 0
-              ? activeInbox === "feedback"
-                ? "Messages sent through the public contact form will appear here."
-                : activeInbox === "grievances"
-                  ? "Submissions through the grievance portal will appear here."
-                  : "When visitors submit an admission or chatbot enquiry, their details will appear here."
-              : "Try adjusting your search keyword or status filter to see other enquiries."}
+          <h3 className="text-base font-bold text-slate-800">No admission enquiries found</h3>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-sm mt-1">
+            {searchQuery || statusFilter !== "all"
+              ? "Try adjusting your search criteria or filter to see more enquiries."
+              : "No admission applications have been submitted yet. New form submissions from the website will appear here in real-time."}
           </p>
         </div>
       ) : (
@@ -563,213 +396,169 @@ export default function EnquiriesPage({ role = "staff" }) {
           {filteredList.map((item) => {
             const currentStatus = item.status || "new";
             const cfg = STATUS_CONFIG[currentStatus] || STATUS_CONFIG.new;
-            const noteValue =
-              editingNotes[item.id] !== undefined
-                ? editingNotes[item.id]
-                : activeInbox === "grievances"
-                  ? item.adminNotes || ""
-                  : item.staffNotes || "";
+            const isRead = item.isRead === true || item.read === true;
+            const noteValue = editingNotes[item.id] !== undefined ? editingNotes[item.id] : item.staffNotes || "";
 
             return (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-4 sm:p-5 hover:shadow-md transition-shadow">
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                  {/* Left: Student Header & Basic Details */}
-                  <div className="space-y-2.5 flex-1 min-w-0">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <h3 className="text-base font-bold text-slate-900 font-poppins">
-                        {item.name || "Anonymous Applicant"}
-                      </h3>
-
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#363991]/10 text-[#363991] border border-[#363991]/20">
-                        <GraduationCap size={12} className="mr-1" />
-                        {item.course || item.category || "B.Ed."}
+                className={`rounded-xl border bg-white p-5 shadow-xs transition hover:border-slate-300 ${!isRead ? "border-l-4 border-l-[#363991] border-slate-200" : "border-slate-200"
+                  }`}>
+                {/* Top Strip */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold text-[#363991] bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100">
+                      {item.id.length > 15 ? item.id.substring(0, 15) + "…" : item.id}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium">
+                      Received {item.createdAtFormatted || "Recent"}
+                    </span>
+                    {!isRead && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-100 text-blue-900">
+                        NEW
                       </span>
+                    )}
+                  </div>
 
-                      {activeInbox === "enquiries" ? (
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
-                            item.isRead === true || item.read === true
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "border-amber-200 bg-amber-50 text-amber-700"
-                          }`}>
-                          {item.isRead === true || item.read === true
-                            ? "Read"
-                            : "Unread"}
-                        </span>
-                      ) : (
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${cfg.badgeClass}`}>
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${cfg.dotClass}`}
-                          />
-                          <span>{cfg.label}</span>
-                        </span>
-                      )}
+                  <div className="flex items-center gap-2 flex-1">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${cfg.badgeClass}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${cfg.dotClass}`} />
+                      {cfg.label}
+                    </span>
 
-                      <span className="text-[11px] text-slate-400 font-medium">
-                        &bull; {item.createdAtFormatted || "Recent"}
-                      </span>
+                    <select
+                      value={currentStatus}
+                      onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                      className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1 text-slate-700 outline-none focus:border-[#363991]">
+                      {Object.keys(STATUS_CONFIG).map((key) => (
+                        <option key={key} value={key}>
+                          Set: {STATUS_CONFIG[key].label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => handleReadToggle(item)}
+                      className={`p-1.5 rounded-lg transition cursor-pointer ${isRead
+                          ? "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                          : "text-blue-600 hover:bg-blue-50"
+                        }`}
+                      title={isRead ? "Mark as unread" : "Mark as read"}>
+                      {isRead ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedEnquiry(item)}
+                      className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      title="View Full Enquiry Details">
+                      <ExternalLink size={16} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item.id)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                      title="Delete Record">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Middle Info Cluster (3 Columns) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                  {/* Column 1: Candidate & Contact */}
+                  <div className="space-y-1.5">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Candidate Details</div>
+                    <div className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>{item.name || "Anonymous Candidate"}</span>
                     </div>
 
-                    {/* Contact Actions Strip */}
-                    <div className="flex items-center gap-3 flex-wrap text-xs">
+                    {item.email && (
+                      <div className="text-xs text-slate-600 flex items-center gap-1.5 truncate" title={item.email}>
+                        <Mail size={12} className="text-slate-400 shrink-0" />
+                        <span className="truncate">{item.email}</span>
+                      </div>
+                    )}
+
+                    {item.city && (
+                      <div className="text-xs text-slate-500 flex items-center gap-1">
+                        <MapPin size={12} className="text-slate-400 shrink-0" />
+                        <span>{item.city}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 pt-2">
                       {item.phone && (
-                        <div className="flex items-center gap-1.5">
+                        <>
                           <a
                             href={`tel:${item.phone}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 font-bold font-mono transition"
-                            title="Direct Phone Call">
-                            <Phone size={12} />
+                            className="inline-flex items-center gap-1 text-[#363991] bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-md border border-indigo-100 text-xs font-bold transition">
+                            <Phone size={11} />
                             <span>{item.phone}</span>
                           </a>
 
                           <a
-                            href={`https://wa.me/91${item.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                              `Hello ${item.name || "Student"}, thank you for contacting Haryana Shakti College of Education regarding ${
-                                item.course || "admissions"
-                              }. How can we assist you?`,
+                            href={`https://wa.me/91${item.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                              `Hello ${item.name || "Candidate"}, thank you for applying to Haryana Shakti College of Education regarding B.Ed. admission.`
                             )}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366]/10 text-[#128C7E] border border-[#25D366]/30 hover:bg-[#25D366]/20 font-bold transition"
-                            title="Open WhatsApp Chat">
-                            <MessageCircle size={13} />
+                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md border border-emerald-200 transition">
+                            <MessageCircle size={11} />
                             <span>WhatsApp</span>
                           </a>
-                        </div>
+                        </>
                       )}
-
-                      {item.email && (
-                        <a
-                          href={`mailto:${item.email}`}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-medium transition"
-                          title="Send Email">
-                          <Mail size={12} className="text-slate-500" />
-                          <span>{item.email}</span>
-                        </a>
-                      )}
-
-                      {item.city && (
-                        <span className="inline-flex items-center gap-1 text-slate-500 text-[11px]">
-                          <MapPin size={12} />
-                          <span>{item.city}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Student Query / Message */}
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-800 leading-relaxed">
-                      <span className="font-bold text-slate-600 block mb-1">
-                        {activeInbox === "feedback"
-                          ? item.subject || "Contact message"
-                          : activeInbox === "grievances"
-                            ? item.subject || "Student grievance"
-                            : "Student Query / Requirement:"}
-                      </span>
-                      <p className="whitespace-pre-line text-slate-700">
-                        {item.query ||
-                          item.message ||
-                          item.description ||
-                          "Callback and admission guidance requested."}
-                      </p>
                     </div>
                   </div>
 
-                  {/* Right: Minimal read state for enquiries; workflow tools for other inboxes. */}
-                  <div className="shrink-0 space-y-3 border-slate-100 pt-2 lg:w-72 lg:pt-0">
-                    {activeInbox === "enquiries" ? (
-                      <button
-                        type="button"
-                        onClick={() => handleReadChange(item)}
-                        className={`inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition ${
-                          item.isRead === true || item.read === true
-                            ? "border-amber-200 bg-white text-amber-800 hover:bg-amber-50"
-                            : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                        }`}>
-                        {item.isRead === true || item.read === true ? (
-                          <>
-                            <EyeOff size={14} />
-                            Mark as unread
-                          </>
-                        ) : (
-                          <>
-                            <Eye size={14} />
-                            Mark as read
-                          </>
-                        )}
-                      </button>
-                    ) : activeInbox !== "feedback" ? (
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                          Update Status
-                        </label>
-                        <select
-                          value={currentStatus}
-                          onChange={(e) =>
-                            handleStatusChange(item.id, e.target.value)
-                          }
-                          className="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-semibold bg-white focus:outline-none focus:border-[#0066FF]">
-                          {(activeInbox === "grievances"
-                            ? ["new", "under-review", "resolved"]
-                            : [
-                                "new",
-                                "in-progress",
-                                "contacted",
-                                "enrolled",
-                                "closed",
-                              ]
-                          ).map((status) => (
-                            <option key={status} value={status}>
-                              {STATUS_CONFIG[status]?.label || status}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : null}
+                  {/* Column 2: Programme & Query Source */}
+                  <div className="space-y-1.5">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Applied Course & Source</div>
+                    <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      <GraduationCap size={15} className="text-[#363991] shrink-0" />
+                      <span>{item.course || "B.Ed. (2-Year Regular)"}</span>
+                    </div>
 
-                    {/* Counselor / Staff Remarks */}
-                    {activeInbox !== "feedback" && activeInbox !== "enquiries" && (
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                          {activeInbox === "grievances"
-                            ? "Admin Notes"
-                            : "Staff Remarks & Notes"}
-                        </label>
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="text"
-                            placeholder="e.g. Called on 12th, visiting campus..."
-                            value={noteValue}
-                            onChange={(e) =>
-                              setEditingNotes({
-                                ...editingNotes,
-                                [item.id]: e.target.value,
-                              })
-                            }
-                            className="flex-1 px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-[#0066FF]"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleSaveNote(item.id)}
-                            disabled={savingNoteId === item.id}
-                            className="px-2.5 py-1.5 rounded-xl bg-[#0066FF] text-white hover:bg-[#0052cc] text-xs font-semibold shrink-0 transition"
-                            title="Save note">
-                            <Save size={13} />
-                          </button>
-                        </div>
+                    <div className="pt-1">
+                      <span className="inline-block text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md border border-slate-200">
+                        Source: {item.source ? item.source.replace(/_/g, " ").toUpperCase() : "ADMISSION MODAL"}
+                      </span>
+                    </div>
+
+                    {item.query && (
+                      <div className="pt-1 text-xs text-slate-600 line-clamp-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        <span className="font-semibold text-slate-700">Message / Request:</span> {item.query}
                       </div>
                     )}
+                  </div>
 
-                    {/* Delete action */}
-                    <div className="flex items-center justify-end pt-1">
+                  {/* Column 3: Counselor Notes & Action */}
+                  <div className="space-y-1.5 flex flex-col justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Counselor Notes</div>
+                      <textarea
+                        value={noteValue}
+                        onChange={(e) =>
+                          setEditingNotes((prev) => ({ ...prev, [item.id]: e.target.value }))
+                        }
+                        placeholder="Add notes about call outcome, student qualification, or counseling steps..."
+                        rows={3}
+                        className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:bg-white focus:border-[#363991] focus:ring-1 focus:ring-[#363991] resize-none mt-1"
+                      />
+                    </div>
+
+                    <div className="flex justify-end pt-1">
                       <button
                         type="button"
-                        onClick={() => handleDelete(item.id, item.name)}
-                        className="inline-flex items-center gap-1 text-[11px] text-red-500 hover:text-red-700 hover:underline">
-                        <Trash2 size={12} />
-                        <span>Delete Submission</span>
+                        disabled={savingNoteId === item.id}
+                        onClick={() => handleSaveNotes(item.id)}
+                        className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs cursor-pointer disabled:opacity-50">
+                        <Save size={12} />
+                        <span>{savingNoteId === item.id ? "Saving…" : "Save Note"}</span>
                       </button>
                     </div>
                   </div>
@@ -777,6 +566,158 @@ export default function EnquiriesPage({ role = "staff" }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* FULL ENQUIRY DETAILS MODAL - FULLSCREEN ON MOBILE              */}
+      {/* ============================================================== */}
+      {selectedEnquiry && (
+        <div
+          className="fixed inset-0 z-50 flex items-stretch justify-stretch p-0 bg-white sm:bg-slate-900/60 sm:backdrop-blur-sm sm:items-center sm:justify-center sm:p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedEnquiry(null)}
+        >
+          <div
+            className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-w-2xl sm:max-h-[90vh] bg-white rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col animate-in fade-in sm:zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-4 border-b border-slate-100 bg-white sm:bg-slate-50/90 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedEnquiry(null)}
+                  className="sm:hidden p-2 -ml-1 text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#363991] border border-indigo-100 hidden sm:flex items-center justify-center shrink-0">
+                  <GraduationCap size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">Admission Enquiry Details</h3>
+                  <p className="text-xs text-slate-500 mt-0.5 font-mono">ID: {selectedEnquiry.id}</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedEnquiry(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg border border-transparent hover:border-slate-200 transition cursor-pointer"
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 sm:p-6 space-y-5 overflow-y-auto overscroll-contain flex-1 -webkit-overflow-scrolling-touch">
+              {/* Status and Timestamp Bar */}
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-xs text-slate-500 font-medium">Status:</span>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${STATUS_CONFIG[selectedEnquiry.status || "new"]?.badgeClass
+                      }`}>
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${STATUS_CONFIG[selectedEnquiry.status || "new"]?.dotClass
+                        }`}
+                    />
+                    {STATUS_CONFIG[selectedEnquiry.status || "new"]?.label || selectedEnquiry.status}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 font-medium">
+                  Submitted: {selectedEnquiry.createdAtFormatted || "Recent"}
+                </div>
+              </div>
+
+              {/* Candidate Info Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl border border-slate-200 bg-white">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                    Candidate Full Name
+                  </span>
+                  <p className="text-sm font-bold text-slate-900">{selectedEnquiry.name || "—"}</p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-white">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                    Phone Number
+                  </span>
+                  <p className="text-sm font-bold text-slate-900">{selectedEnquiry.phone || "—"}</p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-white">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                    Email Address
+                  </span>
+                  <p className="text-sm font-bold text-slate-900 break-all">{selectedEnquiry.email || "—"}</p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-white">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                    Location / City
+                  </span>
+                  <p className="text-sm font-bold text-slate-900">{selectedEnquiry.city || "—"}</p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-white sm:col-span-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                    Programme Applied For
+                  </span>
+                  <p className="text-sm font-bold text-[#363991] flex items-center gap-1.5">
+                    <GraduationCap size={16} />
+                    <span>{selectedEnquiry.course || "B.Ed. (2-Year Regular)"}</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Inquiry Message */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5">
+                  Application Note / Query Message
+                </span>
+                <p className="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
+                  {selectedEnquiry.query || "No query message provided."}
+                </p>
+              </div>
+
+              {/* Counselor Action Strip */}
+              <div className="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-white sm:bg-transparent shadow-[0_-4px_16px_rgba(0,0,0,0.05)] sm:shadow-none -mx-4 -mb-4 sm:mx-0 sm:mb-0 px-4 sm:px-0">
+                <div className="flex items-center gap-2 flex-1">
+                  {selectedEnquiry.phone && (
+                    <>
+                      <a
+                        href={`tel:${selectedEnquiry.phone}`}
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-[#363991] text-white px-4 py-3 sm:py-2 rounded-xl text-xs sm:text-sm font-bold shadow-xs hover:bg-[#282A70] transition"
+                      >
+                        <Phone size={14} />
+                        <span>Call Student</span>
+                      </a>
+                      <a
+                        href={`https://wa.me/91${selectedEnquiry.phone.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-emerald-600 text-white px-4 py-3 sm:py-2 rounded-xl text-xs sm:text-sm font-bold shadow-xs hover:bg-emerald-700 transition"
+                      >
+                        <MessageCircle size={14} />
+                        <span>WhatsApp</span>
+                      </a>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedEnquiry(null)}
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs sm:text-sm font-bold rounded-xl transition cursor-pointer text-center"
+                >
+                  Close Window
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

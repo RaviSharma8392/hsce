@@ -18,6 +18,7 @@ import {
   AlertCircle,
   FileSpreadsheet,
   ChevronDown,
+  ChevronLeft,
   Save,
   ExternalLink,
   MessageCircle,
@@ -142,14 +143,20 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
   }, [tours]);
 
   const handleStatusChange = async (id, newStatus) => {
+    const previousTours = [...tours];
+    setTours((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
+    );
+    if (selectedTour && selectedTour.id === id) {
+      setSelectedTour((prev) => ({ ...prev, status: newStatus }));
+    }
+    showToast(`Status updated to "${STATUS_CONFIG[newStatus]?.label || newStatus}"`);
+
     try {
       await updateTourStatus(id, newStatus);
-      showToast(`Status updated to "${STATUS_CONFIG[newStatus]?.label || newStatus}"`);
-      if (selectedTour && selectedTour.id === id) {
-        setSelectedTour((prev) => ({ ...prev, status: newStatus }));
-      }
     } catch (err) {
       console.error(err);
+      setTours(previousTours);
       showToast("Error updating tour status");
     }
   };
@@ -157,10 +164,17 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
   const handleSaveNotes = async (id) => {
     setSavingNoteId(id);
     const notes = editingNotes[id] ?? "";
+    setTours((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, staffNotes: notes } : t))
+    );
+    if (selectedTour && selectedTour.id === id) {
+      setSelectedTour((prev) => ({ ...prev, staffNotes: notes }));
+    }
+    showToast("Staff counseling notes saved successfully");
+
     try {
       const tour = tours.find((t) => t.id === id);
       await updateTourStatus(id, tour?.status || "pending", notes);
-      showToast("Staff counseling notes saved successfully");
     } catch (err) {
       console.error(err);
       showToast("Error saving notes");
@@ -173,14 +187,18 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
     if (!window.confirm("Are you sure you want to delete this campus tour booking?")) {
       return;
     }
+    const previousTours = [...tours];
+    setTours((prev) => prev.filter((t) => t.id !== id));
+    if (selectedTour && selectedTour.id === id) {
+      setSelectedTour(null);
+    }
+    showToast("Campus tour record deleted");
+
     try {
       await deleteTour(id);
-      showToast("Campus tour record deleted");
-      if (selectedTour && selectedTour.id === id) {
-        setSelectedTour(null);
-      }
     } catch (err) {
       console.error(err);
+      setTours(previousTours);
       showToast("Error deleting tour record");
     }
   };
@@ -285,55 +303,30 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
         </div>
       </div>
 
-      {/* Submission Inboxes Navigation Bar */}
-      <nav
-        aria-label="Submission inboxes"
-        className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-        {[
-          ["enquiries", "Student Enquiries"],
-          ["feedback", "Contact Feedback"],
-          ["grievances", "Student Grievances"],
-          ["tours", "Campus Visit Requests"],
-        ].map(([inbox, label]) => (
-          <button
-            key={inbox}
-            type="button"
-            aria-current={inbox === "tours" ? "page" : undefined}
-            onClick={() => navigate(`/manage/${inbox}`)}
-            className={`rounded-lg border px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              inbox === "tours"
-                ? "border-[#363991] bg-indigo-50 text-[#363991] font-bold shadow-2xs"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-            }`}>
-            {label} {inbox === "tours" && <span className="ml-1 text-slate-400 font-bold">({tours.length})</span>}
-          </button>
-        ))}
-      </nav>
-
       {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-md border border-slate-200 bg-white p-4">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Tour Bookings</div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{stats.total}</div>
-          <div className="text-[11px] text-slate-400 mt-1">All time requests</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Tour Bookings</div>
+          <div className="text-xl sm:text-3xl font-black text-slate-900 mt-0.5 sm:mt-1">{stats.total}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">All time requests</div>
         </div>
 
-        <div className="rounded-md border border-slate-200 bg-white p-4">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Review</div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{stats.pending}</div>
-          <div className="text-[11px] text-slate-400 mt-1">Needs contact or schedule call</div>
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Review</div>
+          <div className="text-xl sm:text-3xl font-black text-amber-600 mt-0.5 sm:mt-1">{stats.pending}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Needs contact or schedule call</div>
         </div>
 
-        <div className="rounded-md border border-slate-200 bg-white p-4">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Confirmed Visits</div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{stats.confirmed}</div>
-          <div className="text-[11px] text-slate-400 mt-1">Ready for guided tour</div>
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Confirmed Visits</div>
+          <div className="text-xl sm:text-3xl font-black text-blue-600 mt-0.5 sm:mt-1">{stats.confirmed}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Ready for guided tour</div>
         </div>
 
-        <div className="rounded-md border border-slate-200 bg-white p-4">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Completed Tours</div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{stats.completed}</div>
-          <div className="text-[11px] text-slate-400 mt-1">Visited campus & counseled</div>
+        <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Completed Tours</div>
+          <div className="text-xl sm:text-3xl font-black text-emerald-600 mt-0.5 sm:mt-1">{stats.completed}</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Visited campus & counseled</div>
         </div>
       </div>
 
@@ -350,21 +343,20 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
           />
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+        <div className="flex items-center gap-2 overflow-x-auto max-w-full">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 shrink-0">
             <Filter size={14} className="text-slate-400" />
             <span>Status:</span>
           </div>
-          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg shrink-0">
             {["all", "pending", "confirmed", "completed", "cancelled"].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition ${
-                  statusFilter === st
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition ${statusFilter === st
                     ? "bg-white text-slate-900 shadow-xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
-                }`}>
+                  }`}>
                 {st === "all" ? "All" : STATUS_CONFIG[st]?.label || st}
               </button>
             ))}
@@ -412,7 +404,7 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1">
                     <span
                       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${cfg.badgeClass}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${cfg.dotClass}`} />
@@ -587,28 +579,46 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
         </div>
       )}
 
-      {/* FULL DETAILS MODAL */}
+      {/* FULL DETAILS MODAL - FULLSCREEN ON MOBILE (PWA APP FEEL) */}
       {selectedTour && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        <div
+          className="fixed inset-0 z-50 flex items-stretch justify-stretch p-0 bg-white sm:bg-slate-900/60 sm:backdrop-blur-sm sm:items-center sm:justify-center sm:p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedTour(null)}
+        >
+          <div
+            className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-w-2xl sm:max-h-[90vh] bg-white rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col animate-in fade-in sm:zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 bg-slate-900 text-white">
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-4 border-b border-slate-100 bg-white sm:bg-slate-50/90 shrink-0">
               <div className="flex items-center gap-2.5">
-                <Compass className="text-[#363991]" size={22} />
+                <button
+                  type="button"
+                  onClick={() => setSelectedTour(null)}
+                  className="sm:hidden p-2 -ml-1 text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#363991] border border-indigo-100 hidden sm:flex items-center justify-center shrink-0">
+                  <Compass size={18} />
+                </div>
                 <div>
-                  <h3 className="font-bold text-base">Campus Tour Application Details</h3>
-                  <div className="text-xs text-slate-400 font-mono">{selectedTour.bookingReference}</div>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">Campus Tour Application Details</h3>
+                  <div className="text-xs text-slate-500 mt-0.5 font-mono">Ref: {selectedTour.bookingReference}</div>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedTour(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-                <X size={20} />
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg border border-transparent hover:border-slate-200 transition cursor-pointer"
+                title="Close"
+              >
+                <X size={18} />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 text-sm text-slate-700">
+            <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1 space-y-6 text-sm text-slate-700 -webkit-overflow-scrolling-touch">
               {/* Tour Status & Schedule */}
               <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div>
@@ -713,20 +723,22 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200">
-              <div className="flex items-center gap-2">
+            <div className="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 bg-white sm:bg-slate-50 border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:shadow-none pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+              <div className="flex items-center gap-2 flex-1">
                 <a
                   href={`tel:${selectedTour.candidatePhone}`}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-[#363991] text-white px-3 py-2 text-xs font-bold hover:bg-[#292c76] transition">
-                  <Phone size={13} />
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#363991] text-white px-4 py-3 sm:py-2 text-xs sm:text-sm font-bold hover:bg-[#292c76] transition shadow-xs"
+                >
+                  <Phone size={14} />
                   <span>Call Candidate</span>
                 </a>
                 <a
                   href={`https://wa.me/91${selectedTour.candidatePhone?.replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white px-3 py-2 text-xs font-bold hover:bg-emerald-700 transition">
-                  <MessageCircle size={13} />
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 text-white px-4 py-3 sm:py-2 text-xs sm:text-sm font-bold hover:bg-emerald-700 transition shadow-xs"
+                >
+                  <MessageCircle size={14} />
                   <span>WhatsApp</span>
                 </a>
               </div>
@@ -734,7 +746,8 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
               <button
                 type="button"
                 onClick={() => setSelectedTour(null)}
-                className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 transition">
+                className="w-full sm:w-auto px-4 py-3 sm:py-2 rounded-xl border border-slate-300 text-slate-700 text-xs sm:text-sm font-bold hover:bg-slate-100 transition text-center cursor-pointer"
+              >
                 Close
               </button>
             </div>

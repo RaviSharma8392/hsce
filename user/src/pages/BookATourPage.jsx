@@ -491,7 +491,44 @@ export default function BookATourPage() {
           </section>
         ) : (
           /* UNIFIED STREAMLINED 1-PAGE QUICK FORM */
-          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div>
+            {/* Mobile Campus Visit Navigation Card (lg:hidden) */}
+            <div className="lg:hidden mb-6 overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-md">
+              <div className="bg-[#2E3A8C] px-5 py-4">
+                <h3 className="font-serif text-lg font-bold text-white tracking-wide">
+                  {t("Campus Visit", "परिसर भ्रमण")}
+                </h3>
+              </div>
+
+              <nav aria-label="Campus Visit Navigation" className="divide-y divide-gray-100 font-sans">
+                <div className="px-5 py-3.5 text-sm font-bold bg-slate-50 text-[#2E3A8C] border-l-4 border-l-[#2E3A8C] pl-4">
+                  {t("Schedule Tour Slot", "भ्रमण समय तय करें")}
+                </div>
+
+                <Link
+                  to="/campus-life"
+                  className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
+                  <span>{t("Curriculum Labs & Facilities", "शिक्षण लैब्स एवं सुविधाएं")}</span>
+                  <ArrowUpRight size={14} className="text-gray-400" />
+                </Link>
+
+                <Link
+                  to="/contact"
+                  className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
+                  <span>{t("Contact Details", "संपर्क विवरण")}</span>
+                  <ArrowUpRight size={14} className="text-gray-400" />
+                </Link>
+
+                <Link
+                  to="/contact/enquiry"
+                  className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
+                  <span>{t("Admission Enquiry", "प्रवेश पूछताछ")}</span>
+                  <ArrowUpRight size={14} className="text-gray-400" />
+                </Link>
+              </nav>
+            </div>
+
+            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
             {/* Main Form Card */}
             <div className="overflow-hidden rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 shadow-xs">
               {/* Card Section Header */}
@@ -926,7 +963,7 @@ export default function BookATourPage() {
             {/* Desktop Quick Info Sticky Sidebar */}
             <aside className="space-y-5 lg:sticky lg:top-24">
               {/* Sidebar Navigation Widget (Matching Reference Image) */}
-              <div className="overflow-hidden rounded-md border border-gray-200/90 bg-white shadow-md">
+              <div className="hidden lg:block overflow-hidden rounded-md border border-gray-200/90 bg-white shadow-md">
                 <div className="bg-[#2E3A8C] px-5 py-4">
                   <h3 className="font-serif text-lg font-bold text-white tracking-wide">
                     {t("Campus Visit", "परिसर भ्रमण")}
@@ -1050,6 +1087,7 @@ export default function BookATourPage() {
               </div>
             </aside>
           </div>
+        </div>
         )}
       </Container>
 

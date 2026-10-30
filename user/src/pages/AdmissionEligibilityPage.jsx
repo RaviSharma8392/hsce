@@ -163,13 +163,13 @@ export default function AdmissionEligibilityPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm font-sans border-collapse">
+            <table className="w-full min-w-[560px] text-left text-xs sm:text-sm font-sans border-collapse">
               <thead>
                 <tr className="bg-[#1F242C] text-white">
-                  <th className="py-3.5 px-5 font-bold border-r border-[#333a44]">Category</th>
-                  <th className="py-3.5 px-5 font-bold border-r border-[#333a44]">Qualifying Examination</th>
-                  <th className="py-3.5 px-5 font-bold border-r border-[#333a44]">Minimum Aggregate</th>
-                  <th className="py-3.5 px-5 font-bold">Statutory Norm</th>
+                  <th className="py-3 px-3.5 sm:py-3.5 sm:px-5 font-bold border-r border-[#333a44]">Category</th>
+                  <th className="py-3 px-3.5 sm:py-3.5 sm:px-5 font-bold border-r border-[#333a44]">Qualifying Examination</th>
+                  <th className="py-3 px-3.5 sm:py-3.5 sm:px-5 font-bold border-r border-[#333a44]">Minimum Aggregate</th>
+                  <th className="py-3 px-3.5 sm:py-3.5 sm:px-5 font-bold">Statutory Norm</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200/80">
@@ -179,16 +179,16 @@ export default function AdmissionEligibilityPage() {
                     className={`transition-colors hover:bg-blue-50/40 ${
                       idx % 2 === 1 ? "bg-slate-50/70" : "bg-white"
                     }`}>
-                    <td className="py-3.5 px-5 font-bold text-slate-900 border-r border-gray-200/80 whitespace-nowrap">
+                    <td className="py-3 px-3.5 sm:py-3.5 sm:px-5 font-bold text-slate-900 border-r border-gray-200/80 whitespace-nowrap">
                       {isHindi ? item.hiCategory : item.category}
                     </td>
-                    <td className="py-3.5 px-5 text-slate-700 leading-relaxed border-r border-gray-200/80">
+                    <td className="py-3 px-3.5 sm:py-3.5 sm:px-5 text-slate-700 leading-relaxed border-r border-gray-200/80">
                       {isHindi ? item.hiDegree : item.degree}
                     </td>
-                    <td className="py-3.5 px-5 font-bold text-[#2E3A8C] border-r border-gray-200/80">
+                    <td className="py-3 px-3.5 sm:py-3.5 sm:px-5 font-bold text-[#2E3A8C] border-r border-gray-200/80">
                       {isHindi ? item.hiRequirement : item.requirement}
                     </td>
-                    <td className="py-3.5 px-5 whitespace-nowrap">
+                    <td className="py-3 px-3.5 sm:py-3.5 sm:px-5 whitespace-nowrap">
                       <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700 border border-gray-200">
                         {item.badge}
                       </span>

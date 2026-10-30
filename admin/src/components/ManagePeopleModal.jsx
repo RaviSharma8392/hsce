@@ -78,17 +78,18 @@ export default function ManagePeopleModal({ isOpen, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-stretch justify-stretch p-0 bg-white sm:bg-slate-900/60 sm:backdrop-blur-sm sm:items-center sm:justify-center sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}>
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-w-2xl sm:max-h-[90vh] bg-white rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#0066FF] via-[#0252cf] to-[#1E3A8A] text-white p-6 relative">
+        <div className="bg-gradient-to-r from-[#0066FF] via-[#0252cf] to-[#1E3A8A] text-white p-4 pt-[max(0.75rem,env(safe-area-inset-top))] sm:p-6 relative shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl backdrop-blur-sm transition-colors">
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl backdrop-blur-sm transition-colors"
+            aria-label="Close modal">
             <X size={18} />
           </button>
 
@@ -173,12 +174,12 @@ export default function ManagePeopleModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="p-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <div className="shrink-0 p-3.5 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-200 bg-white sm:bg-slate-50 flex items-center justify-between text-xs text-slate-500 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] sm:shadow-none">
           <span>{people.length} members listed</span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs">
+            className="px-4 py-2 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs">
             Close
           </button>
         </div>

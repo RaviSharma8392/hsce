@@ -3,6 +3,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  limit,
   doc,
   updateDoc,
   deleteDoc,
@@ -47,7 +48,8 @@ export function subscribeToEnquiries(callback) {
     try {
       const q = query(
         collection(db, "studentEnquiries"),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
+        limit(150)
       );
 
       const unsubscribe = onSnapshot(
@@ -175,7 +177,11 @@ export function setLocalGrievances(list) {
 export function subscribeToGrievances(callback) {
   if (firebaseReady) {
     try {
-      const q = query(collection(db, "grievances"), orderBy("createdAt", "desc"));
+      const q = query(
+        collection(db, "grievances"),
+        orderBy("createdAt", "desc"),
+        limit(150)
+      );
       const unsubscribe = onSnapshot(
         q,
         (snapshot) => {
@@ -256,7 +262,11 @@ export function setLocalFeedback(list) {
 export function subscribeToFeedback(callback) {
   if (firebaseReady) {
     try {
-      const q = query(collection(db, "contactFeedback"), orderBy("createdAt", "desc"));
+      const q = query(
+        collection(db, "contactFeedback"),
+        orderBy("createdAt", "desc"),
+        limit(150)
+      );
       const unsubscribe = onSnapshot(
         q,
         (snapshot) => {
@@ -285,6 +295,23 @@ export function subscribeToFeedback(callback) {
   const handleStorage = () => callback(getLocalFeedback());
   window.addEventListener("storage", handleStorage);
   return () => window.removeEventListener("storage", handleStorage);
+}
+
+export async function updateFeedbackStatus(id, status, notes = "") {
+  if (firebaseReady && !id.startsWith("local_")) {
+    const ref = doc(db, "contactFeedback", id);
+    await updateDoc(ref, {
+      status,
+      adminNotes: notes,
+      updatedAt: serverTimestamp(),
+    });
+  }
+  const current = getLocalFeedback();
+  const updated = current.map((item) =>
+    item.id === id ? { ...item, status, adminNotes: notes } : item
+  );
+  setLocalFeedback(updated);
+  return true;
 }
 
 export async function deleteFeedback(id) {

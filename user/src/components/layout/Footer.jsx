@@ -57,7 +57,7 @@ export function Footer({
 }) {
   const { t } = useLanguage();
 
-  // Real-time synchronization state with Firestore siteContent/settings document
+  // Site settings are loaded by the shared layout and passed into the footer.
   const [liveInfo, setLiveInfo] = useState({ ...defaultCollegeInfo, ...collegeInfo });
   const prevCollegeInfoRef = useRef(collegeInfo);
 
@@ -67,40 +67,6 @@ export function Footer({
       setLiveInfo((prev) => ({ ...prev, ...collegeInfo }));
     }
   }, [collegeInfo]);
-
-  useEffect(() => {
-    let active = true;
-    let unsubscribe;
-
-    const subscribe = async () => {
-      const [{ getLazyFirestore }, { firebaseReady }] = await Promise.all([
-        import("../../config/firebaseLazy"),
-        import("../../config/firebaseOptions"),
-      ]);
-      if (!active || !firebaseReady) return;
-
-      const { db, firestore } = await getLazyFirestore();
-      if (!active) return;
-      unsubscribe = firestore.onSnapshot(
-        firestore.doc(db, "siteContent", "settings"),
-        (snap) => {
-          if (snap.exists()) {
-            setLiveInfo((prev) => ({ ...prev, ...snap.data() }));
-          }
-        },
-        (err) => console.warn("Footer live settings sync:", err),
-      );
-    };
-
-    subscribe().catch((err) => {
-      console.warn("Could not initialize footer settings sync:", err);
-    });
-
-    return () => {
-      active = false;
-      unsubscribe?.();
-    };
-  }, []);
 
   const primaryPhone = liveInfo.phone || "9953155054";
   const alternatePhone = liveInfo.alternatePhone || "8056777077";
@@ -244,7 +210,7 @@ export function Footer({
               {topLinks.map(renderLink)}
             </nav>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-9 pt-2 text-sm text-gray-300 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:pt-8">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 pt-2 text-sm text-gray-300 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:pt-8">
               {linkColumns.map((column, index) => (
                 <nav
                   key={index}
@@ -255,7 +221,7 @@ export function Footer({
               ))}
 
               {/* Governance, Management & Social Links */}
-              <div className="flex flex-col items-start gap-5 text-xs text-gray-400">
+              <div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 flex flex-col items-start gap-5 text-xs text-gray-400">
                 <div>
                   <p className="font-semibold text-white">
                     &copy; {CURRENT_YEAR} {collegeName}

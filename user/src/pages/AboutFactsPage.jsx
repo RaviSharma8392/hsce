@@ -160,13 +160,13 @@ export default function AboutFactsPage() {
 
           {/* Zebra-Striped Facts Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm font-sans border-collapse">
+            <table className="w-full min-w-[460px] text-left text-xs sm:text-sm font-sans border-collapse">
               <thead>
                 <tr className="bg-[#1F242C] text-white">
-                  <th className="py-3.5 px-6 font-bold text-sm tracking-wide border-r border-[#333a44] w-2/5">
+                  <th className="py-3 px-4 sm:py-3.5 sm:px-6 font-bold text-sm tracking-wide border-r border-[#333a44] w-2/5">
                     {content.parameterHeading}
                   </th>
-                  <th className="py-3.5 px-6 font-bold text-sm tracking-wide">
+                  <th className="py-3 px-4 sm:py-3.5 sm:px-6 font-bold text-sm tracking-wide">
                     {content.detailsHeading}
                   </th>
                 </tr>
@@ -178,10 +178,10 @@ export default function AboutFactsPage() {
                     className={`transition-colors hover:bg-blue-50/40 ${
                       idx % 2 === 1 ? "bg-slate-50/70" : "bg-white"
                     }`}>
-                    <td className="px-6 py-3.5 font-bold text-slate-800 border-r border-gray-200/80 align-top">
+                    <td className="px-4 py-3 sm:px-6 sm:py-3.5 font-bold text-slate-800 border-r border-gray-200/80 align-top">
                       {fact.label || fact.param}
                     </td>
-                    <td className="px-6 py-3.5 text-slate-700 leading-relaxed font-medium">
+                    <td className="px-4 py-3 sm:px-6 sm:py-3.5 text-slate-700 leading-relaxed font-medium">
                       {fact.isPhone ? (
                         <div className="flex items-center gap-2">
                           <Phone size={14} className="text-[#363991] shrink-0" />

@@ -3,6 +3,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  limit,
   doc,
   updateDoc,
   deleteDoc,
@@ -46,7 +47,8 @@ export function subscribeToTours(callback) {
     try {
       const q = query(
         collection(db, "campusTours"),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
+        limit(150)
       );
 
       const unsubscribe = onSnapshot(

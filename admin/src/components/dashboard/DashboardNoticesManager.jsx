@@ -5,7 +5,6 @@ import {
   Megaphone,
   Plus,
   Search,
-  Filter,
   Eye,
   Edit3,
   Trash2,
@@ -14,12 +13,11 @@ import {
   CheckCircle2,
   Clock,
   X,
+  ChevronLeft,
   Save,
   AlertCircle,
-  FileCheck,
   Calendar,
   Layers,
-  ArrowUpRight,
 } from "lucide-react";
 import {
   collection,
@@ -35,7 +33,21 @@ import {
 } from "firebase/firestore";
 import { db, firebaseReady } from "../../config/firebase";
 
-const CATEGORIES = ["All", "Admissions", "Academic", "Disclosure", "General"];
+const NOTICE_CATEGORIES = [
+  "General Notice",
+  "Admission",
+  "Examination",
+  "Results",
+  "Academic",
+  "Scholarship",
+  "Recruitment",
+  "Events",
+  "Holiday",
+  "Circular",
+  "Important Announcement",
+];
+const LEGACY_CATEGORIES = ["Admissions", "Disclosure", "General"];
+const CATEGORIES = ["All", ...NOTICE_CATEGORIES, ...LEGACY_CATEGORIES];
 
 export default function DashboardNoticesManager({
   role = "staff",
@@ -56,7 +68,7 @@ export default function DashboardNoticesManager({
 
   // Form states for Add/Edit
   const [formTitle, setFormTitle] = useState("");
-  const [formCategory, setFormCategory] = useState("General");
+  const [formCategory, setFormCategory] = useState("General Notice");
   const [formDescription, setFormDescription] = useState("");
   const [formPdfUrl, setFormPdfUrl] = useState("");
   const [formIsPublished, setFormIsPublished] = useState(true);
@@ -117,7 +129,7 @@ export default function DashboardNoticesManager({
   const handleOpenEdit = (notice) => {
     setEditingNotice(notice);
     setFormTitle(notice.title || "");
-    setFormCategory(notice.category || "General");
+    setFormCategory(notice.category || "General Notice");
     setFormDescription(notice.description || "");
     setFormPdfUrl(notice.pdfUrl || "");
     setFormIsPublished(notice.isPublished === true);
@@ -130,7 +142,7 @@ export default function DashboardNoticesManager({
     setIsAddingNew(true);
     setEditingNotice(null);
     setFormTitle("");
-    setFormCategory("General");
+    setFormCategory("General Notice");
     setFormDescription("");
     setFormPdfUrl("");
     setFormIsPublished(true);
@@ -263,7 +275,7 @@ export default function DashboardNoticesManager({
         authorName: currentUser.displayName || currentUser.email,
       };
 
-      const { id, ...recordData } = newRecord;
+      const { id: _id, ...recordData } = newRecord;
       await setDoc(noticeRef, recordData);
 
       setNotices((prev) => [newRecord, ...prev]);
@@ -333,6 +345,9 @@ export default function DashboardNoticesManager({
 
   // Filtered notices
   const filteredNotices = useMemo(() => {
+    const normalizeCategory = (category) =>
+      category?.toLowerCase() === "admissions" ? "admission" : category?.toLowerCase();
+
     return notices.filter((notice) => {
       const matchSearch =
         searchQuery === "" ||
@@ -342,7 +357,8 @@ export default function DashboardNoticesManager({
 
       const matchCategory =
         selectedCategory === "All" ||
-        notice.category?.toLowerCase() === selectedCategory.toLowerCase();
+        normalizeCategory(notice.category) ===
+          normalizeCategory(selectedCategory);
 
       const matchStatus =
         statusFilter === "All" ||
@@ -623,28 +639,35 @@ export default function DashboardNoticesManager({
 
       {/* MODAL 1: CHECK DETAILS MODAL */}
       {detailsNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-2xl h-[100dvh] sm:h-auto min-h-[100dvh] sm:min-h-0 max-h-[100dvh] sm:max-h-[90vh] rounded-none sm:rounded-2xl bg-white shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70">
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-4 pb-3.5 border-b border-slate-100 bg-slate-50/70 shrink-0">
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="sm:hidden -ml-1.5 p-2 rounded-xl text-slate-700 hover:bg-slate-200/60 active:scale-95 transition"
+                  aria-label="Back">
+                  <ChevronLeft size={20} />
+                </button>
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700 shrink-0">
                   <FileText size={16} />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Notice Inspection &amp; Details
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 truncate">
+                  Notice Details
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
                 <X size={18} />
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto space-y-4 text-slate-800">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-slate-800 flex-1 overscroll-contain">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-blue-100 text-blue-800 border border-blue-200">
                   {detailsNotice.category || "General"}
@@ -668,7 +691,7 @@ export default function DashboardNoticesManager({
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-900 leading-snug">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
                   {detailsNotice.title}
                 </h3>
               </div>
@@ -722,11 +745,11 @@ export default function DashboardNoticesManager({
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/70">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-4 border-t border-slate-100 bg-slate-50/80 shrink-0 sticky bottom-0 z-20">
               <button
                 type="button"
                 onClick={() => handleOpenEdit(detailsNotice)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all shadow-2xs">
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 sm:py-2 rounded-xl sm:rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs transition-all shadow-2xs">
                 <Edit3 size={14} />
                 <span>Edit This Notice</span>
               </button>
@@ -734,7 +757,7 @@ export default function DashboardNoticesManager({
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition-all">
+                className="px-4 py-2.5 sm:py-2 rounded-xl sm:rounded-lg bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-700 font-semibold text-xs transition-all">
                 Close
               </button>
             </div>
@@ -744,15 +767,22 @@ export default function DashboardNoticesManager({
 
       {/* MODAL 2: EDIT OR ADD NOTICE MODAL */}
       {(editingNotice || isAddingNew) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-xl h-[100dvh] sm:h-auto min-h-[100dvh] sm:min-h-0 max-h-[100dvh] sm:max-h-[92vh] rounded-none sm:rounded-2xl bg-white shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70">
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-4 pb-3.5 border-b border-slate-100 bg-slate-50/70 shrink-0">
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="sm:hidden -ml-1.5 p-2 rounded-xl text-slate-700 hover:bg-slate-200/60 active:scale-95 transition"
+                  aria-label="Back">
+                  <ChevronLeft size={20} />
+                </button>
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white shrink-0">
                   {editingNotice ? <Edit3 size={15} /> : <Plus size={16} />}
                 </span>
-                <span className="text-sm font-bold text-slate-900">
+                <span className="text-sm font-bold text-slate-900 truncate">
                   {editingNotice
                     ? "Edit Website Notice"
                     : "Post New Website Notice"}
@@ -761,7 +791,7 @@ export default function DashboardNoticesManager({
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
                 <X size={18} />
               </button>
             </div>
@@ -769,115 +799,121 @@ export default function DashboardNoticesManager({
             {/* Modal Form */}
             <form
               onSubmit={editingNotice ? handleSaveEdit : handleSaveNew}
-              className="p-6 overflow-y-auto space-y-4">
-              {errorMessage && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700">
-                  <AlertCircle size={15} className="shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
+              className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
+                {errorMessage && (
+                  <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+                    <AlertCircle size={15} className="shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Notice Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Admission Notice 2025-26"
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Category *
-                </label>
-                <select
-                  value={formCategory}
-                  onChange={(e) => setFormCategory(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
-                  <option value="General">General</option>
-                  <option value="Admissions">Admissions</option>
-                  <option value="Academic">Academic</option>
-                  <option value="Disclosure">Disclosure</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Description / Circular Text *
-                </label>
-                <textarea
-                  rows={5}
-                  required
-                  placeholder="Provide complete instructions, eligibility, and information for students and public..."
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 p-2.5 text-xs text-slate-800 leading-relaxed focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700">
-                    <AdobePdfIcon size={16} />
-                    <span>Attached PDF Link (Google Drive or Web URL)</span>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Notice Title *
                   </label>
-                  {formPdfUrl.trim() && (
-                    <a
-                      href={formPdfUrl.trim()}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] font-bold text-blue-600 hover:underline">
-                      Preview Link ↗
-                    </a>
-                  )}
-                </div>
-                <input
-                  type="text"
-                  placeholder="https://drive.google.com/file/d/.../view or https://..."
-                  value={formPdfUrl}
-                  onChange={(e) => setFormPdfUrl(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 p-2.5 text-xs text-slate-800 font-mono focus:border-blue-500 focus:outline-none"
-                />
-                <p className="mt-1 text-[11px] text-slate-500">
-                  💡 Paste your Google Drive sharing link or direct PDF document link. (Ensure sharing is set to &ldquo;Anyone with the link can view&rdquo;).
-                </p>
-              </div>
-
-              <div className="pt-2">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
-                    type="checkbox"
-                    checked={formIsPublished}
-                    onChange={(e) => setFormIsPublished(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    type="text"
+                    required
+                    placeholder="e.g. Admission Notice 2025-26"
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    className="w-full rounded-xl sm:rounded-lg border border-slate-300 p-3 sm:p-2.5 text-base sm:text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
                   />
-                  <span className="text-xs font-bold text-slate-800">
-                    Publish immediately on public website
-                  </span>
-                </label>
-                <p className="text-[11px] text-slate-500 ml-6">
-                  If unchecked, notice will be saved as an internal Draft.
-                </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Category *
+                  </label>
+                  <select
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value)}
+                    className="w-full rounded-xl sm:rounded-lg border border-slate-300 p-3 sm:p-2.5 text-base sm:text-xs text-slate-800 focus:border-blue-500 focus:outline-none">
+                    {NOTICE_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                    {LEGACY_CATEGORIES.includes(formCategory) && (
+                      <option value={formCategory}>{formCategory}</option>
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Description / Circular Text *
+                  </label>
+                  <textarea
+                    rows={5}
+                    required
+                    placeholder="Provide complete instructions, eligibility, and information for students and public..."
+                    value={formDescription}
+                    onChange={(e) => setFormDescription(e.target.value)}
+                    className="w-full rounded-xl sm:rounded-lg border border-slate-300 p-3 sm:p-2.5 text-base sm:text-xs text-slate-800 leading-relaxed focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700">
+                      <AdobePdfIcon size={16} />
+                      <span>Attached PDF Link (Google Drive or Web URL)</span>
+                    </label>
+                    {formPdfUrl.trim() && (
+                      <a
+                        href={formPdfUrl.trim()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] font-bold text-blue-600 hover:underline">
+                        Preview Link ↗
+                      </a>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="https://drive.google.com/file/d/.../view or https://..."
+                    value={formPdfUrl}
+                    onChange={(e) => setFormPdfUrl(e.target.value)}
+                    className="w-full rounded-xl sm:rounded-lg border border-slate-300 p-3 sm:p-2.5 text-base sm:text-xs text-slate-800 font-mono focus:border-blue-500 focus:outline-none"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    💡 Paste your Google Drive sharing link or direct PDF document link. (Ensure sharing is set to &ldquo;Anyone with the link can view&rdquo;).
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={formIsPublished}
+                      onChange={(e) => setFormIsPublished(e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-xs font-bold text-slate-800">
+                      Publish immediately on public website
+                    </span>
+                  </label>
+                  <p className="text-[11px] text-slate-500 ml-6">
+                    If unchecked, notice will be saved as an internal Draft.
+                  </p>
+                </div>
               </div>
 
               {/* Form Action Buttons */}
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 px-4 sm:px-6 py-3 sm:py-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-4 border-t border-slate-100 bg-slate-50/80 shrink-0 sticky bottom-0 z-20">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors">
+                  className="px-4 py-2.5 sm:py-2 rounded-xl sm:rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold text-xs transition-colors">
                   Cancel
                 </button>
 
                 <button
                   type="submit"
                   disabled={formSaving}
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs shadow-sm transition-all disabled:opacity-60">
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl sm:rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs shadow-sm transition-all disabled:opacity-60">
                   <Save size={14} />
                   <span>
                     {formSaving

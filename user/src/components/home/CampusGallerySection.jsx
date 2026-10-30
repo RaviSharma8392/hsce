@@ -96,88 +96,98 @@ export function CampusGallerySection() {
           {/* ============================================================ */}
           <div className="lg:col-span-5 flex flex-col justify-between gap-6">
             {/* Quick Reference Section with Rotated Vertical Label (Screenshot 2) */}
-            <div className="flex gap-4 sm:gap-6 bg-white/70 backdrop-blur-xs p-5 sm:p-6 rounded-2xl border border-[#2E3A8C]/15 shadow-xs">
-              {/* Vertical Rotated Label */}
-              <div className="flex items-center justify-center select-none shrink-0 border-r border-[#2E3A8C]/20 pr-3 sm:pr-4">
-                <span className="[writing-mode:vertical-rl] rotate-180 text-xs font-extrabold uppercase tracking-[0.28em] text-[#2E3A8C]">
+            <div className="bg-white/70 backdrop-blur-xs p-4 sm:p-6 rounded-2xl border border-[#2E3A8C]/15 shadow-xs">
+              {/* Mobile top label (sm:hidden) */}
+              <div className="sm:hidden mb-3 pb-2 border-b border-[#2E3A8C]/15 flex items-center gap-2">
+                <span className="h-0.5 w-4 bg-[#FBDD23]" />
+                <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#2E3A8C]">
                   {isHindi ? "त्वरित संदर्भ" : "QUICK REFERENCE"}
                 </span>
               </div>
 
-              {/* 3 Horizontal Action Rows with Circular Yellow Arrow Buttons */}
-              <div className="flex-1 space-y-4">
-                {/* Row 1: Admission / Appointment */}
-                <div className="pb-3.5 border-b border-[#2E3A8C]/15 flex items-center justify-between gap-3">
-                  <div>
-                    <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
-                      {isHindi ? "प्रवेश आमंत्रण" : "Request Admission"}
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {isHindi ? "बी.एड. 2026-27 प्रवेश व काउंसलिंग" : "B.Ed. Counseling & Guidance"}
-                    </p>
+              <div className="flex gap-4 sm:gap-6">
+                {/* Vertical Rotated Label on Tablet/Desktop */}
+                <div className="hidden sm:flex items-center justify-center select-none shrink-0 border-r border-[#2E3A8C]/20 pr-3 sm:pr-4">
+                  <span className="[writing-mode:vertical-rl] rotate-180 text-xs font-extrabold uppercase tracking-[0.28em] text-[#2E3A8C]">
+                    {isHindi ? "त्वरित संदर्भ" : "QUICK REFERENCE"}
+                  </span>
+                </div>
+
+                {/* 3 Horizontal Action Rows with Circular Yellow Arrow Buttons */}
+                <div className="flex-1 space-y-4">
+                  {/* Row 1: Admission / Appointment */}
+                  <div className="pb-3.5 border-b border-[#2E3A8C]/15 flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
+                        {isHindi ? "प्रवेश आमंत्रण" : "Request Admission"}
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {isHindi ? "बी.एड. 2026-27 प्रवेश व काउंसलिंग" : "B.Ed. Counseling & Guidance"}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => openAdmissionModal()}
+                        className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1 cursor-pointer">
+                        <span>{isHindi ? "पूछताछ करें →" : "Make Enquiry →"}</span>
+                      </button>
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => openAdmissionModal()}
-                      className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1 cursor-pointer">
-                      <span>{isHindi ? "पूछताछ करें →" : "Make Enquiry →"}</span>
+                      aria-label="Open admission enquiry form"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105 cursor-pointer">
+                      <ArrowUpRight size={18} strokeWidth={2.5} />
                     </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => openAdmissionModal()}
-                    aria-label="Open admission enquiry form"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105 cursor-pointer">
-                    <ArrowUpRight size={18} strokeWidth={2.5} />
-                  </button>
-                </div>
+                  {/* Row 2: B.Ed. Curriculum / Schedule */}
+                  <div className="pb-3.5 border-b border-[#2E3A8C]/15 flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
+                        {isHindi ? "बी.एड. पाठ्यक्रम" : "Curriculum & Syllabus"}
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {isHindi ? "2-वर्षीय एनसीटीई एवं जीजीएसआईपीयू योजना" : "Two-Year GGSIPU Scheme"}
+                      </p>
+                      <Link
+                        to="/course/bed"
+                        className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1">
+                        <span>{isHindi ? "पाठ्यक्रम देखें →" : "View Syllabus →"}</span>
+                      </Link>
+                    </div>
 
-                {/* Row 2: B.Ed. Curriculum / Schedule */}
-                <div className="pb-3.5 border-b border-[#2E3A8C]/15 flex items-center justify-between gap-3">
-                  <div>
-                    <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
-                      {isHindi ? "बी.एड. पाठ्यक्रम" : "Curriculum & Syllabus"}
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {isHindi ? "2-वर्षीय एनसीटीई एवं जीजीएसआईपीयू योजना" : "Two-Year GGSIPU Scheme"}
-                    </p>
                     <Link
                       to="/course/bed"
-                      className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1">
-                      <span>{isHindi ? "पाठ्यक्रम देखें →" : "View Syllabus →"}</span>
+                      aria-label="View B.Ed. Syllabus"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105">
+                      <ArrowUpRight size={18} strokeWidth={2.5} />
                     </Link>
                   </div>
 
-                  <Link
-                    to="/course/bed"
-                    aria-label="View B.Ed. Syllabus"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105">
-                    <ArrowUpRight size={18} strokeWidth={2.5} />
-                  </Link>
-                </div>
+                  {/* Row 3: Mandatory Disclosures */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
+                        {isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosures"}
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {isHindi ? "एनसीटीई आदेश एवं वैधानिक शपथ-पत्र" : "NCTE Orders & Affidavits"}
+                      </p>
+                      <Link
+                        to="/mandatory-disclosure"
+                        className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1">
+                        <span>{isHindi ? "दस्तावेज देखें →" : "Read more →"}</span>
+                      </Link>
+                    </div>
 
-                {/* Row 3: Mandatory Disclosures */}
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h4 className="text-base sm:text-[17px] font-bold text-[#2E3A8C] leading-tight">
-                      {isHindi ? "अनिवार्य प्रकटीकरण" : "Mandatory Disclosures"}
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {isHindi ? "एनसीटीई आदेश एवं वैधानिक शपथ-पत्र" : "NCTE Orders & Affidavits"}
-                    </p>
                     <Link
                       to="/mandatory-disclosure"
-                      className="mt-1 text-xs font-bold text-[#2E3A8C] hover:underline flex items-center gap-1">
-                      <span>{isHindi ? "दस्तावेज देखें →" : "Read more →"}</span>
+                      aria-label="View Mandatory Disclosures"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105">
+                      <ArrowUpRight size={18} strokeWidth={2.5} />
                     </Link>
                   </div>
-
-                  <Link
-                    to="/mandatory-disclosure"
-                    aria-label="View Mandatory Disclosures"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FBDD23] hover:bg-[#FFDC13] text-slate-900 shadow-xs transition-transform hover:scale-105">
-                    <ArrowUpRight size={18} strokeWidth={2.5} />
-                  </Link>
                 </div>
               </div>
             </div>

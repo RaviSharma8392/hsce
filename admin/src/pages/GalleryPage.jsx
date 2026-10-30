@@ -16,6 +16,7 @@ import {
   RefreshCw,
   X,
   FileImage,
+  ChevronLeft,
   Sparkles,
   LayoutGrid,
   List,
@@ -402,11 +403,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
       {/* Toast Notification */}
       {toastMessage && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold transition-all duration-300 animate-slideIn ${
-            toastMessage.type === "error"
+          className={`fixed top-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold transition-all duration-300 animate-slideIn ${toastMessage.type === "error"
               ? "bg-rose-600 text-white"
               : "bg-emerald-600 text-white"
-          }`}>
+            }`}>
           {toastMessage.type === "error" ? (
             <AlertCircle size={18} />
           ) : (
@@ -458,36 +458,36 @@ export default function GalleryPage({ currentUser, role, permissions }) {
         </div>
 
         {/* Quick KPI Stat Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-6 pt-6 border-t border-slate-100">
-          <div className="bg-white border border-slate-200 rounded-md p-3.5">
-            <span className="text-xs font-medium text-slate-500">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100">
+          <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Total Uploads
             </span>
-            <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1">
               {stats.total}
             </div>
           </div>
-          <div className="bg-white border border-slate-200 rounded-md p-3.5">
-            <span className="text-xs font-medium text-slate-500">
+          <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Published (Live)
             </span>
-            <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1">
               {stats.published}
             </div>
           </div>
-          <div className="bg-white border border-slate-200 rounded-md p-3.5">
-            <span className="text-xs font-medium text-slate-500">
+          <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Drafts / Hidden
             </span>
-            <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1">
               {stats.drafts}
             </div>
           </div>
-          <div className="bg-white border border-slate-200 rounded-md p-3.5">
-            <span className="text-xs font-medium text-slate-500">
+          <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Categories
             </span>
-            <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1">
               {stats.categoriesCount}
             </div>
           </div>
@@ -555,22 +555,20 @@ export default function GalleryPage({ currentUser, role, permissions }) {
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-lg text-xs font-medium transition ${
-                  viewMode === "grid"
+                className={`p-1.5 rounded-lg text-xs font-medium transition ${viewMode === "grid"
                     ? "bg-white text-slate-900 shadow-2xs font-semibold"
                     : "text-slate-500 hover:text-slate-800"
-                }`}
+                  }`}
                 title="Grid View">
                 <LayoutGrid size={15} />
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("table")}
-                className={`p-1.5 rounded-lg text-xs font-medium transition ${
-                  viewMode === "table"
+                className={`p-1.5 rounded-lg text-xs font-medium transition ${viewMode === "table"
                     ? "bg-white text-slate-900 shadow-2xs font-semibold"
                     : "text-slate-500 hover:text-slate-800"
-                }`}
+                  }`}
                 title="Table View">
                 <List size={15} />
               </button>
@@ -630,11 +628,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                 {/* Status Badge */}
                 <div className="absolute top-2.5 left-2.5">
                   <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-xs ${
-                      img.isPublished
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-xs ${img.isPublished
                         ? "bg-emerald-600 text-white"
                         : "bg-slate-700 text-white"
-                    }`}>
+                      }`}>
                     {img.isPublished ? "Published" : "Draft"}
                   </span>
                 </div>
@@ -709,11 +706,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                     <button
                       type="button"
                       onClick={() => handleTogglePublish(img.id, img.isPublished)}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition cursor-pointer ${
-                        img.isPublished
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition cursor-pointer ${img.isPublished
                           ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                      }`}>
+                        }`}>
                       {img.isPublished ? <Eye size={12} /> : <EyeOff size={12} />}
                       <span>{img.isPublished ? "Live" : "Hidden"}</span>
                     </button>
@@ -768,11 +764,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                         onClick={() =>
                           handleTogglePublish(img.id, img.isPublished)
                         }
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold text-[11px] cursor-pointer ${
-                          img.isPublished
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold text-[11px] cursor-pointer ${img.isPublished
                             ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        }`}>
+                          }`}>
                         {img.isPublished ? (
                           <Eye size={12} />
                         ) : (
@@ -826,7 +821,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
       )}
 
       {/* ============================================================== */}
-      {/* STAFF UPLOAD MODAL                                             */}
+      {/* STAFF UPLOAD MODAL - FULLSCREEN ON MOBILE                      */}
       {/* ============================================================== */}
       {isUploadModalOpen && (
         <div
@@ -836,28 +831,36 @@ export default function GalleryPage({ currentUser, role, permissions }) {
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeUploadModal();
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+          className="fixed inset-0 z-50 flex items-stretch justify-stretch p-0 bg-white sm:bg-black/60 sm:backdrop-blur-xs sm:items-center sm:justify-center sm:p-4 overflow-hidden animate-in fade-in duration-200">
           <div
-            className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-scaleIn"
+            className="bg-white rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 shadow-none sm:shadow-2xl max-w-2xl w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden"
             onMouseDown={(event) => event.stopPropagation()}>
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 text-[#0066FF] flex items-center justify-center font-bold">
+            <div className="px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-4 border-b border-slate-200 flex items-center justify-between bg-white sm:bg-slate-50/50 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={closeUploadModal}
+                  className="sm:hidden p-2 -ml-1 text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#363991] border border-indigo-100 hidden sm:flex items-center justify-center font-bold shrink-0">
                   <Upload size={16} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold font-poppins text-slate-900">
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
                     <span id="gallery-modal-title">
                       {editingImageId
                         ? "Edit College Gallery Photo"
                         : "Upload Photo to College Gallery"}
                     </span>
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                     {editingImageId
-                      ? "Update the photograph details and publication status."
-                      : "Add a photograph with its title, category, and date."}
+                      ? "Update photograph details and publication status."
+                      : "Add photograph with title, category, and date."}
                   </p>
                 </div>
               </div>
@@ -866,7 +869,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                 onClick={closeUploadModal}
                 disabled={isSubmitting}
                 aria-label="Close gallery form"
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg border border-transparent hover:border-slate-200 transition cursor-pointer">
                 <X size={18} />
               </button>
             </div>
@@ -874,7 +877,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
             {/* Modal Body */}
             <form
               onSubmit={handleUploadSubmit}
-              className="p-6 overflow-y-auto space-y-5">
+              className="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1 space-y-5 -webkit-overflow-scrolling-touch">
               {uploadError && (
                 <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
                   <AlertCircle size={16} className="flex-shrink-0" />
@@ -894,11 +897,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                       setUploadMode("file");
                       setFormImageUrl("");
                     }}
-                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition ${
-                      uploadMode === "file"
+                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition ${uploadMode === "file"
                         ? "bg-white text-[#0066FF] shadow-xs"
                         : "text-slate-600 hover:text-slate-900"
-                    }`}>
+                      }`}>
                     <Upload size={14} />
                     <span>Upload File from Device</span>
                   </button>
@@ -908,11 +910,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                       setUploadMode("url");
                       setFormImageFile(null);
                     }}
-                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition ${
-                      uploadMode === "url"
+                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition ${uploadMode === "url"
                         ? "bg-white text-[#0066FF] shadow-xs"
                         : "text-slate-600 hover:text-slate-900"
-                    }`}>
+                      }`}>
                     <LinkIcon size={14} />
                     <span>Paste Image Web URL</span>
                   </button>
@@ -1055,18 +1056,20 @@ export default function GalleryPage({ currentUser, role, permissions }) {
               </div>
 
               {/* Modal Footer */}
-              <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-3">
+              <div className="shrink-0 p-4 sm:px-6 sm:py-4 bg-white sm:bg-slate-50/50 border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:shadow-none flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
                 <button
                   type="button"
                   onClick={closeUploadModal}
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition text-center justify-center"
+                >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 bg-[#0066FF] hover:bg-blue-600 disabled:opacity-60 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-xs transition cursor-pointer">
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#363991] hover:bg-[#2A3178] disabled:opacity-60 text-white text-xs sm:text-sm font-bold px-5 py-3 sm:py-2 rounded-xl shadow-xs transition cursor-pointer"
+                >
                   {isSubmitting ? (
                     <>
                       <RefreshCw size={15} className="animate-spin" />

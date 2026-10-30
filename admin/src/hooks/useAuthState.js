@@ -3,6 +3,16 @@ import { getLazyAuth, getLazyFirestore } from "../config/firebaseLazy";
 
 export const SUPER_ADMIN_EMAIL = "sharmaravi8392@gmail.com";
 
+export function normalizePermissions(permissions = {}) {
+  return {
+    ...permissions,
+    chatbotEnquiries:
+      permissions.chatbotEnquiries ?? permissions.enquiries ?? false,
+    grievances: permissions.grievances ?? permissions.feedback ?? false,
+    faculty: permissions.faculty ?? false,
+  };
+}
+
 export function useAuthState() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +46,7 @@ export function useAuthState() {
         syllabus: true,
         homepagePopup: true,
         faculty: true,
+        chatbotEnquiries: true,
         adminUsers: true,
       };
 
@@ -88,7 +99,7 @@ export function useAuthState() {
         // Account is only active if explicitly verified and activated by Ravi Sharma
         if (record?.verified === true && record?.active === true) {
           setRole(record.role || "staff");
-          setPermissions(record.permissions || {});
+          setPermissions(normalizePermissions(record.permissions));
         } else {
           setRole(null);
           setPermissions({});

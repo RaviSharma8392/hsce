@@ -10,15 +10,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-import {
-  collection,
-  onSnapshot,
-  query,
-  limit,
-  where,
-} from "firebase/firestore";
-
-import { db, firebaseReady } from "../../config/firebase";
+import { usePublishedRecords } from "../../hooks/usePublishedRecords";
 import { Container } from "../common/Container";
 import { useLanguage } from "../../context/LanguageContext";
 import { cloudinaryImageUrl, imageData } from "../../data/imagesData";
@@ -111,7 +103,31 @@ function SectionHeading({ eyebrow, lead, accent, to, linkLabel }) {
 export function NoticeEventsSection() {
   const { isHindi, t } = useLanguage();
 
-  const [liveNotices, setLiveNotices] = useState([]);
+  const publishedNotices = usePublishedRecords("notices", [], {
+    limitCount: 100,
+  });
+  const liveNotices = useMemo(
+    () =>
+      publishedNotices
+        .map((notice) => ({
+          ...notice,
+          slug: notice.slug || notice.id,
+          badgeDate: parseNoticeDate(notice),
+        }))
+        .filter(
+          (notice) =>
+            Boolean((notice.title || notice.hiTitle || "").trim()) &&
+            notice.status !== "draft",
+        )
+        .sort((a, b) => {
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          return (
+            (b.badgeDate?.timestamp || 0) - (a.badgeDate?.timestamp || 0)
+          );
+        }),
+    [publishedNotices],
+  );
   const [visibleNoticeCount, setVisibleNoticeCount] =
     useState(INITIAL_NOTICE_COUNT);
 
@@ -140,65 +156,6 @@ export function NoticeEventsSection() {
     ],
     [isHindi],
   );
-
-  /* ================= FIREBASE NOTICES ================= */
-
-  useEffect(() => {
-    if (!firebaseReady) {
-      return undefined;
-    }
-
-    try {
-      const noticesQuery = query(
-        collection(db, "notices"),
-        where("isPublished", "==", true),
-        limit(100),
-      );
-
-      const unsubscribe = onSnapshot(
-        noticesQuery,
-        (snapshot) => {
-          const records = snapshot.docs
-            .map((docSnap) => {
-              const data = docSnap.data();
-
-              return {
-                ...data,
-                id: docSnap.id,
-                slug: data.slug || docSnap.id,
-                badgeDate: parseNoticeDate(data),
-              };
-            })
-            .filter(
-              (notice) =>
-                Boolean((notice.title || notice.hiTitle || "").trim()) &&
-                notice.isPublished !== false &&
-                notice.status !== "draft",
-            )
-            .sort((a, b) => {
-              if (a.isPinned && !b.isPinned) return -1;
-              if (!a.isPinned && b.isPinned) return 1;
-
-              return (
-                (b.badgeDate?.timestamp || 0) - (a.badgeDate?.timestamp || 0)
-              );
-            });
-
-          setLiveNotices(records);
-        },
-        (error) => {
-          console.warn("Firestore notices sync:", error.message);
-          setLiveNotices([]);
-        },
-      );
-
-      return () => unsubscribe();
-    } catch (error) {
-      console.warn("Firestore subscription error:", error);
-      setLiveNotices([]);
-      return undefined;
-    }
-  }, []);
 
   /* ================= FILTER NOTICES ================= */
 

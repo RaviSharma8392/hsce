@@ -205,13 +205,13 @@ export default function AdmissionsPage() {
             <table className="w-full min-w-[550px] border-collapse text-left text-xs sm:text-sm font-sans">
               <thead>
                 <tr className="bg-[#1F242C] text-white">
-                  <th className="py-3.5 px-6 font-bold border-r border-[#333a44]">
+                  <th className="py-3 px-4 sm:py-3.5 sm:px-6 font-bold border-r border-[#333a44]">
                     {t("Category", "श्रेणी")}
                   </th>
-                  <th className="py-3.5 px-6 font-bold border-r border-[#333a44]">
+                  <th className="py-3 px-4 sm:py-3.5 sm:px-6 font-bold border-r border-[#333a44]">
                     {t("Qualification", "शैक्षणिक योग्यता")}
                   </th>
-                  <th className="py-3.5 px-6 text-right font-bold">
+                  <th className="py-3 px-4 sm:py-3.5 sm:px-6 text-right font-bold">
                     {t("Minimum Marks", "न्यूनतम अंक")}
                   </th>
                 </tr>
@@ -223,13 +223,13 @@ export default function AdmissionsPage() {
                     className={`transition-colors hover:bg-blue-50/40 ${
                       idx % 2 === 1 ? "bg-slate-50/70" : "bg-white"
                     }`}>
-                    <td className="px-6 py-4 font-bold text-slate-900 border-r border-gray-200/80">
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 font-bold text-slate-900 border-r border-gray-200/80">
                       {t(item.category, item.hiCategory)}
                     </td>
-                    <td className="px-6 py-4 text-slate-700 leading-relaxed border-r border-gray-200/80">
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 text-slate-700 leading-relaxed border-r border-gray-200/80">
                       {t(item.qualification, item.hiQualification)}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right font-bold text-[#2E3A8C]">
+                    <td className="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4 text-right font-bold text-[#2E3A8C]">
                       {t(item.marks, item.hiMarks)}
                     </td>
                   </tr>

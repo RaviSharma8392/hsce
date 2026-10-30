@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   collection,
-  onSnapshot,
+  getDocs,
   query as createQuery,
   where,
 } from "firebase/firestore";
@@ -30,12 +30,18 @@ const PAGE_SIZE = 10;
 
 const CATEGORY_ITEMS = [
   { key: "All", label: "All Notices", hiLabel: "सभी सूचनाएं" },
-  { key: "Admissions", label: "Admissions & CET", hiLabel: "प्रवेश एवं सीईटी" },
+  { key: "Admission", label: "Admissions & CET", hiLabel: "प्रवेश एवं सीईटी" },
   { key: "Examination", label: "Examinations & Viva", hiLabel: "परीक्षा एवं वाइवा" },
+  { key: "Results", label: "Results", hiLabel: "परिणाम" },
   { key: "Academic", label: "Academic & Internship", hiLabel: "शैक्षणिक एवं इंटर्नशिप" },
-  { key: "Events", label: "Events & Workshops", hiLabel: "कार्यक्रम एवं कार्यशाला" },
   { key: "Scholarship", label: "Scholarships (State & NSP)", hiLabel: "छात्रवृत्ति (राज्य एवं राष्ट्रीय)" },
+  { key: "Recruitment", label: "Recruitment", hiLabel: "भर्ती" },
+  { key: "Events", label: "Events & Workshops", hiLabel: "कार्यक्रम एवं कार्यशाला" },
+  { key: "Holiday", label: "Holidays", hiLabel: "अवकाश" },
   { key: "Circular", label: "Official Circulars", hiLabel: "आधिकारिक परिपत्र" },
+  { key: "General Notice", label: "General Notices", hiLabel: "सामान्य सूचनाएं" },
+  { key: "Important Announcement", label: "Important Announcements", hiLabel: "महत्वपूर्ण घोषणाएं" },
+  { key: "Disclosure", label: "Disclosure", hiLabel: "प्रकटीकरण" },
 ];
 
 const CATEGORY_HI = {
@@ -49,7 +55,19 @@ const CATEGORY_HI = {
   Circular: "परिपत्र",
   Disclosure: "अनिवार्य प्रकटीकरण",
   "General Notice": "सामान्य",
+  General: "सामान्य",
+  Results: "परिणाम",
+  Recruitment: "भर्ती",
+  Holiday: "अवकाश",
+  "Important Announcement": "महत्वपूर्ण घोषणा",
 };
+
+function normalizeCategory(value) {
+  const category = String(value || "").trim().toLowerCase();
+  if (category === "admissions") return "admission";
+  if (category === "general") return "general notice";
+  return category;
+}
 
 function parseNoticeDate(rawDate) {
   if (!rawDate) return { day: "—", month: "HSCE", year: "2026" };
@@ -218,9 +236,8 @@ export default function NoticesPage() {
       where("isPublished", "==", true)
     );
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
+    getDocs(q)
+      .then((snapshot) => {
         if (!active) return;
         const records = snapshot.docs
           .map((item) => ({
@@ -258,26 +275,20 @@ export default function NoticesPage() {
 
         setNotices(records);
         setLoading(false);
-      },
-      (loadError) => {
-        console.error("Notices listener error:", loadError);
+      })
+      .catch((loadError) => {
+        console.error("Notices load error:", loadError);
         if (active) {
           setNotices([]);
-          setError(
-            isHindi
-              ? "सर्वर से सूचनाएं लोड नहीं हो सकीं।"
-              : "Unable to load notices from server. Please try again later."
-          );
+          setError(true);
           setLoading(false);
         }
-      }
-    );
+      });
 
     return () => {
       active = false;
-      if (typeof unsubscribe === "function") unsubscribe();
     };
-  }, [isHindi]);
+  }, []);
 
   // Master notices list source - strictly real notices from Firestore
   const masterList = notices;
@@ -288,15 +299,11 @@ export default function NoticesPage() {
 
     return masterList.filter((notice) => {
       if (category !== "All") {
-        const itemCat = (notice.category || "").toLowerCase();
-        const itemHiCat = (notice.hiCategory || "").toLowerCase();
-        const selected = category.toLowerCase();
-
+        const selected = normalizeCategory(category);
         const matchesCat =
-          itemCat === selected ||
-          itemHiCat === selected ||
-          itemCat.includes(selected) ||
-          selected.includes(itemCat);
+          normalizeCategory(notice.category) === selected ||
+          normalizeCategory(notice.hiCategory) === selected ||
+          normalizeCategory(notice.department) === selected;
 
         if (!matchesCat) return false;
       }
@@ -319,7 +326,13 @@ export default function NoticesPage() {
     const counts = { All: masterList.length };
     for (const item of masterList) {
       const cat = item.category || "General Notice";
-      counts[cat] = (counts[cat] || 0) + 1;
+      const categoryKey =
+        CATEGORY_ITEMS.find(
+          (categoryItem) =>
+            categoryItem.key !== "All" &&
+            normalizeCategory(categoryItem.key) === normalizeCategory(cat),
+        )?.key || cat;
+      counts[categoryKey] = (counts[categoryKey] || 0) + 1;
     }
     return counts;
   }, [masterList]);
@@ -379,32 +392,19 @@ export default function NoticesPage() {
         <AcademicTexturePattern opacity="opacity-[0.38]" />
 
         <Container className="relative z-10">
-          {/* Mobile Category Toggle (Collapsible on smaller screens) */}
-          <div className="lg:hidden mb-4">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="w-full flex items-center justify-between bg-[#363991] text-white px-4 py-3 rounded-xl font-poppins font-semibold text-sm shadow-md transition"
-            >
-              <div className="flex items-center gap-2">
-                <Layers size={18} className="text-[#FBDD23]" />
-                <span>
-                  {isHindi ? "श्रेणी चुनें:" : "Select Category:"}{" "}
-                  <strong className="text-[#FBDD23]">
-                    {isHindi ? activeCategoryObj.hiLabel : activeCategoryObj.label}
-                  </strong>
+          {/* Mobile Category Navigation Card (Matching Reference Image) */}
+          <div className="lg:hidden mb-6">
+            <div className="overflow-hidden rounded-xl bg-white shadow-md border border-slate-200/80">
+              <div className="bg-[#2E3A8C] px-5 py-4 text-white flex items-center justify-between">
+                <h2 className="font-poppins text-lg font-bold tracking-wide">
+                  {isHindi ? "श्रेणियाँ" : "Categories"}
+                </h2>
+                <span className="text-xs bg-[#FBDD23] text-[#2E3A8C] font-bold px-2 py-0.5 rounded-full font-poppins">
+                  {masterList.length} {isHindi ? "सूचनाएं" : "Notices"}
                 </span>
               </div>
-              <ChevronDown
-                size={18}
-                className={`transition-transform duration-200 ${
-                  mobileMenuOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
 
-            {mobileMenuOpen && (
-              <div className="mt-2 bg-white rounded-xl border border-slate-200 shadow-lg divide-y divide-slate-100 overflow-hidden">
+              <nav className="divide-y divide-slate-100 font-sans" aria-label="Notice Categories">
                 {CATEGORY_ITEMS.map((catItem) => {
                   const isActive = category === catItem.key;
                   const count =
@@ -418,18 +418,18 @@ export default function NoticesPage() {
                       key={catItem.key}
                       type="button"
                       onClick={() => changeCategory(catItem.key)}
-                      className={`w-full px-4 py-3 text-left flex items-center justify-between text-sm font-poppins transition ${
+                      className={`group w-full px-5 py-3.5 text-left flex items-center justify-between font-poppins text-sm transition-all duration-150 ${
                         isActive
-                          ? "bg-slate-50 text-[#363991] font-bold border-l-4 border-[#363991]"
-                          : "text-slate-700 hover:bg-slate-50 font-medium"
+                          ? "bg-slate-50/90 text-[#2E3A8C] font-bold border-l-4 border-[#2E3A8C] pl-4"
+                          : "text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] font-medium"
                       }`}
                     >
-                      <span>{label}</span>
+                      <span className="truncate pr-2">{label}</span>
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                        className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold transition ${
                           isActive
-                            ? "bg-[#363991] text-[#FBDD23]"
-                            : "bg-slate-100 text-slate-500"
+                            ? "bg-[#2E3A8C] text-[#FBDD23] shadow-xs"
+                            : "bg-slate-100 text-slate-500 group-hover:bg-slate-200/80 group-hover:text-slate-700"
                         }`}
                       >
                         {count}
@@ -437,8 +437,8 @@ export default function NoticesPage() {
                     </button>
                   );
                 })}
-              </div>
-            )}
+              </nav>
+            </div>
           </div>
 
           {/* TWO-COLUMN LAYOUT: Categories on Left | PDF Notices on Right */}
@@ -574,7 +574,9 @@ export default function NoticesPage() {
               {/* Error Alert */}
               {error && (
                 <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-                  {error}
+                  {isHindi
+                    ? "सर्वर से सूचनाएं लोड नहीं हो सकीं।"
+                    : "Unable to load notices from server. Please try again later."}
                 </div>
               )}
 

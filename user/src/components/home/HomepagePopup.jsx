@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, ExternalLink } from "lucide-react";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db, firebaseReady } from "../../config/firebase";
-import { usePublishedRecords } from "../../hooks/usePublishedRecords";
+import { fetchPublishedRecords } from "../../hooks/usePublishedRecords";
 import { cloudinaryImageUrl } from "../../data/imagesData";
 
 function getCleanDestination(rawUrl) {
@@ -35,38 +35,70 @@ export default function HomepagePopup() {
   const [activeDocPopup, setActiveDocPopup] = useState(null);
   const [visibleVersion, setVisibleVersion] = useState("");
 
-  // Query 1: Real-time listener for fixed document "active"
+  // Read active popup with 5-minute session caching to save Firestore reads
   useEffect(() => {
     if (!firebaseReady) return undefined;
 
-    const popupDocRef = doc(db, "homepagePopups", "active");
-    const unsubscribe = onSnapshot(
-      popupDocRef,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          setActiveDocPopup({ id: docSnap.id, ...docSnap.data() });
-        } else {
-          setActiveDocPopup(null);
+    let active = true;
+    const cacheKey = "hsce_cached_popup_active";
+    try {
+      const raw = sessionStorage.getItem(cacheKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.timestamp < 5 * 60 * 1000) {
+          setActiveDocPopup(parsed.data);
+          return undefined;
         }
-      },
-      (err) => {
-        console.warn("Could not load homepage popup doc:", err);
       }
-    );
+    } catch {}
 
-    return () => unsubscribe();
+    const loadPopup = async () => {
+      try {
+        const docSnap = await getDoc(doc(db, "homepagePopups", "active"));
+        if (docSnap.exists()) {
+          const activePopup = { id: docSnap.id, ...docSnap.data() };
+          if (
+            activePopup.isPublished !== false &&
+            (activePopup.image || activePopup.imageUrl)
+          ) {
+            if (active) {
+              setActiveDocPopup(activePopup);
+              try {
+                sessionStorage.setItem(
+                  cacheKey,
+                  JSON.stringify({ data: activePopup, timestamp: Date.now() })
+                );
+              } catch {}
+            }
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn("Could not load homepage popup doc:", error);
+      }
+
+      const [legacyPopup] = await fetchPublishedRecords("homepagePopups", {
+        limitCount: 1,
+      });
+      if (active) {
+        setActiveDocPopup(legacyPopup || null);
+        try {
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({ data: legacyPopup || null, timestamp: Date.now() })
+          );
+        } catch {}
+      }
+    };
+
+    loadPopup();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  // Query 2: Fallback listener for general published records in "homepagePopups"
-  const collectionPopups = usePublishedRecords("homepagePopups", [], { limitCount: 1 });
-
-  // Resolve the active popup record
-  const popup =
-    (activeDocPopup && activeDocPopup.isPublished !== false && (activeDocPopup.image || activeDocPopup.imageUrl))
-      ? activeDocPopup
-      : collectionPopups.find(
-          (p) => p && p.isPublished !== false && (p.image || p.imageUrl)
-        );
+  const popup = activeDocPopup;
 
   const imageUrl = popup?.image || popup?.imageUrl || "";
   const redirectTarget = getCleanDestination(popup?.linkUrl || popup?.redirectLink);

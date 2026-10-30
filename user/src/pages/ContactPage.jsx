@@ -202,9 +202,9 @@ export default function ContactPage() {
         <Container>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* ============================================================== */}
-            {/* SIDEBAR WIDGET (Matching Reference Image)                      */}
+            {/* SIDEBAR WIDGET (Desktop View: hidden on mobile)                */}
             {/* ============================================================== */}
-            <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+            <aside className="hidden lg:block lg:col-span-4 space-y-6 lg:sticky lg:top-24">
               <div className="overflow-hidden rounded-md border border-gray-200/90 bg-white shadow-md">
                 {/* Solid Royal Blue Header Bar */}
                 <div className="bg-[#2E3A8C] px-5 py-4">
@@ -299,10 +299,53 @@ export default function ContactPage() {
             {/* ============================================================== */}
             {/* MAIN FORM / DETAILS CARD (Matching Reference Image)            */}
             {/* ============================================================== */}
-            <main className="lg:col-span-8">
+            <main className="lg:col-span-8 space-y-6">
+              {/* Mobile Contact Navigation Card (Matching Reference Image) */}
+              <div className="lg:hidden overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-md">
+                <div className="bg-[#2E3A8C] px-5 py-4">
+                  <h3 className="font-serif text-lg font-bold text-white tracking-wide">
+                    {isHindi ? "संपर्क मेन्यू" : "Contact Us"}
+                  </h3>
+                </div>
+
+                <nav aria-label="Contact options" className="divide-y divide-gray-100 font-sans">
+                  {sidebarLinks.map((item) => {
+                    const isActive = activeTab === item.id;
+
+                    if (item.href) {
+                      return (
+                        <Link
+                          key={item.id}
+                          to={item.href}
+                          className="group flex w-full items-center justify-between px-5 py-3.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
+                          <span>{item.label}</span>
+                          <ArrowUpRight size={15} className="text-gray-400 group-hover:text-[#2E3A8C] transition-colors" />
+                        </Link>
+                      );
+                    }
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleTabSelect(item.id)}
+                        className={`group flex w-full items-center justify-between px-5 py-3.5 text-left text-sm font-medium transition-colors cursor-pointer ${
+                          isActive
+                            ? "bg-slate-50 text-[#2E3A8C] font-bold border-l-4 border-l-[#2E3A8C] pl-4"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C]"
+                        }`}>
+                        <span>{item.label}</span>
+                        {!isActive && (
+                          <ArrowUpRight size={15} className="text-gray-400 group-hover:text-[#2E3A8C] transition-colors" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
               {/* TAB 1: GUEST BOOK & FEEDBACK (The EXACT form from screenshot) */}
               {activeTab === "guestbook" && (
-                <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs">
+                <div className="rounded-md border border-gray-200/90 bg-white p-4 sm:p-8 lg:p-10 shadow-xs">
                   {/* Card Section Header */}
                   <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1E293B]">
                     {isHindi ? "अतिथि पुस्तिका" : "Guest Book"}
@@ -476,7 +519,7 @@ export default function ContactPage() {
 
               {/* TAB 2: CONTACT DETAILS */}
               {activeTab === "details" && (
-                <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs space-y-6">
+                <div className="rounded-md border border-gray-200/90 bg-white p-4 sm:p-8 lg:p-10 shadow-xs space-y-6">
                   {/* Card Section Header */}
                   <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1E293B]">
                     {isHindi ? "संपर्क विवरण" : "Contact Details"}
@@ -587,13 +630,13 @@ export default function ContactPage() {
 
               {/* TAB 3: JOB OPPORTUNITIES */}
               {activeTab === "jobs" && (
-                <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs space-y-6">
+                <div className="rounded-md border border-gray-200/90 bg-white p-4 sm:p-8 lg:p-10 shadow-xs space-y-6">
                   <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1E293B]">
                     {isHindi ? "रोजगार के अवसर" : "Job Opportunities"}
                   </h2>
                   <div className="h-[1.5px] w-full bg-[#7C2D37]" />
 
-                  <div className="rounded-xl border border-blue-100 bg-[#F9FAFB] p-6 text-sm text-slate-700 space-y-4">
+                  <div className="rounded-xl border border-blue-100 bg-[#F9FAFB] p-5 sm:p-6 text-sm text-slate-700 space-y-4">
                     <h3 className="font-serif text-lg font-bold text-[#2E3A8C]">
                       Faculty & Staff Recruitment
                     </h3>
@@ -622,6 +665,49 @@ export default function ContactPage() {
                   </div>
                 </div>
               )}
+
+              {/* Mobile Office Hours & Instant Helpline (lg:hidden) */}
+              <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                {/* Office Hours Card */}
+                <div className="rounded-md border border-gray-200/90 bg-white p-5 shadow-xs">
+                  <div className="mb-2.5 flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2E3A8C]/10 text-[#2E3A8C]">
+                      <Clock3 size={16} />
+                    </div>
+                    <h4 className="font-serif text-sm font-bold text-slate-900">
+                      {officeHours.title}
+                    </h4>
+                  </div>
+                  <p className="text-xs leading-relaxed text-slate-600">
+                    {officeHours.schedule}
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-[#2E3A8C]">
+                    {officeHours.timing}
+                  </p>
+                  <p className="mt-2 text-[11px] leading-relaxed text-gray-500 pt-2 border-t border-dashed border-gray-200">
+                    {officeHours.note}
+                  </p>
+                </div>
+
+                {/* Instant Helpline Card */}
+                {phone && (
+                  <div className="rounded-md border border-gray-200/90 bg-white p-5 shadow-xs flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FBDD23]/30 text-[#8F5E00]">
+                      <Phone size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        {isHindi ? "हेल्पलाइन नंबर" : "Admissions Helpline"}
+                      </p>
+                      <a
+                        href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+                        className="text-sm font-bold text-[#2E3A8C] hover:underline">
+                        +91 {phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             </main>
           </div>
         </Container>

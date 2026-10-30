@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { initializeApp, getApps } from "firebase/app";
 import {
   getAuth,
@@ -9,6 +9,7 @@ import {
 import {
   collection,
   doc,
+  getDocs,
   onSnapshot,
   setDoc,
   updateDoc,
@@ -21,7 +22,6 @@ import {
 } from "firebase/firestore";
 import {
   ShieldCheck,
-  UserCheck,
   UserX,
   Clock,
   Search,
@@ -29,31 +29,36 @@ import {
   AlertCircle,
   ShieldAlert,
   Trash2,
-  KeyRound,
-  ExternalLink,
   Users,
   UserPlus,
   Mail,
   Send,
+  ChevronLeft,
   X,
   History,
   Laptop,
   CheckCircle,
   XCircle,
-  RefreshCw,
   Lock,
+  GraduationCap,
 } from "lucide-react";
 import { auth, db, firebaseConfig, firebaseReady } from "../config/firebase";
-import { SUPER_ADMIN_EMAIL } from "../hooks/useAuthState";
+import {
+  normalizePermissions,
+  SUPER_ADMIN_EMAIL,
+} from "../hooks/useAuthState";
 
 const PERMISSION_OPTIONS = [
-  { key: "notices", label: "Notices & Circulars" },
-  { key: "enquiries", label: "Admission Enquiries" },
-  { key: "feedback", label: "Student Feedback & Grievances" },
-  { key: "tours", label: "Campus Visit Requests" },
-  { key: "gallery", label: "Campus Gallery" },
-  { key: "syllabus", label: "Course Syllabus" },
-  { key: "homepagePopup", label: "Homepage Popup" },
+  { key: "notices", label: "Publish notices" },
+  { key: "enquiries", label: "Admission requests" },
+  { key: "chatbotEnquiries", label: "Website chat questions" },
+  { key: "feedback", label: "Contact messages" },
+  { key: "grievances", label: "Student concerns" },
+  { key: "tours", label: "Campus visits" },
+  { key: "gallery", label: "Campus photos" },
+  { key: "faculty", label: "Faculty and staff" },
+  { key: "syllabus", label: "Course documents" },
+  { key: "homepagePopup", label: "Homepage announcement" },
 ];
 
 function formatTimestamp(ts) {
@@ -84,15 +89,22 @@ function formatTimestamp(ts) {
 }
 
 export default function AdminUsersPage({ currentUser }) {
+  const isPrincipal =
+    (currentUser?.email || "").toLowerCase() === SUPER_ADMIN_EMAIL ||
+    currentUser?.role === "principal";
+
   const [users, setUsers] = useState([]);
   const [securityLogs, setSecurityLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [logsLoading, setLogsLoading] = useState(true);
+  const [logsLoading, setLogsLoading] = useState(false);
   const [error, setError] = useState("");
   const [toastMessage, setToastMessage] = useState("");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all"); // "all" | "pending" | "active" | "suspended" | "logs"
   const [savingId, setSavingId] = useState(null);
+
+  // Cached audit logs in memory to avoid repeated queries and save Firestore read costs
+  const cachedLogsRef = useRef(null);
 
   // Local draft states for editing permissions per user
   const [editStates, setEditStates] = useState({});
@@ -110,7 +122,7 @@ export default function AdminUsersPage({ currentUser }) {
   const [provisionError, setProvisionError] = useState("");
 
   // Filter for security logs
-  const [logFilter, setLogFilter] = useState("all"); // "all" | "SUCCESS" | "FAILED" | "USER_PROVISIONED"
+  const [logFilter, setLogFilter] = useState("all");
 
   // 1. Subscribe to adminUsers collection
   useEffect(() => {
@@ -127,19 +139,20 @@ export default function AdminUsersPage({ currentUser }) {
         const list = snapshot.docs.map((docItem) => ({
           id: docItem.id,
           ...docItem.data(),
+          permissions: normalizePermissions(docItem.data().permissions),
         }));
 
         setUsers(list);
         setLoading(false);
 
-        // Pre-populate edit states for smooth toggle interactions
+        // Pre-populate edit states
         setEditStates((prev) => {
           const next = { ...prev };
           list.forEach((item) => {
             if (!next[item.id]) {
               next[item.id] = {
                 role: item.role || "staff",
-                permissions: item.permissions || {},
+                permissions: normalizePermissions(item.permissions),
               };
             }
           });
@@ -158,47 +171,73 @@ export default function AdminUsersPage({ currentUser }) {
     };
   }, []);
 
-  // 2. Subscribe to securityLogs collection
+  // 2. Load audit history only when requested, with in-memory caching and limit(50) to save server costs
   useEffect(() => {
+    if (activeTab !== "logs") {
+      setLogsLoading(false);
+      return undefined;
+    }
+
     if (!firebaseReady) {
       setLogsLoading(false);
       return undefined;
     }
 
-    setLogsLoading(true);
-    const logsCol = collection(db, "securityLogs");
-    const logsQuery = query(logsCol, orderBy("timestamp", "desc"), limit(120));
+    // Check if we already have cached logs to avoid unnecessary reads
+    if (cachedLogsRef.current && cachedLogsRef.current.length > 0) {
+      setSecurityLogs(cachedLogsRef.current);
+      setLogsLoading(false);
+      return undefined;
+    }
 
-    const unsubscribeLogs = onSnapshot(
-      logsQuery,
-      (snapshot) => {
-        const logsList = snapshot.docs.map((docItem) => ({
+    setLogsLoading(true);
+    setError("");
+    const logsCol = collection(db, "securityLogs");
+    const logsQuery = query(logsCol, orderBy("timestamp", "desc"), limit(50));
+    let active = true;
+
+    const loadLogs = async () => {
+      try {
+        const snapshot = await getDocs(logsQuery);
+        if (!active) return;
+        const items = snapshot.docs.map((docItem) => ({
           id: docItem.id,
           ...docItem.data(),
         }));
-        setSecurityLogs(logsList);
-        setLogsLoading(false);
-      },
-      (err) => {
-        console.warn("Security logs subscription warning, falling back:", err);
-        // Fallback without ordering in case index is pending
-        onSnapshot(logsCol, (snap) => {
-          const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-          raw.sort((a, b) => {
-            const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
-            const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
-            return timeB - timeA;
+        cachedLogsRef.current = items;
+        setSecurityLogs(items);
+      } catch (err) {
+        console.warn("Could not load ordered audit history; trying fallback.", err);
+        try {
+          const snapshot = await getDocs(query(logsCol, limit(50)));
+          if (!active) return;
+          const logs = snapshot.docs.map((docItem) => ({
+            id: docItem.id,
+            ...docItem.data(),
+          }));
+          logs.sort((left, right) => {
+            const leftTime = left.timestamp?.toMillis?.() ?? 0;
+            const rightTime = right.timestamp?.toMillis?.() ?? 0;
+            return rightTime - leftTime;
           });
-          setSecurityLogs(raw.slice(0, 120));
-          setLogsLoading(false);
-        });
+          cachedLogsRef.current = logs;
+          setSecurityLogs(logs);
+        } catch (fallbackError) {
+          if (!active) return;
+          console.error("Could not load audit history.", fallbackError);
+          setError("Could not load account activity. Please try again.");
+        }
+      } finally {
+        if (active) setLogsLoading(false);
       }
-    );
+    };
+
+    loadLogs();
 
     return () => {
-      if (typeof unsubscribeLogs === "function") unsubscribeLogs();
+      active = false;
     };
-  }, []);
+  }, [activeTab]);
 
   const showToast = (message) => {
     setToastMessage(message);
@@ -244,17 +283,37 @@ export default function AdminUsersPage({ currentUser }) {
     }));
   };
 
-  // 1. Verify & Activate User (Principal approval action)
+  // 1. Verify & Activate User (Optimistic UI)
   const handleVerifyAndApprove = async (userRecord) => {
     setSavingId(userRecord.id);
     setError("");
 
-    try {
-      const draft = editStates[userRecord.id] || {
-        role: userRecord.role || "staff",
-        permissions: userRecord.permissions || {},
-      };
+    const draft = editStates[userRecord.id] || {
+      role: userRecord.role || "staff",
+      permissions: userRecord.permissions || {},
+    };
 
+    // Optimistic instant update: user immediately shows as Active
+    const previousUsers = [...users];
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userRecord.id
+          ? {
+            ...u,
+            active: true,
+            verified: true,
+            status: "active",
+            role: draft.role,
+            permissions: draft.permissions,
+          }
+          : u
+      )
+    );
+    showToast(
+      `Account for ${userRecord.email} has been verified and activated! Verification email dispatched.`
+    );
+
+    try {
       await updateDoc(doc(db, "adminUsers", userRecord.id), {
         active: true,
         verified: true,
@@ -266,8 +325,8 @@ export default function AdminUsersPage({ currentUser }) {
         lastUpdatedAt: serverTimestamp(),
       });
 
-      // Also dispatch password reset / email verification link so user has secure access credentials
-      await sendPasswordResetEmail(auth, userRecord.email).catch(() => {});
+      // Dispatch password reset / email verification link
+      await sendPasswordResetEmail(auth, userRecord.email).catch(() => { });
 
       await addDoc(collection(db, "securityLogs"), {
         email: userRecord.email.toLowerCase().trim(),
@@ -275,44 +334,53 @@ export default function AdminUsersPage({ currentUser }) {
         details: `Account verified and approved by Principal Ravi Sharma with role ${draft.role}`,
         timestamp: serverTimestamp(),
         deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : "Admin Terminal",
-      }).catch(() => {});
-
-      showToast(`Account for ${userRecord.email} has been verified and activated by Principal Ravi Sharma! Verification link dispatched.`);
+      }).catch(() => { });
     } catch (err) {
       console.error("Verification error:", err);
+      setUsers(previousUsers); // Rollback on failure
       setError(`Failed to verify ${userRecord.email}: ${err.message}`);
     } finally {
       setSavingId(null);
     }
   };
 
-  // 2. Save Updated Permissions & Role
+  // 2. Save Updated Permissions & Role (Optimistic UI)
   const handleSavePermissions = async (userRecord) => {
     setSavingId(userRecord.id);
     setError("");
 
-    try {
-      const draft = editStates[userRecord.id] || {
-        role: userRecord.role || "staff",
-        permissions: userRecord.permissions || {},
-      };
+    const draft = editStates[userRecord.id] || {
+      role: userRecord.role || "staff",
+      permissions: userRecord.permissions || {},
+    };
 
+    // Optimistic instant update
+    const previousUsers = [...users];
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userRecord.id
+          ? { ...u, role: draft.role, permissions: draft.permissions }
+          : u
+      )
+    );
+    showToast(`Assigned work areas updated for ${userRecord.email}.`);
+
+    try {
       await updateDoc(doc(db, "adminUsers", userRecord.id), {
         role: draft.role,
         permissions: draft.permissions,
         lastUpdatedAt: serverTimestamp(),
       });
-
-      showToast(`Permissions updated for ${userRecord.email}.`);
     } catch (err) {
       console.error("Save permissions error:", err);
+      setUsers(previousUsers); // Rollback on failure
       setError(`Failed to update permissions: ${err.message}`);
     } finally {
       setSavingId(null);
     }
   };
 
-  // 3. Suspend / Deactivate Access
+  // 3. Suspend / Deactivate Access (Optimistic UI)
   const handleToggleActive = async (userRecord, newActiveState) => {
     if (userRecord.email?.toLowerCase() === SUPER_ADMIN_EMAIL) {
       alert("The Super Administrator (Principal) account cannot be deactivated.");
@@ -321,6 +389,25 @@ export default function AdminUsersPage({ currentUser }) {
 
     setSavingId(userRecord.id);
     setError("");
+
+    // Optimistic instant update
+    const previousUsers = [...users];
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userRecord.id
+          ? {
+            ...u,
+            active: newActiveState,
+            status: newActiveState ? "active" : "suspended",
+          }
+          : u
+      )
+    );
+    showToast(
+      newActiveState
+        ? `Access reactivated for ${userRecord.email}.`
+        : `Access suspended for ${userRecord.email}.`
+    );
 
     try {
       await updateDoc(doc(db, "adminUsers", userRecord.id), {
@@ -335,15 +422,10 @@ export default function AdminUsersPage({ currentUser }) {
         details: `Access ${newActiveState ? "reactivated" : "suspended"} by Principal Ravi Sharma`,
         timestamp: serverTimestamp(),
         deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : "Admin Terminal",
-      }).catch(() => {});
-
-      showToast(
-        newActiveState
-          ? `Access reactivated for ${userRecord.email}.`
-          : `Access suspended for ${userRecord.email}.`
-      );
+      }).catch(() => { });
     } catch (err) {
       console.error("Status toggle error:", err);
+      setUsers(previousUsers); // Rollback on failure
       setError(`Failed to update status: ${err.message}`);
     } finally {
       setSavingId(null);
@@ -363,7 +445,7 @@ export default function AdminUsersPage({ currentUser }) {
         details: `Password setup & email verification link sent by Principal Ravi Sharma`,
         timestamp: serverTimestamp(),
         deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : "Admin Terminal",
-      }).catch(() => {});
+      }).catch(() => { });
 
       showToast(`Official password setup & verification email dispatched to ${userRecord.email}.`);
     } catch (err) {
@@ -374,7 +456,7 @@ export default function AdminUsersPage({ currentUser }) {
     }
   };
 
-  // 5. Delete Access Record
+  // 5. Delete Access Record (Optimistic UI)
   const handleDeleteUser = async (userRecord) => {
     if (userRecord.email?.toLowerCase() === SUPER_ADMIN_EMAIL) {
       alert("The Super Administrator account cannot be deleted.");
@@ -388,6 +470,11 @@ export default function AdminUsersPage({ currentUser }) {
     setSavingId(userRecord.id);
     setError("");
 
+    // Optimistic instant removal
+    const previousUsers = [...users];
+    setUsers((prev) => prev.filter((u) => u.id !== userRecord.id));
+    showToast(`Access record for ${userRecord.email} has been permanently deleted.`);
+
     try {
       await deleteDoc(doc(db, "adminUsers", userRecord.id));
       await addDoc(collection(db, "securityLogs"), {
@@ -396,11 +483,10 @@ export default function AdminUsersPage({ currentUser }) {
         details: `Access record deleted by Principal Ravi Sharma`,
         timestamp: serverTimestamp(),
         deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : "Admin Terminal",
-      }).catch(() => {});
-
-      showToast(`Access record for ${userRecord.email} has been permanently deleted.`);
+      }).catch(() => { });
     } catch (err) {
       console.error("Delete error:", err);
+      setUsers(previousUsers); // Rollback on failure
       setError(`Failed to delete record: ${err.message}`);
     } finally {
       setSavingId(null);
@@ -448,8 +534,8 @@ export default function AdminUsersPage({ currentUser }) {
       // Clean up secondary auth session immediately
       await signOut(provisioningAuth);
 
-      // Create document in adminUsers collection with pre-verified status by Ravi Sharma
-      await setDoc(doc(db, "adminUsers", newUid), {
+      const newRecord = {
+        id: newUid,
         email: targetEmail,
         displayName: provisionName.trim() || targetEmail.split("@")[0],
         role: provisionRole,
@@ -458,12 +544,28 @@ export default function AdminUsersPage({ currentUser }) {
         verified: true, // Pre-verified by Principal Ravi Sharma!
         status: "active",
         createdBy: currentUser?.email || SUPER_ADMIN_EMAIL,
-        createdAt: serverTimestamp(),
+        createdAt: new Date(),
         lastLoginAt: null,
         provisionedByAdmin: true,
+      };
+
+      // Optimistic update: instantly add to UI
+      setUsers((prev) => [newRecord, ...prev]);
+      setEditStates((prev) => ({
+        ...prev,
+        [newUid]: {
+          role: provisionRole,
+          permissions: provisionPermissions,
+        },
+      }));
+
+      // Create document in adminUsers collection
+      await setDoc(doc(db, "adminUsers", newUid), {
+        ...newRecord,
+        createdAt: serverTimestamp(),
       });
 
-      // Dispatch official Firebase Auth password setup / email verification link to user's inbox
+      // Dispatch official Firebase Auth password setup / email verification link
       await sendPasswordResetEmail(auth, targetEmail);
 
       // Record administrative provisioning event in security audit logs
@@ -473,7 +575,7 @@ export default function AdminUsersPage({ currentUser }) {
         details: `Account provisioned by Principal Ravi Sharma with role ${provisionRole}. Verification email dispatched.`,
         timestamp: serverTimestamp(),
         deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : "Admin Terminal",
-      });
+      }).catch(() => { });
 
       showToast(
         `New account successfully created for ${targetEmail}! An official password setup and email verification link has been sent directly to their email.`
@@ -498,6 +600,25 @@ export default function AdminUsersPage({ currentUser }) {
       setProvisioning(false);
     }
   };
+
+  // Security Guard: Check if non-principal somehow visited this route
+  if (!isPrincipal) {
+    return (
+      <div className="academic-admin-page font-sans space-y-5">
+        <div className="bg-white rounded-xl border border-red-200 p-8 text-center space-y-3">
+          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
+            <Lock size={24} />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900">
+            Access Restricted to Principal Authority
+          </h2>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">
+            Administrative user governance and permission provisioning is strictly restricted to Principal Ravi Sharma ({SUPER_ADMIN_EMAIL}).
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Filtered and sorted records
   const pendingUsers = useMemo(
@@ -551,184 +672,125 @@ export default function AdminUsersPage({ currentUser }) {
   }, [securityLogs, logFilter, search]);
 
   return (
-    <div className="space-y-6 font-sans">
-      {/* Header Banner */}
-      <div className="bg-white p-6 sm:p-7 rounded-xl border border-slate-200/90 shadow-2xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-xs shrink-0">
-              <ShieldCheck size={26} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                  Admin Access &amp; User Governance
-                </h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                  Principal Authority
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Authorized provisioning, verification &amp; permission governance by Principal <strong>Ravi Sharma ({SUPER_ADMIN_EMAIL})</strong>
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg shrink-0">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span>Policy: <strong>Admin-Only Provisioning</strong></span>
-            </div>
-
-            {/* Button to open Provision User Modal */}
-            <button
-              type="button"
-              onClick={() => setIsProvisionOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-lg text-xs font-bold shadow-sm transition"
-            >
-              <UserPlus size={15} />
-              <span>Provision New User</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Counter Bar */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-          <div className="text-xs font-semibold uppercase text-slate-500">Total Accounts</div>
-          <div className="text-2xl font-extrabold text-slate-900 mt-1">{users.length}</div>
-        </div>
-
-        <div
-          className={`p-4 rounded-xl border shadow-2xs ${
-            pendingUsers.length > 0
-              ? "bg-amber-50/80 border-amber-300 text-amber-950"
-              : "bg-white border-slate-200 text-slate-900"
-          }`}
-        >
-          <div className="flex items-center justify-between text-xs font-semibold uppercase">
-            <span>Pending Approvals</span>
-            {pendingUsers.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-            )}
-          </div>
-          <div className="text-2xl font-extrabold mt-1 text-amber-700">
-            {pendingUsers.length}
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-          <div className="text-xs font-semibold uppercase text-slate-500">Active Admins &amp; Staff</div>
-          <div className="text-2xl font-extrabold text-emerald-700 mt-1">{activeUsers.length}</div>
-        </div>
-
-        <div
-          onClick={() => setActiveTab("logs")}
-          className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs cursor-pointer hover:border-blue-300 transition-colors"
-        >
-          <div className="flex items-center justify-between text-xs font-semibold uppercase text-slate-500">
-            <span>Login Audit Events</span>
-            <History size={14} className="text-blue-600" />
-          </div>
-          <div className="text-2xl font-extrabold text-blue-700 mt-1">
-            {securityLogs.length}
-          </div>
-        </div>
-      </div>
-
+    <div className="academic-admin-page space-y-5 font-sans">
       {/* Toast Notification */}
       {toastMessage && (
-        <div
-          className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm font-medium flex items-center gap-2 shadow-xs transition-all"
-          role="alert"
-        >
-          <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-xl animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Error Banner */}
       {error && (
-        <div
-          className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 text-sm font-medium flex items-center gap-2 shadow-xs"
-          role="alert"
-        >
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 text-xs sm:text-sm font-medium flex items-center gap-2 shadow-xs">
           <AlertCircle size={18} className="text-red-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          <button
-            type="button"
-            onClick={() => setActiveTab("all")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
-              activeTab === "all"
-                ? "bg-blue-700 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            All Accounts ({users.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("pending")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === "pending"
-                ? "bg-amber-600 text-white shadow-2xs"
-                : "text-amber-800 bg-amber-50 hover:bg-amber-100/80"
-            }`}
-          >
-            <Clock size={13} />
-            <span>Pending Approvals ({pendingUsers.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("active")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
-              activeTab === "active"
-                ? "bg-blue-700 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            Active ({activeUsers.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("suspended")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
-              activeTab === "suspended"
-                ? "bg-blue-700 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            Suspended ({suspendedUsers.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("logs")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === "logs"
-                ? "bg-indigo-700 text-white shadow-2xs"
-                : "text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80"
-            }`}
-          >
-            <History size={13} />
-            <span>Live Login Audit ({securityLogs.length})</span>
-          </button>
+      {/* Page Header (Consistent with FacultyPage, CampusToursPage, EnquiriesPage) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-200 bg-white p-4 sm:p-6 rounded-none sm:rounded-xl shadow-xs">
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
+              <ShieldCheck className="text-[#363991]" size={26} />
+              <span>Admin Access &amp; Staff Governance</span>
+            </h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
+              Principal Authority
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Authorized provisioning, verification &amp; permission governance managed by Principal <strong>Ravi Sharma ({SUPER_ADMIN_EMAIL})</strong>.
+          </p>
         </div>
 
-        <div className="relative min-w-[220px]">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Policy: Admin-Only Provisioning</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsProvisionOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#363991] hover:bg-[#2A3178] px-3.5 py-2 text-xs font-bold text-white shadow-xs transition cursor-pointer"
+          >
+            <UserPlus size={15} />
+            <span>Provision New User</span>
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div
+          onClick={() => setActiveTab("all")}
+          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs cursor-pointer hover:border-indigo-300 transition"
+        >
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            Total Accounts
+          </div>
+          <div className="text-xl sm:text-3xl font-black text-slate-900 mt-0.5 sm:mt-1">
+            {users.length}
+          </div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Registered administrators</div>
+        </div>
+
+        <div
+          onClick={() => setActiveTab("pending")}
+          className={`rounded-xl border p-3 sm:p-4 shadow-xs cursor-pointer transition ${pendingUsers.length > 0
+              ? "bg-amber-50/50 border-amber-300 hover:border-amber-400"
+              : "bg-white border-slate-200 hover:border-indigo-300"
+            }`}
+        >
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <span>Pending Approvals</span>
+            {pendingUsers.length > 0 && (
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+            )}
+          </div>
+          <div className="text-xl sm:text-3xl font-black text-amber-600 mt-0.5 sm:mt-1">
+            {pendingUsers.length}
+          </div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Needs verification / approval</div>
+        </div>
+
+        <div
+          onClick={() => setActiveTab("active")}
+          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs cursor-pointer hover:border-indigo-300 transition"
+        >
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            Active Staff
+          </div>
+          <div className="text-xl sm:text-3xl font-black text-emerald-600 mt-0.5 sm:mt-1">
+            {activeUsers.length}
+          </div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Authorized portal access</div>
+        </div>
+
+        <div
+          onClick={() => setActiveTab("logs")}
+          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs cursor-pointer hover:border-indigo-300 transition"
+        >
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <span>Audit Events</span>
+            <History size={14} className="text-[#363991]" />
+          </div>
+          <div className="text-xl sm:text-3xl font-black text-[#363991] mt-0.5 sm:mt-1">
+            {securityLogs.length}
+          </div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Recent security audits</div>
+        </div>
+      </div>
+
+      {/* Search & Filter Toolbar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+        <div className="relative flex-1 max-w-md">
           <Search
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           />
           <input
             type="text"
@@ -736,51 +798,106 @@ export default function AdminUsersPage({ currentUser }) {
             onChange={(e) => setSearch(e.target.value)}
             placeholder={
               activeTab === "logs"
-                ? "Search login email or events…"
-                : "Search administrator email or name…"
+                ? "Search login email or event details..."
+                : "Search administrator name, email, or role..."
             }
-            className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-800 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+            className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-md outline-none focus:bg-white focus:border-[#363991] focus:ring-1 focus:ring-[#363991]"
           />
+        </div>
+
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab("all")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${activeTab === "all"
+                ? "bg-white text-slate-900 shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900"
+              }`}
+          >
+            All Accounts ({users.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("pending")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${activeTab === "pending"
+                ? "bg-white text-amber-700 shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900"
+              }`}
+          >
+            <Clock size={12} />
+            <span>Pending ({pendingUsers.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("active")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${activeTab === "active"
+                ? "bg-white text-emerald-700 shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900"
+              }`}
+          >
+            Active ({activeUsers.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("suspended")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${activeTab === "suspended"
+                ? "bg-white text-slate-900 shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900"
+              }`}
+          >
+            Suspended ({suspendedUsers.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("logs")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap flex items-center gap-1 ${activeTab === "logs"
+                ? "bg-white text-[#363991] shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900"
+              }`}
+          >
+            <History size={12} />
+            <span>Audit Events</span>
+          </button>
         </div>
       </div>
 
-      {/* ======================================================== */}
-      {/* VIEW 1: SECURITY & LIVE LOGIN AUDIT LOGS                */}
-      {/* ======================================================== */}
+      {/* VIEW 1: SECURITY AUDIT LOGS TABLE */}
       {activeTab === "logs" ? (
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5 sm:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+          {/* Lavender Header Bar (Matching Reference Image) */}
+          <div className="bg-[#E4E7F5] px-5 py-3 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <History size={18} className="text-blue-700" />
-                <span>Live Login &amp; Terminal Activity Logs</span>
-              </h2>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <History size={18} className="text-[#363991]" />
+                <span>Security Audit History</span>
+              </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Real-time security auditing: monitor authorized sign-ins, blocked guessing attempts, and account modifications.
+                Real-time security auditing: monitor authorized sign-ins, verification approvals, and account modifications.
               </p>
             </div>
 
-            {/* Filter by outcome */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
                 onClick={() => setLogFilter("all")}
-                className={`px-2.5 py-1 rounded text-xs font-semibold ${
-                  logFilter === "all"
-                    ? "bg-slate-800 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition ${logFilter === "all"
+                    ? "bg-[#363991] text-white"
+                    : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
+                  }`}
               >
                 All Events
               </button>
               <button
                 type="button"
                 onClick={() => setLogFilter("SUCCESS")}
-                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 ${
-                  logFilter === "SUCCESS"
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 cursor-pointer transition ${logFilter === "SUCCESS"
                     ? "bg-emerald-700 text-white"
-                    : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                }`}
+                    : "bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100"
+                  }`}
               >
                 <CheckCircle size={12} />
                 <span>Success</span>
@@ -788,23 +905,21 @@ export default function AdminUsersPage({ currentUser }) {
               <button
                 type="button"
                 onClick={() => setLogFilter("FAILED")}
-                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 ${
-                  logFilter === "FAILED"
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 cursor-pointer transition ${logFilter === "FAILED"
                     ? "bg-red-700 text-white"
-                    : "bg-red-50 text-red-800 hover:bg-red-100"
-                }`}
+                    : "bg-red-50 text-red-800 border border-red-200 hover:bg-red-100"
+                  }`}
               >
                 <XCircle size={12} />
-                <span>Failed Attempts</span>
+                <span>Failed</span>
               </button>
               <button
                 type="button"
                 onClick={() => setLogFilter("USER_PROVISIONED")}
-                className={`px-2.5 py-1 rounded text-xs font-semibold ${
-                  logFilter === "USER_PROVISIONED"
-                    ? "bg-blue-700 text-white"
-                    : "bg-blue-50 text-blue-800 hover:bg-blue-100"
-                }`}
+                className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition ${logFilter === "USER_PROVISIONED"
+                    ? "bg-[#363991] text-white"
+                    : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
+                  }`}
               >
                 Provisioned
               </button>
@@ -812,121 +927,187 @@ export default function AdminUsersPage({ currentUser }) {
           </div>
 
           {logsLoading ? (
-            <div className="p-8 text-center text-slate-400 text-sm">
-              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <span>Loading real-time security events…</span>
+            <div className="flex flex-col items-center justify-center py-16 bg-white">
+              <div className="h-8 w-8 rounded-full border-3 border-indigo-100 border-t-[#363991] animate-spin mb-3" />
+              <p className="text-sm font-semibold text-slate-600">Loading audit history...</p>
             </div>
           ) : filteredLogs.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 text-sm">
-              <History size={28} className="mx-auto text-slate-300 mb-2" />
-              <p className="font-semibold text-slate-600">No security audit logs found</p>
+            <div className="p-12 text-center text-slate-400 text-sm">
+              <History size={32} className="mx-auto text-slate-300 mb-2" />
+              <p className="font-semibold text-slate-700">No security audit logs found</p>
               <p className="text-xs text-slate-400 mt-0.5">
                 New login events and terminal attempts will appear here automatically.
               </p>
             </div>
           ) : (
-            <div className="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
-              {filteredLogs.map((log) => {
-                const isSuccess = log.outcome === "SUCCESS";
-                const isFailed = log.outcome === "FAILED";
-                const isProvisioned = log.outcome === "USER_PROVISIONED";
+            <>
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs font-sans min-w-[750px]">
+                  <thead>
+                    <tr className="bg-[#1F242C] text-white">
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider border-r border-[#333a44] w-[26%]">
+                        User / Identity
+                      </th>
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider border-r border-[#333a44] w-[18%]">
+                        Event Outcome
+                      </th>
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider border-r border-[#333a44] w-[36%]">
+                        Event Details
+                      </th>
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider text-right w-[20%]">
+                        Terminal &amp; Timestamp
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {filteredLogs.map((log, idx) => {
+                      const isSuccess = log.outcome === "SUCCESS";
+                      const isFailed = log.outcome === "FAILED";
+                      const isProvisioned = log.outcome === "USER_PROVISIONED";
 
-                return (
-                  <div
-                    key={log.id}
-                    className={`p-3.5 rounded-lg border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
-                      isSuccess
-                        ? "bg-emerald-50/40 border-emerald-200/80"
-                        : isFailed
-                        ? "bg-red-50/50 border-red-200"
-                        : isProvisioned
-                        ? "bg-blue-50/40 border-blue-200/80"
-                        : "bg-slate-50 border-slate-200"
-                    }`}
-                  >
-                    <div className="flex items-start sm:items-center gap-3 min-w-0">
-                      <div
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                          isSuccess
-                            ? "bg-emerald-600 text-white"
-                            : isFailed
-                            ? "bg-red-600 text-white"
-                            : isProvisioned
-                            ? "bg-blue-700 text-white"
-                            : "bg-slate-600 text-white"
-                        }`}
-                      >
-                        {isSuccess ? (
-                          <CheckCircle size={15} />
-                        ) : isFailed ? (
-                          <ShieldAlert size={15} />
-                        ) : isProvisioned ? (
-                          <UserPlus size={15} />
-                        ) : (
-                          <Laptop size={15} />
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <strong className="text-slate-900 font-semibold truncate">
-                            {log.email || "Unknown User"}
-                          </strong>
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                              isSuccess
-                                ? "bg-emerald-100 text-emerald-800"
-                                : isFailed
-                                ? "bg-red-100 text-red-800"
-                                : isProvisioned
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-slate-200 text-slate-700"
+                      return (
+                        <tr
+                          key={log.id}
+                          className={`transition-colors hover:bg-slate-50 ${idx % 2 === 1 ? "bg-[#F9FAFB]" : "bg-white"
                             }`}
-                          >
-                            {log.outcome || "EVENT"}
-                          </span>
-                        </div>
-                        <p className="text-slate-600 mt-0.5 truncate">{log.details}</p>
-                      </div>
-                    </div>
+                        >
+                          <td className="py-3 px-4 font-medium text-slate-800 border-r border-slate-200/80">
+                            <span className="font-bold text-slate-900 block truncate text-xs sm:text-sm">
+                              {log.email || "Unknown User"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 border-r border-slate-200/80">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isSuccess
+                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                  : isFailed
+                                    ? "bg-red-100 text-red-800 border border-red-200"
+                                    : isProvisioned
+                                      ? "bg-indigo-100 text-[#363991] border border-indigo-200"
+                                      : "bg-slate-200 text-slate-700"
+                                }`}
+                            >
+                              {isSuccess ? (
+                                <CheckCircle size={10} />
+                              ) : isFailed ? (
+                                <ShieldAlert size={10} />
+                              ) : isProvisioned ? (
+                                <UserPlus size={10} />
+                              ) : (
+                                <Laptop size={10} />
+                              )}
+                              <span>{log.outcome || "EVENT"}</span>
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-700 border-r border-slate-200/80">
+                            <p className="text-xs leading-relaxed text-slate-700">
+                              {log.details}
+                            </p>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex flex-col text-[11px] leading-tight">
+                              <span className="font-semibold text-slate-800">
+                                {formatTimestamp(log.timestamp) || "Just now"}
+                              </span>
+                              <span
+                                className="text-[10px] text-slate-400 truncate mt-0.5"
+                                title={log.deviceInfo}
+                              >
+                                {log.deviceInfo?.includes("Windows")
+                                  ? "Windows Terminal"
+                                  : log.deviceInfo?.includes("Mac")
+                                    ? "Mac Terminal"
+                                    : log.deviceInfo?.includes("Android") ||
+                                      log.deviceInfo?.includes("iPhone")
+                                      ? "Mobile Terminal"
+                                      : "Web Terminal"}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-                    <div className="flex items-center gap-4 text-slate-400 shrink-0 sm:text-right pl-10 sm:pl-0">
-                      <div className="flex flex-col text-[11px] leading-tight">
-                        <span className="font-semibold text-slate-700">
-                          {formatTimestamp(log.timestamp) || "Just now"}
+              {/* Mobile App Cards View for Security Audit Logs */}
+              <div className="block lg:hidden divide-y divide-slate-200 bg-white">
+                {filteredLogs.map((log) => {
+                  const isSuccess = log.outcome === "SUCCESS";
+                  const isFailed = log.outcome === "FAILED";
+                  const isProvisioned = log.outcome === "USER_PROVISIONED";
+
+                  return (
+                    <div key={log.id} className="p-3.5 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-slate-900 text-xs truncate">
+                          {log.email || "Unknown User"}
                         </span>
-                        <span className="text-[10px] text-slate-400 truncate max-w-[200px]" title={log.deviceInfo}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 ${isSuccess
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                              : isFailed
+                                ? "bg-red-100 text-red-800 border border-red-200"
+                                : isProvisioned
+                                  ? "bg-indigo-100 text-[#363991] border border-indigo-200"
+                                  : "bg-slate-200 text-slate-700"
+                            }`}
+                        >
+                          {log.outcome || "EVENT"}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-slate-700 leading-relaxed">
+                        {log.details}
+                      </p>
+
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100">
+                        <span>{formatTimestamp(log.timestamp) || "Just now"}</span>
+                        <span>
                           {log.deviceInfo?.includes("Windows")
-                            ? "Windows Terminal"
+                            ? "Windows"
                             : log.deviceInfo?.includes("Mac")
-                            ? "Mac Terminal"
-                            : log.deviceInfo?.includes("Android") || log.deviceInfo?.includes("iPhone")
-                            ? "Mobile Terminal"
-                            : "Web Terminal"}
+                              ? "Mac"
+                              : log.deviceInfo?.includes("Android") || log.deviceInfo?.includes("iPhone")
+                                ? "Mobile"
+                                : "Web"}
                         </span>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       ) : (
-        /* ======================================================== */
-        /* VIEW 2: ADMINISTRATOR & USER ACCOUNTS LIST               */
-        /* ======================================================== */
-        <div>
+        /* VIEW 2: ADMINISTRATION TABLE (Matching Reference Image 1 & FacultyPage Style) */
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+          {/* Lavender Header Bar (Matching Image 1 & FacultyPage line 1119) */}
+          <div className="bg-[#E4E7F5] px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              Administration
+            </h3>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/90 text-slate-700 border border-slate-300">
+              {filteredUsers.length} Staff Members
+            </span>
+          </div>
+
           {loading ? (
-            <div className="p-12 text-center text-slate-400 text-sm bg-white rounded-xl border border-slate-200/90 shadow-2xs">
-              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <span>Loading administrative access records…</span>
+            <div className="flex flex-col items-center justify-center py-20 bg-white">
+              <div className="h-8 w-8 rounded-full border-3 border-indigo-100 border-t-[#363991] animate-spin mb-3" />
+              <p className="text-sm font-semibold text-slate-600">
+                Loading administrative access records...
+              </p>
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="p-12 text-center bg-white rounded-xl border border-slate-200/90 shadow-2xs">
-              <Users size={32} className="mx-auto text-slate-300 mb-2" />
-              <p className="text-sm font-semibold text-slate-700">No account records found</p>
-              <p className="text-xs text-slate-400 mt-0.5">
+            <div className="flex flex-col items-center justify-center py-16 bg-white text-center px-4">
+              <div className="p-3 bg-indigo-50 text-[#363991] rounded-lg mb-3">
+                <Users size={28} />
+              </div>
+              <h3 className="text-base font-bold text-slate-800">No account records found</h3>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-sm mt-1">
                 {activeTab === "pending"
                   ? "All pending account registration requests have been reviewed."
                   : "No administrative accounts match your search filter."}
@@ -934,248 +1115,519 @@ export default function AdminUsersPage({ currentUser }) {
               <button
                 type="button"
                 onClick={() => setIsProvisionOpen(true)}
-                className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-semibold hover:bg-blue-800 transition shadow-2xs"
+                className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#363991] hover:bg-[#2A3178] text-white text-xs font-bold transition shadow-xs cursor-pointer"
               >
                 <UserPlus size={14} />
                 <span>Provision an Account Now</span>
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredUsers.map((u) => {
-                const isSuperAdmin = u.email?.toLowerCase() === SUPER_ADMIN_EMAIL;
-                const draft = editStates[u.id] || {
-                  role: u.role || "staff",
-                  permissions: u.permissions || {},
-                };
-                const isPending =
-                  u.verified !== true || u.status === "pending_verification";
-                const isSaving = savingId === u.id;
-                const lastLoginFormatted = formatTimestamp(u.lastLoginAt);
+            <>
+              {/* Black Table Header & Crisp Clean Rows matching Reference Image 1 */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs font-sans min-w-[750px]">
+                  <thead>
+                    <tr className="bg-[#1F242C] text-white">
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider border-r border-[#333a44] w-[26%]">
+                        Name
+                      </th>
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider border-r border-[#333a44] w-[22%]">
+                        Designation
+                      </th>
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider border-r border-[#333a44] w-[34%]">
+                        Department &amp; Qualifications
+                      </th>
+                      <th className="py-2.5 px-4 font-bold text-xs uppercase tracking-wider text-right w-[18%]">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {filteredUsers.map((u, idx) => {
+                      const isSuperAdmin = u.email?.toLowerCase() === SUPER_ADMIN_EMAIL;
+                      const draft = editStates[u.id] || {
+                        role: u.role || "staff",
+                        permissions: normalizePermissions(u.permissions),
+                      };
+                      const isPending =
+                        u.verified !== true || u.status === "pending_verification";
+                      const isSaving = savingId === u.id;
+                      const lastLoginFormatted = formatTimestamp(u.lastLoginAt);
 
-                return (
-                  <div
-                    key={u.id}
-                    className={`p-5 sm:p-6 rounded-xl border transition-all shadow-2xs ${
-                      isSuperAdmin
-                        ? "bg-blue-50/40 border-blue-200 ring-1 ring-blue-100"
-                        : isPending
-                        ? "bg-amber-50/30 border-amber-200"
-                        : u.active
-                        ? "bg-white border-slate-200/90"
-                        : "bg-slate-50 border-slate-200 text-slate-400"
-                    }`}
-                  >
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div
-                          className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs ${
-                            isSuperAdmin
-                              ? "bg-blue-700 text-white"
-                              : isPending
-                              ? "bg-amber-500 text-white"
-                              : u.active
-                              ? "bg-slate-700 text-white"
-                              : "bg-slate-300 text-slate-600"
-                          }`}
+                      return (
+                        <tr
+                          key={u.id}
+                          className={`transition-colors hover:bg-indigo-50/25 ${idx % 2 === 1 ? "bg-[#F9FAFB]" : "bg-white"
+                            }`}
                         >
-                          {u.email ? u.email.charAt(0).toUpperCase() : "U"}
+                          {/* COLUMN 1: NAME (Matching Reference Image 1) */}
+                          <td className="py-3 px-4 align-top border-r border-slate-200/80">
+                            <span className="font-bold text-slate-900 block text-sm">
+                              {u.displayName || u.email}
+                            </span>
+                            {u.email ? (
+                              <a
+                                href={`mailto:${u.email}`}
+                                className="text-xs text-blue-700 hover:underline block mt-0.5 truncate"
+                              >
+                                {u.email}
+                              </a>
+                            ) : (
+                              <span className="text-xs text-slate-400 italic block mt-0.5">
+                                No email listed
+                              </span>
+                            )}
+
+                            <div className="mt-1.5 space-y-0.5 text-[11px] text-slate-500">
+                              <div>
+                                UID:{" "}
+                                <code className="font-mono text-[10px] text-[#363991] bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100">
+                                  {u.id.length > 14 ? u.id.slice(0, 14) + "…" : u.id}
+                                </code>
+                              </div>
+                              {u.createdBy && (
+                                <div className="text-[10px] text-slate-400 truncate">
+                                  Added by: {u.createdBy}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* COLUMN 2: DESIGNATION (Matching Reference Image 1) */}
+                          <td className="py-3 px-4 align-top border-r border-slate-200/80">
+                            <div className="space-y-1.5">
+                              <div>
+                                {isSuperAdmin ? (
+                                  <span className="font-bold text-slate-900 text-xs sm:text-sm block">
+                                    Principal / Super Admin
+                                  </span>
+                                ) : (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-semibold text-slate-500">Role:</span>
+                                    <select
+                                      value={draft.role || "staff"}
+                                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                                      className="px-2 py-0.5 rounded border border-slate-300 text-xs font-bold bg-white text-slate-800 outline-none focus:border-[#363991] cursor-pointer"
+                                    >
+                                      <option value="staff">Staff</option>
+                                      <option value="principal">Principal</option>
+                                    </select>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Status badge */}
+                              <div>
+                                {isSuperAdmin ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1F242C] text-white uppercase tracking-wider">
+                                    <ShieldCheck size={11} /> Master Authority
+                                  </span>
+                                ) : isPending ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wider">
+                                    <Clock size={11} /> Pending Verification
+                                  </span>
+                                ) : u.active ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
+                                    <CheckCircle2 size={11} /> Active Access
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 uppercase tracking-wider">
+                                    <UserX size={11} /> Suspended
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="text-[11px] text-slate-500 pt-0.5">
+                                <span className="text-slate-400">Last login:</span>{" "}
+                                <strong
+                                  className={
+                                    lastLoginFormatted
+                                      ? "text-slate-800 font-semibold"
+                                      : "text-slate-400 font-normal"
+                                  }
+                                >
+                                  {lastLoginFormatted || "Never"}
+                                </strong>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* COLUMN 3: DEPARTMENT & QUALIFICATIONS / PERMISSIONS (Matching Reference Image 1) */}
+                          <td className="py-3 px-4 align-top border-r border-slate-200/80 text-xs">
+                            {isSuperAdmin ? (
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 flex items-center gap-1.5 text-xs">
+                                  <GraduationCap size={14} className="text-[#363991] shrink-0" />
+                                  <span>Campus Administration &amp; Institutional Governance</span>
+                                </span>
+                                <p className="text-xs text-slate-500 leading-relaxed">
+                                  Full unhindered master access across all modules, notices, admissions, syllabus, faculty, and system security controls.
+                                </p>
+                                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-[#363991] border border-indigo-100 mt-1">
+                                  Full Master Access (10/10)
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-semibold text-slate-800 flex items-center gap-1.5 text-xs">
+                                    <GraduationCap size={14} className="text-[#363991] shrink-0" />
+                                    <span>Work Areas &amp; Tasks</span>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => grantAllPermissions(u.id)}
+                                    className="text-[11px] font-bold text-[#363991] hover:underline cursor-pointer"
+                                  >
+                                    Choose all tasks
+                                  </button>
+                                </div>
+
+                                {/* Interactive Permission Badges in Black & White Theme */}
+                                <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                                  {PERMISSION_OPTIONS.map((opt) => {
+                                    const isGranted = Boolean(draft.permissions?.[opt.key]);
+                                    return (
+                                      <label
+                                        key={opt.key}
+                                        className={`flex items-center gap-1.5 px-2 py-1 rounded border text-[11px] cursor-pointer select-none transition ${isGranted
+                                            ? "bg-[#1F242C] text-white border-[#1F242C] font-semibold"
+                                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                                          }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isGranted}
+                                          onChange={() => handlePermissionToggle(u.id, opt.key)}
+                                          className="w-3 h-3 rounded border-slate-300 accent-black shrink-0"
+                                        />
+                                        <span className="truncate">{opt.label}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+
+                          {/* COLUMN 4: ACTIONS */}
+                          <td className="py-3 px-4 align-top text-right">
+                            {isSuperAdmin ? (
+                              <div className="text-right">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 italic">
+                                  <Lock size={12} /> Master Account Protected
+                                </span>
+                              </div>
+                            ) : isPending ? (
+                              <div className="space-y-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleVerifyAndApprove(u)}
+                                  disabled={isSaving}
+                                  className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-md text-xs font-bold shadow-xs transition disabled:opacity-60 cursor-pointer"
+                                >
+                                  <ShieldCheck size={13} />
+                                  <span>{isSaving ? "Verifying…" : "Verify & Grant Access"}</span>
+                                </button>
+                                <div className="flex items-center justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteUser(u)}
+                                    disabled={isSaving}
+                                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
+                                    title="Delete access record"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSavePermissions(u)}
+                                  disabled={isSaving}
+                                  className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-[#1F242C] hover:bg-black text-white rounded-md text-xs font-bold shadow-xs transition disabled:opacity-60 cursor-pointer"
+                                >
+                                  <span>{isSaving ? "Saving…" : "Save task choices"}</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleSendVerificationEmail(u)}
+                                  disabled={isSaving}
+                                  title="Send password reset and email verification link to user's inbox"
+                                  className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-md text-xs font-semibold border border-slate-300 transition disabled:opacity-60 cursor-pointer"
+                                >
+                                  <Mail size={12} className="text-[#363991]" />
+                                  <span>Send Setup Link</span>
+                                </button>
+
+                                <div className="flex items-center justify-between gap-1 pt-0.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleActive(u, !u.active)}
+                                    disabled={isSaving}
+                                    className={`flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-[11px] font-semibold border transition cursor-pointer ${u.active
+                                        ? "border-amber-200 text-amber-800 bg-amber-50 hover:bg-amber-100"
+                                        : "border-emerald-200 text-emerald-800 bg-emerald-50 hover:bg-emerald-100"
+                                      }`}
+                                  >
+                                    {u.active ? "Suspend" : "Reactivate"}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteUser(u)}
+                                    disabled={isSaving}
+                                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer shrink-0"
+                                    title="Delete access record"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile App Cards View for Administration Users */}
+              <div className="block lg:hidden divide-y divide-slate-200 bg-white">
+                {filteredUsers.map((u) => {
+                  const isSuperAdmin = u.email?.toLowerCase() === SUPER_ADMIN_EMAIL;
+                  const draft = editStates[u.id] || {
+                    role: u.role || "staff",
+                    permissions: normalizePermissions(u.permissions),
+                  };
+                  const isPending =
+                    u.verified !== true || u.status === "pending_verification";
+                  const isSaving = savingId === u.id;
+                  const lastLoginFormatted = formatTimestamp(u.lastLoginAt);
+
+                  return (
+                    <div key={u.id} className="p-4 space-y-3">
+                      {/* Header: Name, Email & Status */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-900 block text-sm truncate">
+                            {u.displayName || u.email}
+                          </span>
+                          {u.email && (
+                            <a
+                              href={`mailto:${u.email}`}
+                              className="text-xs text-blue-700 hover:underline block mt-0.5 truncate"
+                            >
+                              {u.email}
+                            </a>
+                          )}
                         </div>
 
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <strong className="text-sm sm:text-base font-bold text-slate-900 truncate">
-                              {u.displayName || u.email}
-                            </strong>
-
-                            {u.displayName && (
-                              <span className="text-xs text-slate-500 font-normal">
-                                ({u.email})
-                              </span>
-                            )}
-
-                            {isSuperAdmin ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-700 text-white uppercase tracking-wider">
-                                <ShieldCheck size={12} />
-                                Master Principal
-                              </span>
-                            ) : isPending ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wider">
-                                <Clock size={11} />
-                                Pending Verification
-                              </span>
-                            ) : u.active ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
-                                <CheckCircle2 size={11} />
-                                Active &bull; {u.role === "principal" ? "Principal" : "Staff"}
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 uppercase tracking-wider">
-                                <UserX size={11} />
-                                Suspended
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="text-xs text-slate-500 mt-1 flex items-center gap-3.5 flex-wrap">
-                            <span>
-                              UID: <code className="font-mono text-[11px] text-slate-600">{u.id}</code>
+                        {/* Status Badge */}
+                        <div className="shrink-0">
+                          {isSuperAdmin ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1F242C] text-white uppercase tracking-wider">
+                              <ShieldCheck size={10} /> Master
                             </span>
-                            <span>
-                              Last Login:{" "}
-                              <strong className={lastLoginFormatted ? "text-slate-800" : "text-slate-400 font-normal"}>
-                                {lastLoginFormatted ? lastLoginFormatted : "Never logged in yet"}
-                              </strong>
+                          ) : isPending ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wider">
+                              <Clock size={10} /> Pending
                             </span>
-                            {u.createdBy && (
-                              <span>Provisioned by: <strong>{u.createdBy}</strong></span>
-                            )}
-                          </div>
+                          ) : u.active ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
+                              <CheckCircle2 size={10} /> Active
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 uppercase tracking-wider">
+                              <UserX size={10} /> Suspended
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      {/* Actions Bar for User */}
-                      {!isSuperAdmin && (
-                        <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                          {isPending ? (
+                      {/* Role & Last Login */}
+                      <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                        <div>
+                          {isSuperAdmin ? (
+                            <span className="font-bold text-slate-900 text-xs">
+                              Principal / Super Admin
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-slate-500 font-semibold">Role:</span>
+                              <select
+                                value={draft.role || "staff"}
+                                onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                                className="px-2 py-0.5 rounded border border-slate-300 text-xs font-bold bg-white text-slate-800 outline-none"
+                              >
+                                <option value="staff">Staff</option>
+                                <option value="principal">Principal</option>
+                              </select>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-slate-400">
+                          Last login: <strong className="text-slate-700">{lastLoginFormatted || "Never"}</strong>
+                        </span>
+                      </div>
+
+                      {/* Work Areas & Tasks */}
+                      <div className="pt-2 border-t border-slate-100">
+                        {isSuperAdmin ? (
+                          <p className="text-xs text-slate-500">
+                            Full master access across all institutional management modules.
+                          </p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-slate-700">Work Areas & Tasks</span>
+                              <button
+                                type="button"
+                                onClick={() => grantAllPermissions(u.id)}
+                                className="text-[11px] font-bold text-[#363991] hover:underline cursor-pointer"
+                              >
+                                Choose all
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {PERMISSION_OPTIONS.map((opt) => {
+                                const isGranted = Boolean(draft.permissions?.[opt.key]);
+                                return (
+                                  <button
+                                    key={opt.key}
+                                    type="button"
+                                    onClick={() => handlePermissionToggle(u.id, opt.key)}
+                                    className={`flex items-center justify-between p-1.5 rounded text-[11px] font-semibold border transition text-left cursor-pointer ${isGranted
+                                        ? "bg-[#1F242C] text-white border-[#1F242C]"
+                                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                                      }`}
+                                  >
+                                    <span className="truncate">{opt.label}</span>
+                                    {isGranted && <CheckCircle size={10} className="shrink-0 text-emerald-400" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Actions Strip */}
+                      <div className="pt-2 border-t border-slate-100">
+                        {isSuperAdmin ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500">
+                            <Lock size={12} /> Master Account Protected
+                          </span>
+                        ) : isPending ? (
+                          <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => handleVerifyAndApprove(u)}
                               disabled={isSaving}
-                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white rounded-lg text-xs font-bold shadow-sm transition disabled:opacity-60"
+                              className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-xs transition disabled:opacity-60 cursor-pointer"
                             >
                               <ShieldCheck size={14} />
                               <span>{isSaving ? "Verifying…" : "Verify & Grant Access"}</span>
                             </button>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => handleSendVerificationEmail(u)}
-                                disabled={isSaving}
-                                title="Send password reset and email verification link to user's inbox"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold border border-slate-300 transition disabled:opacity-60"
-                              >
-                                <Mail size={13} className="text-blue-600" />
-                                <span>Send Setup Link</span>
-                              </button>
-
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteUser(u)}
+                              disabled={isSaving}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 transition cursor-pointer"
+                              title="Delete access record"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
                               <button
                                 type="button"
                                 onClick={() => handleSavePermissions(u)}
                                 disabled={isSaving}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-semibold shadow-2xs transition disabled:opacity-60"
+                                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 bg-[#1F242C] hover:bg-black text-white rounded-lg text-xs font-bold shadow-xs transition disabled:opacity-60 cursor-pointer"
                               >
-                                <span>Save Permissions</span>
+                                <span>{isSaving ? "Saving…" : "Save task choices"}</span>
                               </button>
-
+                              <button
+                                type="button"
+                                onClick={() => handleSendVerificationEmail(u)}
+                                disabled={isSaving}
+                                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold border border-slate-300 transition disabled:opacity-60 cursor-pointer"
+                              >
+                                <Mail size={13} className="text-[#363991]" />
+                                <span>Send Setup Link</span>
+                              </button>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
                               <button
                                 type="button"
                                 onClick={() => handleToggleActive(u, !u.active)}
                                 disabled={isSaving}
-                                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
-                                  u.active
+                                className={`flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${u.active
                                     ? "border-amber-200 text-amber-800 bg-amber-50 hover:bg-amber-100"
                                     : "border-emerald-200 text-emerald-800 bg-emerald-50 hover:bg-emerald-100"
-                                }`}
+                                  }`}
                               >
-                                {u.active ? "Suspend Access" : "Reactivate Access"}
+                                {u.active ? "Suspend User" : "Reactivate User"}
                               </button>
-                            </>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteUser(u)}
-                            disabled={isSaving}
-                            className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
-                            title="Delete this access record"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Permissions & Role Configuration (Disabled for Super Admin who has all permissions) */}
-                    {!isSuperAdmin && (
-                      <div className="pt-4 space-y-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                              Assigned Role:
-                            </label>
-                            <select
-                              value={draft.role || "staff"}
-                              onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                              className="px-3 py-1 rounded-lg border border-slate-300 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-blue-600"
-                            >
-                              <option value="staff">Staff (Selected Permissions)</option>
-                              <option value="principal">Principal (Full System Access)</option>
-                            </select>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => grantAllPermissions(u.id)}
-                            className="text-[11px] font-semibold text-blue-700 hover:text-blue-900 hover:underline text-left sm:text-right"
-                          >
-                            Select All Permissions
-                          </button>
-                        </div>
-
-                        {/* Permissions Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 pt-1">
-                          {PERMISSION_OPTIONS.map((opt) => {
-                            const isGranted = Boolean(draft.permissions?.[opt.key]);
-                            return (
-                              <label
-                                key={opt.key}
-                                className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer select-none transition ${
-                                  isGranted
-                                    ? "bg-blue-50/80 border-blue-300 text-blue-950 font-medium"
-                                    : "bg-slate-50 border-slate-200 text-slate-600"
-                                }`}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteUser(u)}
+                                disabled={isSaving}
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 transition cursor-pointer"
+                                title="Delete access record"
                               >
-                                <input
-                                  type="checkbox"
-                                  checked={isGranted}
-                                  onChange={() => handlePermissionToggle(u.id, opt.key)}
-                                  className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <span className="truncate">{opt.label}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL: PROVISION NEW USER (ADMIN EXCLUSIVE)              */}
-      {/* ======================================================== */}
+      {/* MODAL: PROVISION NEW USER - FULLSCREEN ON MOBILE */}
       {isProvisionOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 z-50 flex items-stretch justify-stretch p-0 bg-white sm:bg-slate-900/60 sm:backdrop-blur-sm sm:items-center sm:justify-center sm:p-4 animate-in fade-in duration-200"
+          onClick={() => setIsProvisionOpen(false)}
+        >
+          <div
+            className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-w-lg sm:max-h-[90vh] bg-white rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col animate-in fade-in sm:zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-4 border-b border-slate-100 bg-white sm:bg-slate-50/90 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center">
-                  <UserPlus size={16} />
+                <button
+                  type="button"
+                  onClick={() => setIsProvisionOpen(false)}
+                  className="sm:hidden p-2 -ml-1 text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#363991] border border-indigo-100 hidden sm:flex items-center justify-center shrink-0">
+                  <UserPlus size={18} />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900 leading-tight">
                     Provision New Portal User
                   </h3>
-                  <p className="text-[11px] text-slate-500">
-                    Administrator creation with automatic email verification link
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Create administrative account with automatic verification link
                   </p>
                 </div>
               </div>
@@ -1183,14 +1635,15 @@ export default function AdminUsersPage({ currentUser }) {
               <button
                 type="button"
                 onClick={() => setIsProvisionOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg border border-transparent hover:border-slate-200 transition cursor-pointer"
+                title="Close"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleProvisionUserSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleProvisionUserSubmit} className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 -webkit-overflow-scrolling-touch">
               {provisionError && (
                 <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-2">
                   <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
@@ -1199,8 +1652,8 @@ export default function AdminUsersPage({ currentUser }) {
               )}
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Full Name / Designation
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Full Name / Designation <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1208,13 +1661,13 @@ export default function AdminUsersPage({ currentUser }) {
                   onChange={(e) => setProvisionName(e.target.value)}
                   placeholder="e.g. Dr. Priya Verma (Faculty)"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#363991] focus:ring-2 focus:ring-[#363991]/15 transition bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Institutional Email Address
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Institutional Email Address <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -1222,39 +1675,38 @@ export default function AdminUsersPage({ currentUser }) {
                   onChange={(e) => setProvisionEmail(e.target.value)}
                   placeholder="e.g. priya.verma@haryanashakti.ac.in"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#363991] focus:ring-2 focus:ring-[#363991]/15 transition font-mono bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   Assigned Administrative Role
                 </label>
                 <select
                   value={provisionRole}
                   onChange={(e) => setProvisionRole(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-800 outline-none focus:border-blue-600 font-medium"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-800 outline-none focus:border-[#363991] focus:ring-2 focus:ring-[#363991]/15 font-medium transition bg-white"
                 >
-                  <option value="staff">Staff (Module-Specific Access)</option>
-                  <option value="principal">Principal (Full Access)</option>
+                  <option value="staff">Staff</option>
+                  <option value="principal">Principal</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                  Module Permissions
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Choose the work areas for this person
                 </label>
-                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 border border-slate-100 rounded-lg">
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
                   {PERMISSION_OPTIONS.map((opt) => {
                     const isChecked = Boolean(provisionPermissions[opt.key]);
                     return (
                       <label
                         key={opt.key}
-                        className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer select-none transition ${
-                          isChecked
-                            ? "bg-blue-50/80 border-blue-300 text-blue-950 font-medium"
-                            : "bg-slate-50 border-slate-200 text-slate-600"
-                        }`}
+                        className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer select-none transition ${isChecked
+                            ? "bg-[#1F242C] text-white border-[#1F242C] font-semibold"
+                            : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                          }`}
                       >
                         <input
                           type="checkbox"
@@ -1265,7 +1717,7 @@ export default function AdminUsersPage({ currentUser }) {
                               [opt.key]: !prev[opt.key],
                             }))
                           }
-                          className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          className="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900 accent-black"
                         />
                         <span className="truncate">{opt.label}</span>
                       </label>
@@ -1274,27 +1726,27 @@ export default function AdminUsersPage({ currentUser }) {
                 </div>
               </div>
 
-              <div className="rounded-lg bg-blue-50/80 p-3 border border-blue-200 text-xs text-blue-900 flex items-start gap-2">
-                <Mail size={16} className="text-blue-700 shrink-0 mt-0.5" />
+              <div className="rounded-lg bg-indigo-50/80 p-3 border border-indigo-100 text-xs text-[#363991] flex items-start gap-2.5">
+                <Mail size={16} className="text-[#363991] shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  <strong>Verification &amp; Password link:</strong> When you click Provision, an official email from the college system will automatically be dispatched to the user's email address allowing them to set their password and verify their account.
+                  <strong>Verification &amp; Password link:</strong> An official invitation will be sent to the user&apos;s email allowing them to securely set their password and verify access.
                 </p>
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-slate-100 bg-white sm:bg-transparent shadow-[0_-4px_16px_rgba(0,0,0,0.05)] sm:shadow-none -mx-4 -mb-4 sm:mx-0 sm:mb-0 px-4 sm:px-0">
                 <button
                   type="button"
                   onClick={() => setIsProvisionOpen(false)}
                   disabled={provisioning}
-                  className="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={provisioning}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-lg text-xs font-bold shadow-md transition disabled:opacity-60"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-[#363991] hover:bg-[#2A3178] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition disabled:opacity-60 cursor-pointer text-center"
                 >
                   {provisioning ? (
                     <>
@@ -1303,7 +1755,7 @@ export default function AdminUsersPage({ currentUser }) {
                     </>
                   ) : (
                     <>
-                      <Send size={13} />
+                      <Send size={14} />
                       <span>Provision &amp; Send Verification Email</span>
                     </>
                   )}

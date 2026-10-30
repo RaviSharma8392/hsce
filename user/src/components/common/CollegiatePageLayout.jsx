@@ -37,9 +37,9 @@ export function CollegiatePageLayout({
       )}
 
       {/* 2. Main Page Grid with Left Sidebar & Right Content */}
-      <div className="relative z-10 py-10 sm:py-14">
+      <div className="relative z-10 py-6 sm:py-10 lg:py-14">
         <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             {/* Left Sidebar Navigation */}
             <div className="lg:col-span-4 xl:col-span-3">
               <div className="sticky top-24">

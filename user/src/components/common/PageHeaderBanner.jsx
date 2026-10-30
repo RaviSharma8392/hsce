@@ -20,14 +20,14 @@ export function PageHeaderBanner({
   return (
     <div className={`w-full ${className}`}>
       {/* Top Deep Royal Blue Banner Section */}
-      <div className="bg-[#1c3274] text-white py-12 sm:py-16 md:py-20 relative overflow-hidden">
+      <div className="bg-[#1c3274] text-white py-8 sm:py-14 md:py-20 relative overflow-hidden">
         <Container>
           <div className="max-w-4xl">
-            <Heading className="text-3xl sm:text-4xl lg:text-[42px] font-bold font-poppins text-white tracking-tight leading-tight">
+            <Heading className="text-2xl sm:text-4xl lg:text-[42px] font-bold font-poppins text-white tracking-tight leading-tight">
               {title}
             </Heading>
             {subtitle && (
-              <p className="mt-3 text-sm sm:text-base text-white/90 font-normal leading-relaxed font-sans max-w-3xl">
+              <p className="mt-2.5 sm:mt-3 text-xs sm:text-base text-white/90 font-normal leading-relaxed font-sans max-w-3xl">
                 {subtitle}
               </p>
             )}
@@ -40,7 +40,7 @@ export function PageHeaderBanner({
         <Container>
           <nav
             aria-label="Breadcrumb"
-            className="py-3 sm:py-3.5 flex items-center flex-wrap text-xs sm:text-[13px] text-gray-700 font-sans">
+            className="py-2.5 sm:py-3.5 flex items-center flex-wrap gap-y-1 text-xs sm:text-[13px] text-gray-700 font-sans">
             {/* Always start with Home */}
             <Link
               to="/"
