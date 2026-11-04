@@ -59,6 +59,8 @@ export default function WelcomeSplashScreen() {
         <div className="w-24 h-24 sm:w-28 sm:h-28 mb-4 flex items-center justify-center">
           <img
             src={imageData.collegeLogo}
+            width="432"
+            height="432"
             alt="Haryana Shakti College of Education Logo"
             className="w-full h-full object-contain"
             loading="eager"

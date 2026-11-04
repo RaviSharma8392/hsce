@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
 import {
   Monitor,
@@ -291,6 +290,8 @@ function CampusOverviewComponent({ isHindi, onSelectTab }) {
         <div className="relative aspect-[16/9] overflow-hidden rounded border border-gray-200 bg-slate-100 shadow-2xs mb-6">
           <img
             src={imageData.campusHero}
+            width="1200"
+            height="675"
             alt="Haryana Shakti College of Education Campus"
             onError={(e) => {
               e.currentTarget.onerror = null;
@@ -507,6 +508,8 @@ function FacilityDetailComponent({ facility, isHindi, onSelectTab }) {
         <div className="relative aspect-[16/9] max-h-[380px] w-full overflow-hidden rounded border border-gray-200 bg-slate-100 shadow-2xs mb-6">
           <img
             src={facility.image}
+            width="1200"
+            height="675"
             alt={facility.title}
             onError={(e) => {
               e.currentTarget.onerror = null;
@@ -780,6 +783,8 @@ function CampusPhotoViewer({ photo, onClose }) {
 
         <img
           src={photo.image}
+          width="1200"
+          height="800"
           alt={photo.alt}
           className="max-h-[75vh] w-full object-contain bg-black"
         />
@@ -866,12 +871,6 @@ export default function CampusLifePage() {
 
   return (
     <>
-      <Helmet>
-        <title>
-          {activeBreadcrumbLabel} | {isHindi ? "परिसर एवं सुविधाएं" : "Facilities & Campus Life"} | HSCE
-        </title>
-      </Helmet>
-
       <CollegiatePageLayout
         bannerTitle={isHindi ? "परिसर का जीवन एवं सुविधाएं" : "Facilities & Campus Life"}
         bannerSubtitle={

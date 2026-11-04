@@ -23,12 +23,36 @@ function escapeXml(value) {
 }
 
 function createSitemap() {
+  const currentDate = new Date().toISOString().split('T')[0]
   const urls = seoPages
     .filter((page) => page.indexable !== false)
-    .map(
-      (page) =>
-        `  <url><loc>${escapeXml(`${siteUrl}${page.path}`)}</loc></url>`,
-    )
+    .map((page) => {
+      const loc = escapeXml(`${siteUrl}${page.path === '/' ? '/' : page.path}`)
+      const lastmod = page.lastmod || currentDate
+      const changefreq =
+        page.changefreq ||
+        (page.path === '/' ||
+        page.path.startsWith('/notices') ||
+        page.path.startsWith('/admissions')
+          ? 'weekly'
+          : 'monthly')
+      const priority =
+        page.priority ||
+        (page.path === '/'
+          ? '1.0'
+          : page.path === '/course' || page.path === '/admissions'
+            ? '0.9'
+            : '0.8')
+
+      return [
+        '  <url>',
+        `    <loc>${loc}</loc>`,
+        `    <lastmod>${lastmod}</lastmod>`,
+        `    <changefreq>${changefreq}</changefreq>`,
+        `    <priority>${priority}</priority>`,
+        '  </url>',
+      ].join('\n')
+    })
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',

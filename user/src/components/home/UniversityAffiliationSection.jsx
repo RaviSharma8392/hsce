@@ -197,6 +197,8 @@ export function UniversityAffiliationSection() {
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                 <img
                   src={universityData.campusImage}
+                  width="1600"
+                  height="1000"
                   alt="Guru Gobind Singh Indraprastha University campus"
                   loading="lazy"
                   className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"

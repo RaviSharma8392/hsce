@@ -5,3 +5,14 @@
   Cross-Origin-Opener-Policy: same-origin-allow-popups
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+
+/robots.txt
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600, must-revalidate
+  Content-Type: application/xml; charset=UTF-8
+
+/google3a0ff77e0457b278.html
+  Cache-Control: public, max-age=3600, must-revalidate
+  Content-Type: text/html; charset=UTF-8

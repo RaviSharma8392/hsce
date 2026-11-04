@@ -308,6 +308,8 @@ export default function GalleryPage() {
             <div className="relative flex min-h-[300px] flex-1 items-center justify-center bg-slate-950 p-2">
               <img
                 src={cloudinaryImageUrl(activeImage.image, 1200)}
+                width="1200"
+                height="800"
                 alt={activeImage.title}
                 className="max-h-[70vh] max-w-full object-contain"
               />

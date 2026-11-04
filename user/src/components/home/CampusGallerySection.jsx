@@ -204,6 +204,8 @@ export function CampusGallerySection() {
                   <div className="relative h-20 w-24 sm:h-22 sm:w-28 shrink-0 overflow-hidden rounded-lg bg-slate-200 border border-white/20">
                     <img
                       src={album.image}
+                      width="112"
+                      height="88"
                       alt={isHindi ? album.titleHi : album.titleEn}
                       className="h-full w-full object-cover"
                       loading="lazy"
@@ -252,6 +254,8 @@ export function CampusGallerySection() {
                   className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-200 border border-white/80 shadow-md">
                   <img
                     src={photo.src}
+                    width="600"
+                    height="450"
                     alt={photo.alt}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

@@ -737,6 +737,8 @@ export function EnquireNowTab() {
           className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-white border-2 border-[#2E3A8C] shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#2E3A8C]/20 cursor-pointer overflow-hidden p-1.5">
           <img
             src={imageData.collegeLogo}
+            width="432"
+            height="432"
             alt="Haryana Shakti College of Education"
             className="h-full w-full object-contain"
           />
@@ -756,6 +758,8 @@ export function EnquireNowTab() {
               <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white p-1 border border-yellow-300">
                 <img
                   src={imageData.collegeLogo}
+                  width="432"
+                  height="432"
                   alt="HSCE"
                   className="h-full w-full object-contain"
                 />
@@ -826,6 +830,8 @@ export function EnquireNowTab() {
                       <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white p-0.5 border border-slate-200 overflow-hidden">
                         <img
                           src={imageData.collegeLogo}
+                          width="432"
+                          height="432"
                           alt="Admission Assistant"
                           className="h-full w-full object-contain"
                         />
@@ -914,7 +920,7 @@ export function EnquireNowTab() {
             {isTyping && (
               <div className="flex items-center gap-2 text-xs text-slate-500 bg-white rounded-xl border border-slate-200 p-2.5 w-max">
                 <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-white p-0.5 border border-slate-200 overflow-hidden">
-                  <img src={imageData.collegeLogo} alt="AI" className="h-full w-full object-contain" />
+                  <img src={imageData.collegeLogo} width="432" height="432" alt="AI" className="h-full w-full object-contain" />
                 </span>
                 <span className="font-semibold text-slate-700">Connecting</span>
                 <span className="inline-flex gap-1 ml-1">

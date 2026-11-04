@@ -274,7 +274,7 @@ export const navItems = [
       { label: "Eligibility Criteria", hiLabel: "पात्रता मापदंड", to: "/admissions/eligibility" },
       { label: "Admission Procedure", hiLabel: "प्रवेश प्रक्रिया", to: "/admissions/procedure" },
       { label: "Required Documents", hiLabel: "आवश्यक दस्तावेज़", to: "/admissions/documents" },
-      { label: "Online Enquiry", hiLabel: "ऑनलाइन प्रवेश पूछताछ", to: "/enquiry" },
+      { label: "Online Enquiry", hiLabel: "ऑनलाइन प्रवेश पूछताछ", to: "/contact/enquiry" },
     ],
   },
   {
@@ -314,7 +314,7 @@ export const navItems = [
     hiLabel: "अनिवार्य प्रकटीकरण",
     to: "/mandatory-disclosure",
     subLinks: [
-      { label: "NCTE Regulatory Disclosure", hiLabel: "एनसीटीई विनियामक प्रकटीकरण", to: "/mandatory-disclosure" },
+      { label: "Regulatory Disclosure", hiLabel: "विनियामक प्रकटीकरण", to: "/mandatory-disclosure" },
       { label: "Institutional Committees", hiLabel: "संस्थागत समितियाँ", to: "/committees?tab=directory" },
       { label: "Lodge Online Grievance", hiLabel: "ऑनलाइन शिकायत निवारण", to: "/committees?tab=lodge" },
       { label: "Notices & Circulars", hiLabel: "सूचनाएं एवं परिपत्र", to: "/notices" },
@@ -328,7 +328,7 @@ export const navItems = [
       { label: "Contact Directory", hiLabel: "संपर्क विवरण", to: "/contact?tab=details" },
       { label: "Guest Book & Feedback", hiLabel: "अतिथि पुस्तिका (Guest Book)", to: "/contact?tab=guestbook" },
       { label: "Job Opportunities", hiLabel: "रोजगार के अवसर", to: "/contact?tab=jobs" },
-      { label: "Admission Enquiry", hiLabel: "ऑनलाइन प्रवेश पूछताछ", to: "/enquiry" },
+      { label: "Admission Enquiry", hiLabel: "ऑनलाइन प्रवेश पूछताछ", to: "/contact/enquiry" },
       { label: "Book a Campus Tour", hiLabel: "कैंपस भ्रमण बुक करें", to: "/book-a-tour" },
     ],
   },

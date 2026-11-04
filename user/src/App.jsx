@@ -94,7 +94,10 @@ function App() {
           element={<Navigate to="/about/recognition" replace />}
         />
         <Route path="/campus-life" element={<CampusLifePage />} />
-        <Route path="/about/facilities" element={<CampusLifePage />} />
+        <Route
+          path="/about/facilities"
+          element={<Navigate to="/campus-life" replace />}
+        />
         <Route
           path="/about/campus"
           element={<Navigate to="/campus-life" replace />}
@@ -111,8 +114,14 @@ function App() {
 
         {/* Academics & Courses */}
         <Route path="/course" element={<CoursePage />} />
-        <Route path="/course/bed" element={<CoursePage />} />
-        <Route path="/course/syllabus" element={<SyllabusPage />} />
+        <Route
+          path="/course/bed"
+          element={<Navigate to="/course" replace />}
+        />
+        <Route
+          path="/course/syllabus"
+          element={<Navigate to="/syllabus" replace />}
+        />
         <Route path="/bed" element={<Navigate to="/course" replace />} />
         <Route path="/syllabus" element={<SyllabusPage />} />
         <Route
@@ -128,9 +137,18 @@ function App() {
 
         {/* Admissions */}
         <Route path="/admissions" element={<AdmissionsPage />} />
-        <Route path="/admissions/overview" element={<AdmissionsPage />} />
-        <Route path="/admission" element={<AdmissionsPage />} />
-        <Route path="/admission/overview" element={<AdmissionsPage />} />
+        <Route
+          path="/admissions/overview"
+          element={<Navigate to="/admissions" replace />}
+        />
+        <Route
+          path="/admission"
+          element={<Navigate to="/admissions" replace />}
+        />
+        <Route
+          path="/admission/overview"
+          element={<Navigate to="/admissions" replace />}
+        />
         <Route
           path="/admission-guide"
           element={<Navigate to="/admissions" replace />}
@@ -141,7 +159,7 @@ function App() {
         />
         <Route
           path="/admission/eligibility"
-          element={<AdmissionEligibilityPage />}
+          element={<Navigate to="/admissions/eligibility" replace />}
         />
         <Route
           path="/admissions/procedure"
@@ -149,7 +167,7 @@ function App() {
         />
         <Route
           path="/admission/procedure"
-          element={<AdmissionProcedurePage />}
+          element={<Navigate to="/admissions/procedure" replace />}
         />
         <Route
           path="/admissions/documents"
@@ -157,7 +175,7 @@ function App() {
         />
         <Route
           path="/admission/documents"
-          element={<AdmissionDocumentsPage />}
+          element={<Navigate to="/admissions/documents" replace />}
         />
 
         {/* Notices */}

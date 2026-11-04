@@ -104,6 +104,8 @@ export function AffiliationTrustBarWidget() {
                         {item.logoUrl ? (
                           <img
                             src={item.logoUrl}
+                            width="240"
+                            height="48"
                             alt={item.title}
                             className="max-h-12 max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"

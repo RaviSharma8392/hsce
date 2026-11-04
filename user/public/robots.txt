@@ -1,4 +1,21 @@
+# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
+Allow: /assets/
+Allow: /assets/*.js
+Allow: /assets/*.css
+Disallow: /admin/
+Disallow: /*?*q=
+
+User-agent: Googlebot
+Allow: /
+Allow: /assets/
+Allow: /assets/*.js
+Allow: /assets/*.css
+
+User-agent: Googlebot-Image
+Allow: /assets/
+Allow: /assets/brand/
+Allow: /assets/campus/
 
 Sitemap: https://hscekanjhawala.com/sitemap.xml

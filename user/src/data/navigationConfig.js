@@ -61,7 +61,7 @@ export const getAboutSidebarConfig = (isHindi) => ({
     },
     {
       label: isHindi ? "प्रवेश पूछताछ" : "Admission Enquiry",
-      to: "/enquiry",
+      to: "/contact/enquiry",
       variant: "yellow",
     },
     {
@@ -97,7 +97,7 @@ export const getAdmissionsSidebarConfig = (isHindi) => ({
     },
     {
       id: "enquiry",
-      to: "/enquiry",
+      to: "/contact/enquiry",
       label: isHindi ? "प्रवेश पूछताछ फॉर्म" : "Admission Enquiry Form",
     },
     {
@@ -109,7 +109,7 @@ export const getAdmissionsSidebarConfig = (isHindi) => ({
   quickActions: [
     {
       label: isHindi ? "ऑनलाइन पूछताछ करें" : "Online Enquiry",
-      to: "/enquiry",
+      to: "/contact/enquiry",
       variant: "yellow",
     },
     {
@@ -175,7 +175,7 @@ export const getAcademicsSidebarConfig = (isHindi, activeTab = null) => ({
     },
     {
       label: isHindi ? "प्रवेश पूछताछ" : "Admission Enquiry",
-      to: "/enquiry",
+      to: "/contact/enquiry",
       variant: "yellow",
     },
     {
@@ -246,7 +246,7 @@ export const getCampusLifeSidebarConfig = (isHindi, activeTab = null) => ({
     },
     {
       label: isHindi ? "प्रवेश पूछताछ" : "Admission Enquiry",
-      to: "/enquiry",
+      to: "/contact/enquiry",
       variant: "yellow",
     },
     {

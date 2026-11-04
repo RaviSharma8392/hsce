@@ -4,7 +4,7 @@ const organizationId = `${siteUrl}/#organization`;
 const websiteId = `${siteUrl}/#website`;
 
 export function createSeoStructuredData(page) {
-  const canonicalUrl = `${siteUrl}${page.path}`;
+  const canonicalUrl = `${siteUrl}${page.path === "/" ? "/" : page.path}`;
   const graph = [
     {
       "@type": "WebSite",
@@ -12,7 +12,12 @@ export function createSeoStructuredData(page) {
       name: collegeName,
       alternateName: ["HSCE", "HSCE Delhi", "Haryana Shakti College"],
       url: `${siteUrl}/`,
-      publisher: { "@id": organizationId },
+      publisher: {
+        "@type": ["CollegeOrUniversity", "EducationalOrganization"],
+        "@id": organizationId,
+        name: collegeName,
+        url: `${siteUrl}/`,
+      },
       potentialAction: {
         "@type": "SearchAction",
         target: {
@@ -29,7 +34,12 @@ export function createSeoStructuredData(page) {
       name: page.title,
       description: page.description,
       isPartOf: { "@id": websiteId },
-      about: { "@id": organizationId },
+      about: {
+        "@type": ["CollegeOrUniversity", "EducationalOrganization"],
+        "@id": organizationId,
+        name: collegeName,
+        url: `${siteUrl}/`,
+      },
       ...(page.image && {
         primaryImageOfPage: {
           "@type": "ImageObject",
@@ -42,13 +52,17 @@ export function createSeoStructuredData(page) {
 
   if (page.path === "/") {
     graph.push({
-      "@type": "EducationalOrganization",
+      "@type": ["CollegeOrUniversity", "EducationalOrganization"],
       "@id": organizationId,
       name: collegeName,
       alternateName: "HSCE",
       url: `${siteUrl}/`,
-      logo: `${siteUrl}/assets/brand/college-logo.png`,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/assets/brand/college-logo.png`,
+      },
       image: page.image,
+      foundingDate: "2012",
       description:
         "Haryana Shakti College of Education offers the Bachelor of Education (B.Ed.) programme in Kanjhawala, Delhi.",
       telephone: "+91-9953155054",
@@ -82,8 +96,14 @@ export function createSeoStructuredData(page) {
           availableLanguage: ["English", "Hindi"],
         },
       ],
+      affiliation: {
+        "@type": "CollegeOrUniversity",
+        name: "Guru Gobind Singh Indraprastha University",
+        alternateName: "GGSIPU",
+        url: "http://www.ipu.ac.in/",
+      },
       parentOrganization: {
-        "@type": "EducationalOrganization",
+        "@type": "Organization",
         name: "Haryana Shakti Education Society",
       },
       sameAs: [
@@ -108,7 +128,7 @@ export function createSeoStructuredData(page) {
         "@type": "ListItem",
         position: index + 1,
         name: item.name,
-        item: `${siteUrl}${item.path}`,
+        item: `${siteUrl}${item.path === "/" ? "/" : item.path}`,
       })),
     });
   }
@@ -119,7 +139,12 @@ export function createSeoStructuredData(page) {
       "@id": `${siteUrl}/course#bed-course`,
       name: "Bachelor of Education (B.Ed.)",
       description: page.description,
-      provider: { "@id": organizationId },
+      provider: {
+        "@type": ["CollegeOrUniversity", "EducationalOrganization"],
+        "@id": organizationId,
+        name: collegeName,
+        url: `${siteUrl}/`,
+      },
       url: `${siteUrl}/course`,
       educationalCredentialAwarded: "Bachelor of Education (B.Ed.)",
       timeRequired: "P2Y",

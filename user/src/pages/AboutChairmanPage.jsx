@@ -65,6 +65,8 @@ export default function AboutChairmanPage() {
                 <div className="overflow-hidden rounded-md border border-gray-300/80 bg-white p-1 inline-block shadow-xs">
                   <img
                     src={chairmanImage}
+                    width="208"
+                    height="256"
                     alt={chairmanName}
                     className="h-64 w-52 object-cover rounded"
                   />

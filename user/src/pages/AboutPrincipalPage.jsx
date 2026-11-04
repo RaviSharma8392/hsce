@@ -60,6 +60,8 @@ export default function AboutPrincipalPage() {
                 <div className="overflow-hidden rounded-md border border-gray-300/80 bg-white p-1 inline-block shadow-xs">
                   <img
                     src={principalImage}
+                    width="208"
+                    height="256"
                     alt={principalName}
                     className="h-64 w-52 object-cover rounded"
                   />
