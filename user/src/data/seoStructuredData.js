@@ -33,7 +33,7 @@ export function createSeoStructuredData(page) {
           alternateName: "HSCE",
           url: `${siteUrl}/`,
           description:
-            "Haryana Shakti College of Education (HSCE), established in 2012 under the aegis of Haryana Shakti Education Society, is a teacher education institution in Kanjhawala, Delhi. The college offers a two-year Bachelor of Education (B.Ed.) programme recognised by NCTE and affiliated with Guru Gobind Singh Indraprastha University (GGSIPU), Delhi.",
+            "Haryana Shakti College of Education (HSCE) is a teacher education institution in Kanjhawala, Delhi. Established in 2012 under Haryana Shakti Education Society, it offers a two-year Bachelor of Education (B.Ed.) programme recognised by NCTE and affiliated with Guru Gobind Singh Indraprastha University (GGSIPU).",
           foundingDate: "2012",
           logo: {
             "@type": "ImageObject",
@@ -42,6 +42,7 @@ export function createSeoStructuredData(page) {
           image:
             "https://res.cloudinary.com/dljt6vgkk/image/upload/f_auto,q_auto,w_1400/v1792002734/college-campus-hero_y0tjjk.png",
           telephone: ["+91-9953155054", "+91-8056777077"],
+          email: "hsce.kanjhawala@gmail.com",
           address: {
             "@type": "PostalAddress",
             streetAddress: "Ghevra Road, Kanjhawala",
@@ -74,7 +75,7 @@ export function createSeoStructuredData(page) {
           url: `${siteUrl}/`,
           name: "Haryana Shakti College of Education | Official Website",
           description:
-            "Haryana Shakti College of Education, Kanjhawala, Delhi. Explore the B.Ed. programme, NCTE recognition, GGSIPU affiliation, admissions, faculty, campus facilities and college information.",
+            "Official site of Haryana Shakti College of Education (HSCE), Kanjhawala, Delhi. Explore the B.Ed. programme, GGSIPU admissions, NCTE recognition, academics and campus.",
           isPartOf: {
             "@id": websiteId,
           },

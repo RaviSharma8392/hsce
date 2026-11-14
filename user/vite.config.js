@@ -23,12 +23,10 @@ function escapeXml(value) {
 }
 
 function createSitemap() {
-  const currentDate = new Date().toISOString().split('T')[0]
   const urls = seoPages
     .filter((page) => page.indexable !== false)
     .map((page) => {
       const loc = escapeXml(`${siteUrl}${page.path === '/' ? '/' : page.path}`)
-      const lastmod = page.lastmod || currentDate
       const changefreq =
         page.changefreq ||
         (page.path === '/' ||
@@ -47,7 +45,7 @@ function createSitemap() {
       return [
         '  <url>',
         `    <loc>${loc}</loc>`,
-        `    <lastmod>${lastmod}</lastmod>`,
+        ...(page.lastmod ? [`    <lastmod>${page.lastmod}</lastmod>`] : []),
         `    <changefreq>${changefreq}</changefreq>`,
         `    <priority>${priority}</priority>`,
         '  </url>',
@@ -63,7 +61,7 @@ function createSitemap() {
   ].join('\n')
 }
 
-function createRouteHtml(template, page) {
+function createRouteHtml(template, page, { includeStructuredData = true } = {}) {
   const canonicalUrl = `${siteUrl}${page.path}`
   const title = escapeHtml(page.title)
   const description = escapeHtml(page.description)
@@ -73,10 +71,9 @@ function createRouteHtml(template, page) {
       : 'index, follow, max-image-preview:large'
   const image = escapeHtml(page.image || `${siteUrl}/assets/brand/college-logo.png`)
   const imageAlt = escapeHtml(page.imageAlt || 'Haryana Shakti College of Education')
-  const structuredData = JSON.stringify(createSeoStructuredData(page)).replaceAll(
-    '<',
-    '\\u003c',
-  )
+  const structuredData = includeStructuredData
+    ? JSON.stringify(createSeoStructuredData(page)).replaceAll('<', '\\u003c')
+    : ''
 
   return template
     .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${title}</title>`)
@@ -126,7 +123,7 @@ function createRouteHtml(template, page) {
     )
     .replace(
       '<!-- seo-json-ld -->',
-      `<script type="application/ld+json">${structuredData}</script>`,
+      structuredData ? `<script type="application/ld+json">${structuredData}</script>` : '',
     )
 }
 
@@ -193,10 +190,9 @@ function seoPagesPlugin() {
         description:
           'The requested page could not be found on the Haryana Shakti College of Education website.',
         indexable: false,
-      })
+      }, { includeStructuredData: false })
         .replace(/<meta\s+property="og:url"\s+content="[^"]*"\s*\/>/, '')
         .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/>/, '')
-        .replace('<!-- seo-json-ld -->', '')
       await writeFile(resolve(outputDirectory, '404.html'), notFoundHtml)
 
       await writeFile(resolve(outputDirectory, 'sitemap.xml'), createSitemap())

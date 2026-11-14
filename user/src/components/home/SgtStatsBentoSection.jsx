@@ -105,8 +105,8 @@ export function SgtStatsBentoSection() {
 
             <p className="mt-3.5 text-sm sm:text-base leading-relaxed text-slate-600 font-normal">
               {isHindi
-                ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में 100 स्वीकृत सीटों के साथ 2-वर्षीय नियमित बी.एड. डिग्री, 16 सप्ताह का प्रत्यक्ष विद्यालय इंटर्नशिप और आधुनिक प्रयोगशालाओं द्वारा भावी शिक्षकों को वास्तविक कक्षा शिक्षण हेतु तैयार किया जाता है।"
-                : "HSCE delivers high-standard teacher education with 100 sanctioned B.Ed. seats, recognized statutory affiliations, 16 weeks of real-school internship, and comprehensive lab resources for classroom-ready educators."}
+                ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन का दो-वर्षीय बी.एड. कार्यक्रम भावी शिक्षकों को शैक्षिक सिद्धांत, शिक्षण अभ्यास और विद्यालय इंटर्नशिप से परिचित कराता है। पाठ्यक्रम और प्रवेश संबंधी जानकारी वर्तमान जीजीएसआईपीयू निर्देशों के अनुसार देखें।"
+                : "The two-year B.Ed. programme at Haryana Shakti College of Education combines educational theory, teaching practice and school internship. Refer to current GGSIPU guidance for programme and admission details."}
             </p>
           </div>
 
