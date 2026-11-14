@@ -107,7 +107,7 @@ export function Footer({
       ["/about/history", "aboutHistory", "History & Genesis"],
       ["/about/chairman", "aboutChairman", "Chairman's Desk"],
       ["/about/principal", "aboutPrincipal", "Principal's Desk"],
-      ["/course/bed", "bedCourse", "B.Ed Programme"],
+      ["/course", "bedCourse", "B.Ed. Programme"],
       ["/syllabus", "curriculumPedagogy", "B.Ed. Syllabus"],
     ],
     [

@@ -272,7 +272,11 @@ export default function GalleryPage({ currentUser, role, permissions }) {
 
       if (result.success) {
         showToast(
-          editingImageId ? "Photo updated." : "Photo added to gallery.",
+          editingImageId
+            ? "Photo updated."
+            : result.syncedToCloud
+              ? "Photo added & synced to cloud gallery."
+              : "Photo saved to local gallery. (Sync pending rules update)",
         );
         resetForm();
         setIsUploadModalOpen(false);
@@ -298,7 +302,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
             : await addGalleryImage(photoData, currentUser);
           if (result.success) {
             showToast(
-              editingImageId ? "Photo updated." : "Photo added to gallery.",
+              editingImageId ? "Photo updated." : "Photo saved to gallery.",
             );
             resetForm();
             setIsUploadModalOpen(false);
@@ -308,8 +312,15 @@ export default function GalleryPage({ currentUser, role, permissions }) {
           console.error("Direct save fallback error:", fallbackErr);
         }
       }
+
+      const isPermissionDenied =
+        err?.code === "permission-denied" ||
+        err?.message?.toLowerCase().includes("permission");
+
       setUploadError(
-        err?.message || "Failed to save photo. Please try again.",
+        isPermissionDenied
+          ? "Missing or insufficient permissions: Please publish the updated Firestore rules in Firebase Console to grant upload permissions."
+          : err?.message || "Failed to save photo. Please try again.",
       );
     } finally {
       setIsSubmitting(false);

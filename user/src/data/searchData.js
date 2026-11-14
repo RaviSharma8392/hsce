@@ -202,7 +202,7 @@ export const searchData = [
     hiCategory: "वैधानिक एवं प्रकटीकरण",
     description: "Official NCTE mandatory disclosure format, endowment fund, land details, building safety, and affidavits.",
     hiDescription: "एनसीटीई अनिवार्य प्रकटीकरण, भूमि विवरण, भवन सुरक्षा, वित्तीय कोष एवं शपथ पत्र।",
-    keywords: "mandatory disclosure ncte regulatory affidavits land building compliance rti प्रकटीकरण विनियामक",
+    keywords: "mandatory disclosure ncte regulatory affidavits land building compliance rti nrcapp nrcapp-81 accreditation order प्रकटीकरण विनियामक",
   },
   {
     name: "Internal Quality Assurance Cell (IQAC)",

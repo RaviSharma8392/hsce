@@ -334,6 +334,7 @@ export const aboutRecognitionContent = {
         body: "National Council for Teacher Education (NCTE)",
         status: "Statutory Approval & Recognition",
         details: "Recognized by NCTE (Northern Regional Committee), a statutory body of the Government of India established under the NCTE Act, 1993, for running the Bachelor of Education (B.Ed.) programme.",
+        orderPdf: "/documents/status-of-accreditation-nrcapp-81.pdf",
       },
       {
         body: "Guru Gobind Singh Indraprastha University (GGSIPU)",
@@ -371,6 +372,7 @@ export const aboutRecognitionContent = {
         body: "राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE)",
         status: "वैधानिक अनुमोदन एवं मान्यता",
         details: "भारत सरकार के एनसीटीई अधिनियम 1993 के तहत स्थापित उत्तरी क्षेत्रीय समिति (NRC-NCTE) द्वारा बी.एड. पाठ्यक्रम संचालन हेतु पूर्ण वैधानिक मान्यता प्राप्त।",
+        orderPdf: "/documents/status-of-accreditation-nrcapp-81.pdf",
       },
       {
         body: "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU)",
@@ -500,7 +502,7 @@ export const aboutFactsContent = {
       { label: "Official Email", value: "hsce.kanjhawala@gmail.com" },
       { label: "Academic Course", value: "B.Ed. (Bachelor of Education — 2-Year Regular)" },
       { label: "Affiliating University", value: "Guru Gobind Singh Indraprastha University (GGSIPU)" },
-      { label: "Statutory Approval", value: "National Council for Teacher Education (NCTE)" },
+      { label: "Statutory Approval", value: "National Council for Teacher Education (NCTE)", link: "/documents/status-of-accreditation-nrcapp-81.pdf" },
       { label: "Quality Accreditation", value: "Accredited by NAAC" },
       { label: "Institutional Society", value: "Haryana Shakti Education Society" },
     ],
@@ -525,7 +527,7 @@ export const aboutFactsContent = {
       { label: "आधिकारिक ईमेल", value: "hsce.kanjhawala@gmail.com" },
       { label: "शैक्षणिक पाठ्यक्रम", value: "बी.एड. (बैचलर ऑफ एजुकेशन — 2-वर्षीय नियमित)" },
       { label: "संबद्ध विश्वविद्यालय", value: "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU)" },
-      { label: "वैधानिक मान्यता", value: "राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE)" },
+      { label: "वैधानिक मान्यता", value: "राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE)", link: "/documents/status-of-accreditation-nrcapp-81.pdf" },
       { label: "गुणवत्ता प्रत्यायन", value: "नैक (NAAC) द्वारा मूल्यांकित" },
       { label: "संचालक संस्था", value: "हरियाणा शक्ति एजुकेशन सोसाइटी" },
     ],

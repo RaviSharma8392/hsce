@@ -173,7 +173,7 @@ export function Layout({ children }) {
   const emailText =
     collegeInfo.email ||
     collegeInfo.contactEmail ||
-    "info@haryanashaktibed.org";
+    "hsce.kanjhawala@gmail.com";
 
   const adminPortalHref =
     import.meta.env.VITE_ADMIN_PORTAL_URL ||

@@ -260,8 +260,13 @@ export default function AddNoticeModal({
       }
       onClose();
     } catch (submitError) {
+      const isPerm =
+        submitError?.code === "permission-denied" ||
+        submitError?.message?.toLowerCase().includes("permission");
       setError(
-        submitError.message || "Could not save notice. Please try again.",
+        isPerm
+          ? "Missing or insufficient permissions: Please publish the updated Firestore rules in Firebase Console to allow notice creation."
+          : submitError.message || "Could not save notice. Please try again.",
       );
     } finally {
       setSubmitting(false);

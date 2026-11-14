@@ -56,6 +56,19 @@ export default function AboutRecognitionPage() {
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans">
                   {item.details}
                 </p>
+                {item.orderPdf && (
+                  <div className="mt-3 pt-3 border-t border-gray-200/80">
+                    <a
+                      href={item.orderPdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2E3A8C] hover:text-[#1b2358] hover:underline">
+                      <FileText size={14} className="text-red-600" />
+                      <span>{isHindi ? "मान्यता एवं प्रत्यायन आदेश देखें (NRCAPP-81)" : "View Recognition & Accreditation Order (NRCAPP-81)"}</span>
+                      <ArrowRight size={12} />
+                    </a>
+                  </div>
+                )}
               </div>
             ))}
           </div>

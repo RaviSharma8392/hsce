@@ -396,7 +396,14 @@ export default function ContentManager({
       setNotice(editingId ? "Changes saved." : "Record created.");
       resetForm();
     } catch (saveError) {
-      setError(saveError.message || "Unable to save this record.");
+      const isPerm =
+        saveError?.code === "permission-denied" ||
+        saveError?.message?.toLowerCase().includes("permission");
+      setError(
+        isPerm
+          ? "Missing or insufficient permissions: Please ensure you are logged in and your Firestore rules in Firebase Console are published."
+          : saveError.message || "Unable to save this record.",
+      );
     } finally {
       setSaving(false);
     }

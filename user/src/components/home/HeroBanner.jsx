@@ -132,7 +132,7 @@ export function HeroBanner({ slides = heroSlides }) {
 
                 {/* Banner title */}
                 <div className="absolute inset-x-0 top-[40%] -translate-y-1/2 z-20 px-6 sm:px-12 md:top-16 lg:top-24 lg:translate-y-0 lg:px-16">
-                  {/* Mobile View: Badge + Title + Subtitle (Matching Reference Image 4) */}
+                  {/* Mobile View: Badge + H1 + Subtitle */}
                   <div className="max-w-xl md:hidden">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FBDD23] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1A2254] shadow-md">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#1A2254]" />
@@ -141,22 +141,22 @@ export function HeroBanner({ slides = heroSlides }) {
                         : "GGSIPU AFFILIATED • NCTE APPROVED"}
                     </span>
 
-                    <h2 className="mt-2 text-[26px] sm:text-[30px] font-extrabold leading-[1.18] text-white drop-shadow-xl tracking-tight">
+                    <h1 className="mt-2 text-[26px] sm:text-[30px] font-extrabold leading-[1.18] text-white drop-shadow-xl tracking-tight">
                       {isHindi ? (
-                        <>व्यावसायिक शिक्षक शिक्षा के लिए आपकी पसंद</>
+                        <>हरियाणा शक्ति कॉलेज ऑफ एजुकेशन</>
                       ) : (
-                        <>Your Choice for Professional Career</>
+                        <>Haryana Shakti College of Education</>
                       )}
-                    </h2>
+                    </h1>
 
                     <p className="mt-2 text-xs leading-relaxed text-slate-100 font-medium drop-shadow-md">
                       {isHindi
-                        ? "एनसीटीई द्वारा अनुमोदित एवं गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली से संबद्ध।"
-                        : "Approved by NCTE & Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi."}
+                        ? "एनसीटीई मान्यता • गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली से संबद्ध दो-वर्षीय बी.एड. संस्थान।"
+                        : "NCTE Recognised & Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi."}
                     </p>
                   </div>
 
-                  {/* Desktop View: Full Standard Desktop Badge + Heading + Subtitle */}
+                  {/* Desktop View: Full Standard Desktop Badge + H1 + Subtitle */}
                   <div className="hidden md:block max-w-2xl">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FBDD23] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#363991] shadow-md">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#363991]" />
@@ -165,25 +165,24 @@ export function HeroBanner({ slides = heroSlides }) {
                         : "GGSIPU Affiliated • NCTE Approved"}
                     </span>
 
-                    <h2 className="mt-3 text-4xl md:text-5xl font-extrabold leading-[1.25] text-white drop-shadow-lg tracking-tight">
+                    <h1 className="mt-3 text-4xl md:text-5xl font-extrabold leading-[1.25] text-white drop-shadow-lg tracking-tight">
                       {isHindi ? (
                         <>
-                          व्यावसायिक शिक्षक शिक्षा के लिए{" "}
-                          <br className="hidden sm:block" />
-                          आपकी सर्वोत्तम पसंद
+                          हरियाणा शक्ति कॉलेज <br className="hidden sm:block" />
+                          ऑफ एजुकेशन
                         </>
                       ) : (
                         <>
-                          Your Choice for <br className="hidden sm:block" />
-                          Professional Career
+                          Haryana Shakti College <br className="hidden sm:block" />
+                          of Education
                         </>
                       )}
-                    </h2>
+                    </h1>
 
                     <p className="mt-2 text-sm text-slate-200 line-clamp-2 sm:line-clamp-none font-medium max-w-lg drop-shadow-sm leading-relaxed">
                       {isHindi
-                        ? "एनसीटीई द्वारा अनुमोदित एवं गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली से संबद्ध।"
-                        : "Approved by NCTE & Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi."}
+                        ? "एनसीटीई द्वारा विधिवत मान्यता प्राप्त एवं गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली से संबद्ध शिक्षक शिक्षा संस्थान।"
+                        : "NCTE Recognised & Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi • Two-Year B.Ed. Programme."}
                     </p>
                   </div>
                 </div>

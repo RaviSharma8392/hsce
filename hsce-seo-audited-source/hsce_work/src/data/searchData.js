@@ -123,7 +123,7 @@ export const searchData = [
     name: "Mandatory Disclosure",
     url: "/mandatory-disclosure",
     category: "Resources",
-    keywords: "disclosure regulatory documents information",
+    keywords: "disclosure regulatory documents information nrcapp nrcapp-81 status of accreditation",
   },
   {
     name: "Internal Quality Assurance Cell",

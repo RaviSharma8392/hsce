@@ -1,5 +1,5 @@
 import React from "react";
-import { Phone, Mail } from "lucide-react";
+import { Phone, Mail, ArrowUpRight } from "lucide-react";
 import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout";
 import { getAboutSidebarConfig } from "../data/navigationConfig";
 import { useLanguage } from "../context/LanguageContext";
@@ -52,6 +52,7 @@ const INSTITUTIONAL_FACTS = {
       {
         label: "Statutory Approval",
         value: "National Council for Teacher Education (NCTE)",
+        link: "/documents/status-of-accreditation-nrcapp-81.pdf",
       },
       {
         label: "Quality Accreditation",
@@ -110,6 +111,7 @@ const INSTITUTIONAL_FACTS = {
       {
         label: "वैधानिक मान्यता (Statutory Approval)",
         value: "राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE)",
+        link: "/documents/status-of-accreditation-nrcapp-81.pdf",
       },
       {
         label: "गुणवत्ता प्रत्यायन (Quality Accreditation)",
@@ -193,6 +195,15 @@ export default function AboutFactsPage() {
                           className="inline-flex items-center gap-2 text-[#363991] hover:underline">
                           <Mail size={14} className="shrink-0" />
                           <span>{fact.value || fact.val}</span>
+                        </a>
+                      ) : fact.link ? (
+                        <a
+                          href={fact.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 font-semibold text-[#2E3A8C] hover:underline">
+                          <span>{fact.value || fact.val}</span>
+                          <ArrowUpRight size={13} className="shrink-0 text-slate-500" />
                         </a>
                       ) : (
                         <span>{fact.value || fact.val}</span>

@@ -345,8 +345,13 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
       }
     } catch (error) {
       console.error("Save syllabus error:", error);
+      const isPerm =
+        error?.code === "permission-denied" ||
+        error?.message?.toLowerCase().includes("permission");
       setUploadError(
-        error?.message || "An error occurred while saving the syllabus.",
+        isPerm
+          ? "Missing or insufficient permissions: Please ensure you are logged in and your Firestore rules in Firebase Console are published."
+          : error?.message || "An error occurred while saving the syllabus.",
       );
     } finally {
       setIsSubmitting(false);

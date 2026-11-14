@@ -129,8 +129,10 @@ export async function addGalleryImage(data, currentUser = null) {
   };
 
   let firestoreDocId = null;
+  let firestoreError = null;
 
   if (firebaseReady) {
+    try {
       const docRef = await addDoc(collection(db, "gallery"), {
         title: payload.title,
         category: payload.category,
@@ -145,6 +147,10 @@ export async function addGalleryImage(data, currentUser = null) {
         updatedAt: serverTimestamp(),
       });
       firestoreDocId = docRef.id;
+    } catch (err) {
+      console.warn("Firestore addDoc error in galleryService (saving locally):", err?.message || err);
+      firestoreError = err;
+    }
   }
 
   const localRecord = {
@@ -157,7 +163,13 @@ export async function addGalleryImage(data, currentUser = null) {
   list.unshift(localRecord);
   setLocalGalleryImages(list);
 
-  return { success: true, id: localRecord.id, record: localRecord };
+  return {
+    success: true,
+    id: localRecord.id,
+    record: localRecord,
+    syncedToCloud: Boolean(firestoreDocId),
+    cloudError: firestoreError?.message,
+  };
 }
 
 export async function updateGalleryImage(id, data) {
@@ -173,7 +185,11 @@ export async function updateGalleryImage(id, data) {
   };
 
   if (firebaseReady && !id.startsWith("gallery_local_")) {
-    await updateDoc(doc(db, "gallery", id), payload);
+    try {
+      await updateDoc(doc(db, "gallery", id), payload);
+    } catch (err) {
+      console.warn("Firestore updateDoc notice in galleryService:", err?.message || err);
+    }
   }
 
   const list = getLocalGalleryImages();
@@ -190,13 +206,17 @@ export async function updateGalleryImage(id, data) {
  */
 export async function toggleGalleryPublish(id, isPublished) {
   if (firebaseReady && !id.startsWith("gallery_local_")) {
-    const ref = doc(db, "gallery", id);
-    await updateDoc(ref, {
-      isPublished,
-      status: isPublished ? "published" : "draft",
-      publishedAt: isPublished ? serverTimestamp() : null,
-      updatedAt: serverTimestamp(),
-    });
+    try {
+      const ref = doc(db, "gallery", id);
+      await updateDoc(ref, {
+        isPublished,
+        status: isPublished ? "published" : "draft",
+        publishedAt: isPublished ? serverTimestamp() : null,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.warn("Firestore toggleGalleryPublish notice in galleryService:", err?.message || err);
+    }
   }
 
   const list = getLocalGalleryImages();
@@ -218,8 +238,12 @@ export async function toggleGalleryPublish(id, isPublished) {
  */
 export async function deleteGalleryImage(id) {
   if (firebaseReady && !id.startsWith("gallery_local_")) {
-    const ref = doc(db, "gallery", id);
-    await deleteDoc(ref);
+    try {
+      const ref = doc(db, "gallery", id);
+      await deleteDoc(ref);
+    } catch (err) {
+      console.warn("Firestore deleteGalleryImage notice in galleryService:", err?.message || err);
+    }
   }
 
   const list = getLocalGalleryImages().filter((item) => item.id !== id);

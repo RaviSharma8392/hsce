@@ -10,9 +10,9 @@ const principalImage = cloudinaryImageUrl(imageData.principalPortrait, 1400);
 export const seoPages = [
   {
     path: "/",
-    title: `Haryana Shakti College of Education | NCTE Approved B.Ed. in Delhi`,
+    title: `Haryana Shakti College of Education, Delhi | Official Website`,
     description:
-      "Haryana Shakti College of Education (HSCE), Kanjhawala, Delhi offers NCTE-approved & GGSIPU-affiliated 2-year B.Ed. Apply for admissions, view fees & campus.",
+      "Haryana Shakti College of Education (HSCE), Kanjhawala, Delhi. Explore the two-year B.Ed. programme, NCTE recognition, GGSIPU affiliation, admissions, faculty, campus facilities and college information.",
     image: campusImage,
     imageAlt: "Haryana Shakti College of Education campus",
     breadcrumbs: [],
@@ -20,7 +20,7 @@ export const seoPages = [
   },
   {
     path: "/about",
-    title: `About the College | Haryana Shakti College of Education (HSCE Delhi)`,
+    title: `About Haryana Shakti College of Education`,
     description:
       "Learn about HSCE Kanjhawala, Delhi, established in 2012 by Haryana Shakti Education Society. NCTE approved & GGSIPU affiliated premier teacher education college.",
     image: campusImage,
@@ -29,7 +29,7 @@ export const seoPages = [
   },
   {
     path: "/about/history",
-    title: `History & Genesis | Haryana Shakti College of Education, Delhi`,
+    title: `History & Genesis | HSCE Delhi`,
     description:
       "Trace the history and milestones of HSCE Kanjhawala since 2012, dedicated to quality teacher training and professional education across North-West Delhi.",
     image: campusImage,
@@ -41,7 +41,7 @@ export const seoPages = [
   },
   {
     path: "/about/vision-mission",
-    title: `Vision & Mission | Haryana Shakti College of Education, Delhi`,
+    title: `Vision & Mission | HSCE Delhi`,
     description:
       "Explore our vision and mission to nurture innovative, reflective educators committed to transformative teaching, constitutional values, and academic excellence.",
     image: campusImage,
@@ -89,7 +89,7 @@ export const seoPages = [
   },
   {
     path: "/about/facts",
-    title: `Institutional Fact Sheet & Key Metrics | HSCE Delhi`,
+    title: `Institutional Facts & Metrics | HSCE Delhi`,
     description:
       "Key institutional facts of HSCE Delhi: 100 sanctioned B.Ed. seats, NCTE approval, GGSIPU affiliation, address on Ghevra Road Kanjhawala, and official helplines.",
     image: campusImage,
@@ -101,7 +101,7 @@ export const seoPages = [
   },
   {
     path: "/campus-life",
-    title: `Campus Life & Facilities | Haryana Shakti College of Education`,
+    title: `College Facilities & Campus Life | HSCE`,
     description:
       "Explore campus life at HSCE Delhi: ICT lab, psychology and curriculum labs, academic library, multipurpose seminar hall, sports facilities, and cultural events.",
     image: campusImage,
@@ -110,7 +110,7 @@ export const seoPages = [
   },
   {
     path: "/course",
-    title: `Bachelor of Education (B.Ed.) Programme | 2 Years | HSCE Delhi`,
+    title: `B.Ed. Programme | HSCE Delhi`,
     description:
       "NCTE-approved 2-year regular Bachelor of Education (B.Ed.) affiliated to GGSIPU Delhi. Explore semester-wise curriculum, pedagogy subjects, and school practice.",
     image: campusImage,
@@ -132,7 +132,7 @@ export const seoPages = [
   },
   {
     path: "/faculty",
-    title: `Faculty & Academic Staff Directory | HSCE Delhi`,
+    title: `Faculty & Academics | Haryana Shakti College`,
     description:
       "Meet qualified teacher educators at HSCE Delhi, led by Principal Dr. Savita Rathee. Explore faculty qualifications, pedagogy specializations, and staff profiles.",
     image: campusImage,
@@ -144,7 +144,7 @@ export const seoPages = [
   },
   {
     path: "/admissions",
-    title: `B.Ed. Admissions 2026-27 | Haryana Shakti College of Education`,
+    title: `B.Ed. Admissions 2026–27 | HSCE`,
     description:
       "Apply for 2-Year regular B.Ed. admissions 2026-27 at HSCE Delhi. Explore GGSIPU counselling steps, eligibility criteria, document checklist, and fee helpline.",
     image: campusImage,
@@ -153,7 +153,7 @@ export const seoPages = [
   },
   {
     path: "/admissions/eligibility",
-    title: `B.Ed. Eligibility Criteria & Qualifying Marks | HSCE Delhi`,
+    title: `B.Ed. Eligibility Criteria | HSCE Delhi`,
     description:
       "Review B.Ed. admission eligibility criteria at HSCE Delhi: 50% in Bachelor or Master degrees, 55% for B.Tech/B.E., 45% for SC/ST/PwD, and pedagogy requirements.",
     image: campusImage,
@@ -179,7 +179,7 @@ export const seoPages = [
   },
   {
     path: "/admissions/procedure",
-    title: `B.Ed. Admission Procedure & Counselling Steps | HSCE Delhi`,
+    title: `B.Ed. Admission Procedure | HSCE`,
     description:
       "Step-by-step guide to B.Ed. admissions at HSCE Delhi: GGSIPU online portal registration, choice filling, CET counselling, seat allotment, and campus reporting.",
     image: campusImage,
@@ -213,7 +213,7 @@ export const seoPages = [
   },
   {
     path: "/notices",
-    title: `Official Notices & Academic Circulars | HSCE Delhi`,
+    title: `College Notices & Academic Updates | HSCE`,
     description:
       "Stay updated with official academic circulars, GGSIPU examination notifications, admission schedules, fee reminders, and college announcements from HSCE Delhi.",
     image: campusImage,
@@ -222,7 +222,7 @@ export const seoPages = [
   },
   {
     path: "/mandatory-disclosure",
-    title: `Mandatory Regulatory Disclosures & NCTE Orders | HSCE Delhi`,
+    title: `NCTE Mandatory Disclosure | HSCE Delhi`,
     description:
       "Access statutory public disclosures of HSCE Delhi pursuant to NCTE norms: formal recognition orders, GGSIPU affiliation letters, faculty list, and intake norms.",
     image: campusImage,
@@ -231,7 +231,7 @@ export const seoPages = [
   },
   {
     path: "/gallery",
-    title: `Photo Gallery & Campus Moments | HSCE Delhi`,
+    title: `College Gallery & Campus Photos | HSCE`,
     description:
       "Browse campus photos of Haryana Shakti College of Education: smart classrooms, ICT and psychology labs, campus sports, cultural festivals, and community camps.",
     image: campusImage,
@@ -240,7 +240,7 @@ export const seoPages = [
   },
   {
     path: "/committees",
-    title: `Institutional Committees & Grievance Redressal | HSCE Delhi`,
+    title: `Institutional Committees | HSCE Delhi`,
     description:
       "Details of HSCE Delhi statutory bodies: Student Grievance Redressal Committee, Anti-Ragging Squad, Internal Complaints Committee (ICC), and grievance redressal.",
     image: campusImage,
@@ -261,7 +261,7 @@ export const seoPages = [
   },
   {
     path: "/contact",
-    title: `Contact Us & Campus Directions | Kanjhawala, Delhi | HSCE`,
+    title: `Contact Haryana Shakti College | Kanjhawala Delhi`,
     description:
       "Contact HSCE, Ghevra Road, Kanjhawala, Delhi - 110081 (Near Ghevra Metro). Helplines: 9953155054, 8056777077. Official email, map directions, and office hours.",
     image: campusImage,

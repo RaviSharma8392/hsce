@@ -170,7 +170,14 @@ export default function HomepagePopupPage({ currentUser }) {
       );
     } catch (saveErr) {
       console.error("Popup save error:", saveErr);
-      setError(saveErr.message || "Failed to save popup.");
+      const isPerm =
+        saveErr?.code === "permission-denied" ||
+        saveErr?.message?.toLowerCase().includes("permission");
+      setError(
+        isPerm
+          ? "Missing or insufficient permissions: Please publish the updated Firestore rules in Firebase Console to allow popup updates."
+          : saveErr.message || "Failed to save popup.",
+      );
     } finally {
       setSaving(false);
     }
@@ -254,15 +261,13 @@ export default function HomepagePopupPage({ currentUser }) {
             <button
               type="button"
               onClick={handleToggleStatus}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition ${
-                isEnabled
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition ${isEnabled
                   ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
                   : "bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200"
-              }`}>
+                }`}>
               <span
-                className={`h-2.5 w-2.5 rounded-full ${
-                  isEnabled ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                }`}
+                className={`h-2.5 w-2.5 rounded-full ${isEnabled ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                  }`}
               />
               <span>{isEnabled ? "Popup is Active (Live)" : "Popup is Disabled (Hidden)"}</span>
             </button>
@@ -323,11 +328,10 @@ export default function HomepagePopupPage({ currentUser }) {
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition ${
-                    isDragging
+                  className={`group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition ${isDragging
                       ? "border-[#194178] bg-blue-50/50"
                       : "border-slate-300 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-100/60"
-                  }`}>
+                    }`}>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -417,13 +421,11 @@ export default function HomepagePopupPage({ currentUser }) {
                 <button
                   type="button"
                   onClick={() => setIsEnabled(!isEnabled)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    isEnabled ? "bg-emerald-600" : "bg-slate-300"
-                  }`}>
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isEnabled ? "bg-emerald-600" : "bg-slate-300"
+                    }`}>
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      isEnabled ? "translate-x-5" : "translate-x-0"
-                    }`}
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isEnabled ? "translate-x-5" : "translate-x-0"
+                      }`}
                   />
                 </button>
               </div>

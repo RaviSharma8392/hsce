@@ -150,6 +150,7 @@ export const aboutCollegeData = {
         body: "National Council for Teacher Education (NCTE)",
         status: "Statutory Approval & Recognition",
         details: "Recognized by NCTE (Northern Regional Committee), a statutory body of the Government of India established under the NCTE Act, 1993, for running the Bachelor of Education (B.Ed.) programme.",
+        orderPdf: "/documents/status-of-accreditation-nrcapp-81.pdf",
       },
       {
         body: "Guru Gobind Singh Indraprastha University (GGSIPU)",

@@ -15,9 +15,9 @@ export const disclosures = [
       "राष्ट्रीय अध्यापक शिक्षा परिषद (एनसीटीई) की उत्तरी क्षेत्रीय समिति (NRC) द्वारा 100 सीटों के स्वीकृत वार्षिक प्रवेश के साथ 2-वर्षीय बी.एड. पाठ्यक्रम संचालन हेतु जारी वैधानिक मान्यता आदेश।",
     session: "2025-26 & Continuous",
     publicationDate: "2025-08-01",
-    refNumber: "NRC/NCTE/F-7/HR-B.Ed/2012/HSCE",
-    link: "#",
-    fileSize: "1.4 MB (PDF)",
+    refNumber: "NRC/NCTE/F-7/HR-B.Ed/2012/HSCE (NRCAPP-81)",
+    link: "/documents/status-of-accreditation-nrcapp-81.pdf",
+    fileSize: "928 KB (PDF)",
   },
   {
     id: "ggsipu-affiliation-order",

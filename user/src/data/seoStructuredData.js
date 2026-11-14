@@ -3,116 +3,130 @@ import { collegeName, siteUrl } from "./seoPages.js";
 const organizationId = `${siteUrl}/#organization`;
 const websiteId = `${siteUrl}/#website`;
 
+/**
+ * Creates valid, validated Schema.org JSON-LD structured data for every page.
+ * Homepage: Consolidated @graph with WebSite, CollegeOrUniversity, WebPage.
+ * Internal pages: WebPage referencing #website and #organization, BreadcrumbList, Course, and visible FAQs.
+ */
 export function createSeoStructuredData(page) {
   const canonicalUrl = `${siteUrl}${page.path === "/" ? "/" : page.path}`;
-  const graph = [
-    {
-      "@type": "WebSite",
-      "@id": websiteId,
-      name: collegeName,
-      alternateName: ["HSCE", "HSCE Delhi", "Haryana Shakti College"],
-      url: `${siteUrl}/`,
-      publisher: {
-        "@type": ["CollegeOrUniversity", "EducationalOrganization"],
-        "@id": organizationId,
-        name: collegeName,
-        url: `${siteUrl}/`,
-      },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+
+  // 1. Homepage Consolidated Graph (Phase 3 Specification)
+  if (page.path === "/") {
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": websiteId,
+          url: `${siteUrl}/`,
+          name: collegeName,
+          alternateName: ["HSCE", "HSCE Delhi", "Haryana Shakti College"],
+          publisher: {
+            "@id": organizationId,
+          },
         },
-        "query-input": "required name=search_term_string",
-      },
-    },
+        {
+          "@type": "CollegeOrUniversity",
+          "@id": organizationId,
+          name: collegeName,
+          alternateName: "HSCE",
+          url: `${siteUrl}/`,
+          description:
+            "Haryana Shakti College of Education (HSCE), established in 2012 under the aegis of Haryana Shakti Education Society, is a teacher education institution in Kanjhawala, Delhi. The college offers a two-year Bachelor of Education (B.Ed.) programme recognised by NCTE and affiliated with Guru Gobind Singh Indraprastha University (GGSIPU), Delhi.",
+          foundingDate: "2012",
+          logo: {
+            "@type": "ImageObject",
+            url: `${siteUrl}/assets/brand/college-logo.png`,
+          },
+          image:
+            "https://res.cloudinary.com/dljt6vgkk/image/upload/f_auto,q_auto,w_1400/v1792002734/college-campus-hero_y0tjjk.png",
+          telephone: ["+91-9953155054", "+91-8056777077"],
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "Ghevra Road, Kanjhawala",
+            addressLocality: "Kanjhawala",
+            addressRegion: "Delhi",
+            postalCode: "110081",
+            addressCountry: "IN",
+          },
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              telephone: "+91-9953155054",
+              contactType: "admissions",
+              areaServed: "IN",
+              availableLanguage: ["English", "Hindi"],
+            },
+            {
+              "@type": "ContactPoint",
+              telephone: "+91-8056777077",
+              contactType: "office",
+              areaServed: "IN",
+              availableLanguage: ["English", "Hindi"],
+            },
+          ],
+          sameAs: ["https://www.instagram.com/hscekanjhawala/"],
+        },
+        {
+          "@type": "WebPage",
+          "@id": `${siteUrl}/#webpage`,
+          url: `${siteUrl}/`,
+          name: "Haryana Shakti College of Education | Official Website",
+          description:
+            "Haryana Shakti College of Education, Kanjhawala, Delhi. Explore the B.Ed. programme, NCTE recognition, GGSIPU affiliation, admissions, faculty, campus facilities and college information.",
+          isPartOf: {
+            "@id": websiteId,
+          },
+          about: {
+            "@id": organizationId,
+          },
+          mainEntity: {
+            "@id": organizationId,
+          },
+          primaryImageOfPage: {
+            "@type": "ImageObject",
+            url: "https://res.cloudinary.com/dljt6vgkk/image/upload/f_auto,q_auto,w_1400/v1792002734/college-campus-hero_y0tjjk.png",
+          },
+        },
+      ],
+    };
+  }
+
+  // 2. Internal Pages Graph (Phase 6 Specification)
+  const graph = [
     {
       "@type": "WebPage",
       "@id": `${canonicalUrl}#webpage`,
       url: canonicalUrl,
       name: page.title,
       description: page.description,
-      isPartOf: { "@id": websiteId },
+      isPartOf: {
+        "@type": "WebSite",
+        "@id": websiteId,
+        name: collegeName,
+        url: `${siteUrl}/`,
+      },
       about: {
-        "@type": ["CollegeOrUniversity", "EducationalOrganization"],
+        "@type": "CollegeOrUniversity",
         "@id": organizationId,
         name: collegeName,
         url: `${siteUrl}/`,
+      },
+      mainEntity: {
+        "@id": organizationId,
       },
       ...(page.image && {
         primaryImageOfPage: {
           "@type": "ImageObject",
           url: page.image,
-          caption: page.imageAlt,
+          caption: page.imageAlt || collegeName,
         },
       }),
     },
   ];
 
-  if (page.path === "/") {
-    graph.push({
-      "@type": ["CollegeOrUniversity", "EducationalOrganization"],
-      "@id": organizationId,
-      name: collegeName,
-      alternateName: "HSCE",
-      url: `${siteUrl}/`,
-      logo: {
-        "@type": "ImageObject",
-        url: `${siteUrl}/assets/brand/college-logo.png`,
-      },
-      image: page.image,
-      foundingDate: "2012",
-      description:
-        "Haryana Shakti College of Education offers the Bachelor of Education (B.Ed.) programme in Kanjhawala, Delhi.",
-      telephone: "+91-9953155054",
-      email: "hsce.kanjhawala@gmail.com",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "Ghevra Road, Kanjhawala",
-        addressLocality: "North West Delhi",
-        addressRegion: "Delhi",
-        postalCode: "110081",
-        addressCountry: "IN",
-      },
-      geo: {
-        "@type": "GeoCoordinates",
-        latitude: "28.7155",
-        longitude: "77.0012",
-      },
-      contactPoint: [
-        {
-          "@type": "ContactPoint",
-          telephone: "+91-9953155054",
-          contactType: "admissions",
-          areaServed: "IN",
-          availableLanguage: ["English", "Hindi"],
-        },
-        {
-          "@type": "ContactPoint",
-          telephone: "+91-8056777077",
-          contactType: "office",
-          areaServed: "IN",
-          availableLanguage: ["English", "Hindi"],
-        },
-      ],
-      affiliation: {
-        "@type": "CollegeOrUniversity",
-        name: "Guru Gobind Singh Indraprastha University",
-        alternateName: "GGSIPU",
-        url: "http://www.ipu.ac.in/",
-      },
-      parentOrganization: {
-        "@type": "Organization",
-        name: "Haryana Shakti Education Society",
-      },
-      sameAs: [
-        "https://www.instagram.com/hscekanjhawala/",
-        "https://haryanashakticollege.com",
-      ],
-    });
-  }
-
+  // Breadcrumbs
   if (page.breadcrumbs?.length) {
     const items = [
       { name: "Home", path: "/" },
@@ -124,6 +138,7 @@ export function createSeoStructuredData(page) {
 
     graph.push({
       "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
       itemListElement: items.map((item, index) => ({
         "@type": "ListItem",
         position: index + 1,
@@ -133,14 +148,16 @@ export function createSeoStructuredData(page) {
     });
   }
 
+  // Course Schema (Only on /course)
   if (page.pageType === "course") {
     graph.push({
       "@type": "Course",
       "@id": `${siteUrl}/course#bed-course`,
       name: "Bachelor of Education (B.Ed.)",
-      description: page.description,
+      description:
+        "Two-year regular Bachelor of Education (B.Ed.) programme recognised by NCTE and affiliated with Guru Gobind Singh Indraprastha University (GGSIPU), Delhi.",
       provider: {
-        "@type": ["CollegeOrUniversity", "EducationalOrganization"],
+        "@type": "CollegeOrUniversity",
         "@id": organizationId,
         name: collegeName,
         url: `${siteUrl}/`,
@@ -151,6 +168,7 @@ export function createSeoStructuredData(page) {
     });
   }
 
+  // Visible FAQs (Only on pages where FAQs visibly appear)
   if (page.faqs?.length) {
     graph.push({
       "@type": "FAQPage",

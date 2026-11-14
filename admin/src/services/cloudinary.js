@@ -5,6 +5,9 @@
  * never fail due to missing or invalid Cloudinary API keys / presets.
  */
 
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage, firebaseReady } from "../config/firebase";
+
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -92,6 +95,29 @@ export function fileToDataUrl(file) {
   });
 }
 
+async function tryFirebaseStorageUpload(file, folder = "uploads") {
+  if (!firebaseReady || !storage) {
+    return null;
+  }
+  try {
+    const cleanName = (file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "-");
+    const storagePath = `public/${folder}/${Date.now()}-${cleanName}`;
+    const fileRef = ref(storage, storagePath);
+    await uploadBytes(fileRef, file, { contentType: file.type });
+    const downloadUrl = await getDownloadURL(fileRef);
+    return {
+      secure_url: downloadUrl,
+      public_id: storagePath,
+      format: file.type.split("/")[1] || "jpeg",
+      bytes: file.size,
+      isFirebaseStorage: true,
+    };
+  } catch (err) {
+    console.warn("Firebase Storage upload attempt notice:", err?.message || err);
+    return null;
+  }
+}
+
 /**
  * Upload a File (Image or PDF) to Cloudinary, with client-side fallback
  * @param {File} file - The file to upload
@@ -123,8 +149,13 @@ export async function uploadToCloudinary(file, options = {}) {
     cloudName === "hsce-college" ||
     uploadPreset === "hsce_documents";
 
-  // If placeholder or missing credentials and it's an image, fall back to optimized image
+  // If placeholder or missing credentials, attempt Firebase Storage first
   if (isPlaceholderConfig && !options.forceCloudinary) {
+    const fbRes = await tryFirebaseStorageUpload(file, options.folder || "uploads");
+    if (fbRes?.secure_url) {
+      return fbRes;
+    }
+
     if (isImage) {
       const optimizedUrl = await compressImageFile(file);
       return {
@@ -160,6 +191,12 @@ export async function uploadToCloudinary(file, options = {}) {
         `Cloudinary upload failed (${response.status}: ${serverMessage || response.statusText}).`,
       );
 
+      // Cloudinary failed: try Firebase Storage fallback
+      const fbFallback = await tryFirebaseStorageUpload(file, options.folder || "uploads");
+      if (fbFallback?.secure_url) {
+        return fbFallback;
+      }
+
       // If it's an image, fallback so the user is never blocked by "Unknown API key" or preset issues
       if (isImage && !options.forceCloudinary) {
         console.info("Using client-side optimized image storage fallback.");
@@ -191,6 +228,12 @@ export async function uploadToCloudinary(file, options = {}) {
       resource_type: data.resource_type,
     };
   } catch (err) {
+    // Attempt Firebase Storage fallback
+    const fbFallback = await tryFirebaseStorageUpload(file, options.folder || "uploads");
+    if (fbFallback?.secure_url) {
+      return fbFallback;
+    }
+
     // If it's an image and not forced, safely fallback
     if (isImage && !options.forceCloudinary) {
       console.warn("Cloudinary fetch error, falling back to client-side compression:", err);

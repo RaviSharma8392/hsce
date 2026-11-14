@@ -450,21 +450,43 @@ export function HomeFeaturedOverview() {
             {/* Left Column: Heading, Real HSCE Story, 2 Solid Navy Buttons */}
             <div className="lg:col-span-7">
               <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-900 tracking-tight leading-tight">
-                {isHindi ? "संस्थान परिचय (Overview)" : "Overview"}
+                {isHindi ? "संस्थान परिचय (Overview)" : "About Haryana Shakti College of Education"}
               </h2>
 
-              <p className="mt-5 text-sm sm:text-[15px] leading-relaxed text-slate-600 font-normal">
-                {isHindi
-                  ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU), दिल्ली (कॉलेज कोड: 147) से संबद्ध और राष्ट्रीय अध्यापक शिक्षा परिषद (NRC-NCTE) द्वारा विधिवत मान्यता प्राप्त है। हरियाणा शक्ति एजुकेशन सोसाइटी (2012 में कंझावला, दिल्ली में स्थापित) के तत्वावधान में संचालित यह महाविद्यालय शिक्षक शिक्षा में शैक्षणिक उत्कृष्टता का एक प्रतिष्ठित केंद्र है। महाविद्यालय 100 स्वीकृत वार्षिक सीटों के साथ 2-वर्षीय नियमित बी.एड. पाठ्यक्रम, 16 सप्ताह का गहन विद्यालय इंटर्नशिप और आधुनिक पाठ्यचर्या प्रयोगशालाएं प्रदान करता है।"
-                  : "The Haryana Shakti College of Education is affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi (College Code: 147) and recognized by the National Council for Teacher Education (NRC-NCTE). Managed under the visionary leadership of Haryana Shakti Education Society (established in 2012 in Kanjhawala, Delhi), the college aims to be a centre of academic excellence in professional teacher education. HSCE offers a comprehensive two-year regular Bachelor of Education (B.Ed.) programme with an approved intake of 100 annual seats, combining rigorous pedagogy, 16 weeks of practical school internship across Delhi schools, and modern curriculum laboratories to prepare dedicated, future-ready educators."}
-              </p>
+              <div className="mt-5 space-y-3.5 text-sm sm:text-[15px] leading-relaxed text-slate-600 font-normal">
+                {isHindi ? (
+                  <>
+                    <p>
+                      हरियाणा शक्ति कॉलेज ऑफ एजुकेशन (HSCE) 2012 में हरियाणा शक्ति एजुकेशन सोसाइटी (पंजीकृत) के तत्वावधान में स्थापित एक शिक्षक शिक्षा संस्थान है। घेवरा रोड, कंझावला, दिल्ली – 110081 पर स्थित यह संस्थान शिक्षक प्रशिक्षण के क्षेत्र में गुणवत्तापूर्ण व्यावसायिक शिक्षा प्रदान करने के लिए समर्पित है।
+                    </p>
+                    <p>
+                      महाविद्यालय दो-वर्षीय बैचलर ऑफ एजुकेशन (बी.एड.) पाठ्यक्रम संचालित करता है, जिसे राष्ट्रीय अध्यापक शिक्षा परिषद (NCTE) द्वारा मान्यता प्राप्त है और यह गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU), दिल्ली से संबद्ध है।
+                    </p>
+                    <p>
+                      शैक्षणिक उत्कृष्टता, व्यावसायिक नैतिकता और व्यावहारिक शिक्षण अनुभव पर विशेष ध्यान केंद्रित करते हुए, HSCE का उद्देश्य शिक्षा क्षेत्र के लिए सक्षम और उत्तरदायी शिक्षकों को तैयार करना है।
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      Haryana Shakti College of Education (HSCE) is a teacher education institution established in 2012 under the aegis of Haryana Shakti Education Society (Regd.). Located on Ghevra Road, Kanjhawala, Delhi – 110081, the institution is dedicated to providing quality professional education in the field of teacher training.
+                    </p>
+                    <p>
+                      The college offers a two-year Bachelor of Education (B.Ed.) programme, recognised by the National Council for Teacher Education (NCTE) and affiliated with Guru Gobind Singh Indraprastha University (GGSIPU), Delhi.
+                    </p>
+                    <p>
+                      With a focus on academic excellence, professional ethics and practical teaching experience, HSCE aims to prepare competent and responsible educators for the education sector.
+                    </p>
+                  </>
+                )}
+              </div>
 
               {/* Two Solid Navy Blue Buttons (Matching user screenshot) */}
               <div className="mt-8 flex flex-wrap items-center gap-3.5">
                 <Link
                   to="/about"
                   className="inline-flex min-h-[44px] items-center justify-center rounded-sm bg-[#2E3A8C] px-7 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all hover:bg-[#202965] active:scale-[0.98]">
-                  <span>{isHindi ? "और पढ़ें (READ MORE)" : "READ MORE"}</span>
+                  <span>{isHindi ? "और पढ़ें (READ MORE)" : "READ MORE ABOUT US"}</span>
                 </Link>
 
                 <Link

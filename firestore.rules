@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the request is from an authenticated user
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Check if record is published for public viewing
+    function isPublishedRecord() {
+      return resource != null && resource.data.isPublished == true;
+    }
+
+    // 1. Gallery collection (Photo Gallery)
+    match /gallery/{galleryId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 2. Notices collection (Latest & Admission Notices)
+    match /notices/{noticeId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 3. Documents collection (Mandatory Disclosures, Affidavits, Forms)
+    match /documents/{documentId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 4. Faculty collection (Teaching & Administrative Staff)
+    match /faculty/{facultyId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 5. Committees collection (Governing Body, Internal Committees)
+    match /committees/{committeeId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 6. Syllabus collection (B.Ed., D.El.Ed. Syllabi & Academic Calendars)
+    match /syllabus/{syllabusId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 7. Campus Tours (Bookings & Inquiries)
+    match /campusTours/{tourId} {
+      allow read: if true;
+      allow create: if true; // Public students/parents can schedule tours
+      allow update, delete: if isSignedIn();
+    }
+
+    // 8. Homepage Popups (Admission Alerts & Dynamic Banners)
+    match /homepagePopups/{popupId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 9. Homepage Messages (Principal & Chairman Statements)
+    match /homepageMessages/{messageId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 10. Site Content & Global Configurations
+    match /siteContent/{documentId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // 11. Admin Users & Permissions
+    match /adminUsers/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // 12. Staff Profiles (Individual Settings)
+    match /staffProfiles/{profileId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // 13. Security Audit Logs (Auth events, brute force protection)
+    match /securityLogs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isSignedIn();
+    }
+
+    // 14. Student Enquiries (Admission Queries, Chatbot Submissions)
+    match /studentEnquiries/{enquiryId} {
+      allow create: if true; // Public visitor submission
+      allow read, update, delete: if isSignedIn();
+    }
+
+    // 15. Contact & Feedback Submissions
+    match /contactFeedback/{feedbackId} {
+      allow create: if true; // Public visitor submission
+      allow read, update, delete: if isSignedIn();
+    }
+
+    // 16. Grievance Submissions
+    match /grievances/{grievanceId} {
+      allow create: if true; // Public student/parent submission
+      allow read, update, delete: if isSignedIn();
+    }
+
+    // Default fallback rule for any newly added collection
+    match /{document=**} {
+      allow read: if isSignedIn() || resource.data.isPublished == true;
+      allow write: if isSignedIn();
+    }
+  }
+}
+

@@ -620,7 +620,14 @@ export default function FacultyPage() {
       }
     } catch (err) {
       console.error("Save faculty error:", err);
-      setFormError("Failed to save changes. Please try again.");
+      const isPerm =
+        err?.code === "permission-denied" ||
+        err?.message?.toLowerCase().includes("permission");
+      setFormError(
+        isPerm
+          ? "Missing or insufficient permissions: Please ensure you are logged in and your Firestore rules in Firebase Console are published."
+          : "Failed to save changes. Please try again.",
+      );
     } finally {
       setSaving(false);
     }

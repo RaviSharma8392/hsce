@@ -201,9 +201,9 @@ export function AdmissionCTA() {
                   {isHindi ? "ईमेल पूछताछ" : "Direct Email Inquiries"}
                 </p>
                 <a
-                  href={`mailto:${collegeInfo.email || "haryanashakticollege@gmail.com"}`}
+                  href={`mailto:${collegeInfo.email || "hsce.kanjhawala@gmail.com"}`}
                   className="mt-0.5 block truncate text-xs sm:text-sm font-bold text-slate-900 hover:text-[#2E3A8C] transition-colors">
-                  {collegeInfo.email || "haryanashakticollege@gmail.com"}
+                  {collegeInfo.email || "hsce.kanjhawala@gmail.com"}
                 </a>
                 <div className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
                   <ShieldCheck size={13} />

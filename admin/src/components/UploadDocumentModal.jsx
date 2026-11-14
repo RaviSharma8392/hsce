@@ -110,7 +110,14 @@ export default function UploadDocumentModal({
         onClose();
       }, 1000);
     } catch (err) {
-      setError("Failed to upload document. " + err.message);
+      const isPerm =
+        err?.code === "permission-denied" ||
+        err?.message?.toLowerCase().includes("permission");
+      setError(
+        isPerm
+          ? "Missing or insufficient permissions: Please publish the updated Firestore rules in Firebase Console to allow document uploads."
+          : "Failed to upload document. " + err.message,
+      );
     } finally {
       setSubmitting(false);
     }

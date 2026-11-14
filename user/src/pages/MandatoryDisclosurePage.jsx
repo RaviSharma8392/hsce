@@ -62,13 +62,26 @@ const disclosureTitles = [
   "14 (a) and (b) (1)",
 ];
 
-const documentUrls = {};
+const ACCREDITATION_PDF_URL = "/documents/status-of-accreditation-nrcapp-81.pdf";
+const INSTITUTE_INFO_PDF_URL = "/documents/HSCE%20College%20Brochure.pdf";
+
+const documentUrls = {
+  // (A) Institute Information (HSCE College Brochure)
+  1: INSTITUTE_INFO_PDF_URL,
+  "(A) Institute Information": INSTITUTE_INFO_PDF_URL,
+  "Institute Information": INSTITUTE_INFO_PDF_URL,
+
+  // 1. Status of Accreditation (NCTE NRC Recognition & Accreditation Order - NRCAPP-81)
+  3: ACCREDITATION_PDF_URL,
+  "1. Status of Accreditation": ACCREDITATION_PDF_URL,
+  "Status of Accreditation": ACCREDITATION_PDF_URL,
+};
 
 const createDisclosureDocuments = () =>
   disclosureTitles.map((title, index) => ({
     id: index + 1,
     title,
-    url: documentUrls[index + 1] || "",
+    url: documentUrls[index + 1] || documentUrls[title] || "",
   }));
 
 const disclosureData = {
@@ -103,16 +116,54 @@ export default function MandatoryDisclosurePage() {
     ? selectedSession
     : sessions[0];
 
+  const isInstituteInfoDoc = (title) => {
+    const t = String(title || "").toLowerCase();
+    return t.includes("institute information") || t.includes("brochure");
+  };
+
+  const isAccreditationDoc = (title) => {
+    const t = String(title || "").toLowerCase();
+    return t.includes("status of accreditation") || t.includes("accreditation") || t.includes("nrcapp");
+  };
+
   const liveDocuments = publishedDocuments
     .filter((document) => String(document.session || "").trim() === session)
     .map((document) => ({
       id: document.id,
       title: document.title,
-      url: document.url || "",
+      url:
+        document.url ||
+        (isInstituteInfoDoc(document.title) ? INSTITUTE_INFO_PDF_URL : "") ||
+        (isAccreditationDoc(document.title) ? ACCREDITATION_PDF_URL : "") ||
+        documentUrls[document.title] ||
+        "",
     }));
+
+  const fallbackDocuments = disclosureData[session] || disclosureData["2025-2026"] || [];
+
   const sessionDocuments = liveDocuments.length
-    ? liveDocuments
-    : disclosureData[session] || [];
+    ? [
+        ...(!liveDocuments.some((d) => isInstituteInfoDoc(d.title))
+          ? [
+              {
+                id: "statutory-institute-info",
+                title: "(A) Institute Information",
+                url: INSTITUTE_INFO_PDF_URL,
+              },
+            ]
+          : []),
+        ...(!liveDocuments.some((d) => isAccreditationDoc(d.title))
+          ? [
+              {
+                id: "statutory-accreditation",
+                title: "1. Status of Accreditation",
+                url: ACCREDITATION_PDF_URL,
+              },
+            ]
+          : []),
+        ...liveDocuments,
+      ]
+    : fallbackDocuments;
 
   const labels = {
     eyebrow: isHindi ? "सार्वजनिक दस्तावेज़" : "PUBLIC DISCLOSURES",

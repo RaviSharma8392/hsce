@@ -79,7 +79,20 @@ export default function AboutFactsPage() {
                       <td className="px-5 py-3.5 font-semibold text-gray-900 font-poppins">
                         {fact.label}
                       </td>
-                      <td className="px-5 py-3.5 text-gray-700">{fact.value}</td>
+                      <td className="px-5 py-3.5 text-gray-700">
+                        {fact.link ? (
+                          <a
+                            href={fact.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 font-semibold text-[#363991] hover:underline">
+                            <span>{fact.value}</span>
+                            <ExternalLink size={13} className="shrink-0 text-slate-500" />
+                          </a>
+                        ) : (
+                          fact.value
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

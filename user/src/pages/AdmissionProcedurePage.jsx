@@ -167,7 +167,7 @@ export default function AdmissionProcedurePage() {
               </p>
               <div className="mt-4 pt-3 border-t border-gray-100 text-xs text-slate-500 space-y-1">
                 <p><strong>Phone:</strong> {helplinePhone}</p>
-                <p><strong>Email:</strong> {collegeInfo.email || "info@haryanashakticollege.in"}</p>
+                <p><strong>Email:</strong> {collegeInfo.email || "hsce.kanjhawala@gmail.com"}</p>
               </div>
             </div>
 
