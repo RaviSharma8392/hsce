@@ -1,4 +1,4 @@
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
 
 const LOCAL_STORAGE_KEY = "hsce_syllabus_items";
@@ -101,7 +101,11 @@ export async function fetchAllSyllabusItems() {
   if (firebaseReady) {
     try {
       try {
-        const q = query(collection(db, "syllabus"), orderBy("createdAt", "desc"));
+        const q = query(
+          collection(db, "syllabus"),
+          where("isPublished", "==", true),
+          orderBy("createdAt", "desc"),
+        );
         const snapshot = await getDocs(q);
         remoteItems = snapshot.docs.map((docSnap) => ({
           id: docSnap.id,
@@ -109,7 +113,9 @@ export async function fetchAllSyllabusItems() {
           isBackend: true,
         }));
       } catch {
-        const snapshot = await getDocs(collection(db, "syllabus"));
+        const snapshot = await getDocs(
+          query(collection(db, "syllabus"), where("isPublished", "==", true)),
+        );
         remoteItems = snapshot.docs.map((docSnap) => ({
           id: docSnap.id,
           ...docSnap.data(),

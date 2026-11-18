@@ -1,6 +1,5 @@
 import React from "react";
 import { Container } from "../common/Container";
-import { imageData } from "../../data/imagesData";
 import { useLanguage } from "../../context/LanguageContext";
 import { Quote, UserCheck, CheckCircle2, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -43,7 +42,7 @@ export function StarAlumni() {
     college: isHindi
       ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन, कंझावला, दिल्ली"
       : "Haryana Shakti College of Education, Kanjhawala, Delhi",
-    image: imageData.firstYearStudent,
+    image: "/assets/people/pooja-sharma.png",
     quote: isHindi
       ? "हरियाणा शक्ति कॉलेज ऑफ एजुकेशन में अपनी शिक्षक प्रशिक्षण यात्रा शुरू करना एक अत्यंत प्रेरक अनुभव रहा है। अनुभवी प्राध्यापकों का व्यक्तिगत मार्गदर्शन, व्यावहारिक माइक्रो-टीचिंग सत्र और समृद्ध पाठ्यचर्या प्रयोगशालाएं हमें एक आत्मविश्वास से परिपूर्ण और समर्पित शिक्षक बनने के लिए सशक्त बनाती हैं।"
       : "Starting my teacher training journey at HSCE has been a truly empowering experience. The supportive faculty, hands-on micro-teaching sessions, and curriculum labs give us the pedagogical foundation and confidence to excel as future educators.",

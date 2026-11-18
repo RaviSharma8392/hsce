@@ -90,6 +90,22 @@ export function createSeoStructuredData(page) {
             url: "https://res.cloudinary.com/dljt6vgkk/image/upload/f_auto,q_auto,w_1400/v1792002734/college-campus-hero_y0tjjk.png",
           },
         },
+        ...(page.faqs?.length
+          ? [
+              {
+                "@type": "FAQPage",
+                "@id": `${canonicalUrl}#faq`,
+                mainEntity: page.faqs.map((faq) => ({
+                  "@type": "Question",
+                  name: faq.question,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: faq.answer,
+                  },
+                })),
+              },
+            ]
+          : []),
       ],
     };
   }
@@ -127,6 +143,12 @@ export function createSeoStructuredData(page) {
     },
   ];
 
+  if (page.pageType === "developer") {
+    graph[0].mainEntity = {
+      "@id": `${canonicalUrl}#ravi-sharma`,
+    };
+  }
+
   // Breadcrumbs
   if (page.breadcrumbs?.length) {
     const items = [
@@ -146,6 +168,48 @@ export function createSeoStructuredData(page) {
         name: item.name,
         item: `${siteUrl}${item.path === "/" ? "/" : item.path}`,
       })),
+    });
+  }
+
+  // Course Schema (Only on /course)
+  if (page.pageType === "developer") {
+    const personId = `${canonicalUrl}#ravi-sharma`;
+    graph.push({
+      "@type": "Person",
+      "@id": personId,
+      name: "Ravi Sharma",
+      jobTitle: "Website & eCommerce Developer",
+      description:
+        "Independent website developer credited with the Haryana Shakti College of Education website, with work across education, business, and eCommerce projects.",
+      telephone: "+91-83928-56993",
+      email: "ravisharmabhimtal@gmail.com",
+      homeLocation: {
+        "@type": "Place",
+        name: "Nainital and Bhimtal, Uttarakhand, India",
+      },
+      knowsAbout: [
+        "Website development",
+        "eCommerce website development",
+        "React web applications",
+        "Firebase web applications",
+      ],
+      sameAs: ["https://www.instagram.com/raviiiiii._0/"],
+      affiliation: {
+        "@id": organizationId,
+      },
+      url: canonicalUrl,
+    });
+    graph.push({
+      "@type": "ProfilePage",
+      "@id": `${canonicalUrl}#profile`,
+      url: canonicalUrl,
+      name: page.title,
+      isPartOf: {
+        "@id": websiteId,
+      },
+      mainEntity: {
+        "@id": personId,
+      },
     });
   }
 

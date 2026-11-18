@@ -1,13 +1,66 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // Allow public read on all assets (photos, documents, notices)
-    // Allow write/delete only for authenticated administrators/staff
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function adminUserPath() {
+      return /databases/(default)/documents/adminUsers/$(request.auth.uid);
+    }
+
+    function isPrincipal() {
+      return isSignedIn() &&
+        (request.auth.token.email == 'sharmaravi8392@gmail.com' ||
+          (firestore.exists(adminUserPath()) &&
+            firestore.get(adminUserPath()).data.active == true &&
+            firestore.get(adminUserPath()).data.verified == true &&
+            firestore.get(adminUserPath()).data.role == 'principal'));
+    }
+
+    function hasPermission(permission) {
+      return isPrincipal() ||
+        (isSignedIn() &&
+          firestore.exists(adminUserPath()) &&
+          firestore.get(adminUserPath()).data.active == true &&
+          firestore.get(adminUserPath()).data.verified == true &&
+          (firestore.get(adminUserPath()).data.role == 'principal' ||
+            firestore.get(adminUserPath()).data.get('permissions', {}).get(permission, false) == true));
+    }
+
+    function canManageCollection(collectionName) {
+      return (collectionName == 'notices' && hasPermission('notices')) ||
+        (collectionName == 'gallery' && hasPermission('gallery')) ||
+        (collectionName == 'faculty' && hasPermission('faculty')) ||
+        (collectionName == 'syllabus' && hasPermission('syllabus')) ||
+        (collectionName == 'homepagePopups' && hasPermission('homepagePopup')) ||
+        (collectionName == 'documents' && isPrincipal()) ||
+        (collectionName == 'homepageMessages' && isPrincipal()) ||
+        (collectionName == 'siteContent' && isPrincipal()) ||
+        (collectionName == 'uploads' && isPrincipal());
+    }
+
+    function validUpload() {
+      return request.resource != null &&
+        request.resource.size < 15 * 1024 * 1024 &&
+        request.resource.contentType.matches('(image/(jpeg|png|webp|gif)|application/pdf)');
+    }
+
+    match /public/{collectionName}/{filePath=**} {
+      allow read: if true;
+      allow create, update: if canManageCollection(collectionName) && validUpload();
+      allow delete: if canManageCollection(collectionName);
+    }
+
+    match /public/hsce/{collectionName}/{filePath=**} {
+      allow read: if true;
+      allow create, update: if canManageCollection(collectionName) && validUpload();
+      allow delete: if canManageCollection(collectionName);
+    }
+
     match /{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if false;
     }
   }
 }
-

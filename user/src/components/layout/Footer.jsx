@@ -106,6 +106,7 @@ export function Footer({
       ["/about", "aboutOverview", "About the College"],
       ["/about/history", "aboutHistory", "History & Genesis"],
       ["/about/chairman", "aboutChairman", "Chairman's Desk"],
+      ["/about/manager", "aboutManager", "Manager's Desk"],
       ["/about/principal", "aboutPrincipal", "Principal's Desk"],
       ["/course", "bedCourse", "B.Ed. Programme"],
       ["/syllabus", "curriculumPedagogy", "B.Ed. Syllabus"],
@@ -256,7 +257,9 @@ export function Footer({
                   </p>
                   <div className="pt-1.5 border-t border-white/10 flex items-center gap-1.5 text-xs font-bold text-[#FBDD23]">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
-                    <span>Made &amp; Managed by Ravi Sharma</span>
+                    <Link to="/website-developer" className="hover:underline underline-offset-2">
+                      Made &amp; Managed by Ravi Sharma
+                    </Link>
                   </div>
                 </div>
 
@@ -311,7 +314,11 @@ export function Footer({
           {/* Subtext */}
           <p className="mx-auto mt-4 max-w-3xl text-sm sm:text-base text-[#d1d5db] font-normal leading-relaxed">
             Designed &amp; Developed by{" "}
-            <strong className="font-semibold text-white">Ravi Sharma</strong>. Get
+            <Link
+              to="/website-developer"
+              className="font-semibold text-white hover:text-[#FBDD23] hover:underline">
+              Ravi Sharma
+            </Link>. Get
             a premium, blazing-fast college, university, school portal or custom
             institutional website. Call or WhatsApp:{" "}
             <a

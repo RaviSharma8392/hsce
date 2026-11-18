@@ -234,6 +234,7 @@ export const navItems = [
       { label: "History & Genesis", hiLabel: "इतिहास एवं विकास", to: "/about/history" },
       { label: "Vision & Mission", hiLabel: "लक्ष्य एवं दृष्टि", to: "/about/vision-mission" },
       { label: "Chairman's Desk", hiLabel: "चेयरमैन का संदेश", to: "/about/chairman" },
+      { label: "Manager's Desk", hiLabel: "प्रबंधक का संदेश", to: "/about/manager" },
       { label: "Principal's Desk", hiLabel: "प्राचार्या का संदेश", to: "/about/principal" },
       { label: "Recognition & Affiliation", hiLabel: "मान्यता एवं संबद्धता", to: "/about/recognition" },
       { label: "Fact Sheet", hiLabel: "तथ्य विवरण", to: "/about/facts" },

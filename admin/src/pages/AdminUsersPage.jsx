@@ -601,25 +601,6 @@ export default function AdminUsersPage({ currentUser }) {
     }
   };
 
-  // Security Guard: Check if non-principal somehow visited this route
-  if (!isPrincipal) {
-    return (
-      <div className="academic-admin-page font-sans space-y-5">
-        <div className="bg-white rounded-xl border border-red-200 p-8 text-center space-y-3">
-          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
-            <Lock size={24} />
-          </div>
-          <h2 className="text-lg font-bold text-slate-900">
-            Access Restricted to Principal Authority
-          </h2>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Administrative user governance and permission provisioning is strictly restricted to Principal Ravi Sharma ({SUPER_ADMIN_EMAIL}).
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // Filtered and sorted records
   const pendingUsers = useMemo(
     () => users.filter((u) => u.verified !== true || u.status === "pending_verification"),
@@ -670,6 +651,25 @@ export default function AdminUsersPage({ currentUser }) {
     }
     return list;
   }, [securityLogs, logFilter, search]);
+
+  // Security Guard: Check if non-principal somehow visited this route
+  if (!isPrincipal) {
+    return (
+      <div className="academic-admin-page font-sans space-y-5">
+        <div className="bg-white rounded-xl border border-red-200 p-8 text-center space-y-3">
+          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
+            <Lock size={24} />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900">
+            Access Restricted to Principal Authority
+          </h2>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">
+            Administrative user governance and permission provisioning is strictly restricted to Principal Ravi Sharma ({SUPER_ADMIN_EMAIL}).
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="academic-admin-page space-y-5 font-sans">

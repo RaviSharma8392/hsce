@@ -1,119 +1,321 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Check if the request is from an authenticated user
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // Check if record is published for public viewing
+    function adminUserPath() {
+      return /databases/$(database)/documents/adminUsers/$(request.auth.uid);
+    }
+
+    function isPrincipal() {
+      return isSignedIn() &&
+        (request.auth.token.email == 'sharmaravi8392@gmail.com' ||
+          (exists(adminUserPath()) &&
+            get(adminUserPath()).data.active == true &&
+            get(adminUserPath()).data.verified == true &&
+            get(adminUserPath()).data.role == 'principal'));
+    }
+
+    function hasActivePortalRecord() {
+      return isSignedIn() &&
+        exists(adminUserPath()) &&
+        get(adminUserPath()).data.active == true &&
+        get(adminUserPath()).data.verified == true;
+    }
+
+    function hasPermission(permission) {
+      return isPrincipal() ||
+        (hasActivePortalRecord() &&
+          (get(adminUserPath()).data.role == 'principal' ||
+            get(adminUserPath()).data.get('permissions', {}).get(permission, false) == true));
+    }
+
     function isPublishedRecord() {
       return resource != null && resource.data.isPublished == true;
     }
 
-    // 1. Gallery collection (Photo Gallery)
+    function canReadPublished(permission) {
+      return isPublishedRecord() || hasPermission(permission);
+    }
+
+    function isSelfPendingAdminRequest(userId) {
+      let data = request.resource.data;
+      return isSignedIn() &&
+        request.auth.uid == userId &&
+        data.keys().hasOnly([
+          'uid', 'email', 'role', 'active', 'verified', 'status',
+          'createdAt', 'requestedAt', 'requiresVerificationBy', 'permissions'
+        ]) &&
+        data.keys().hasAll([
+          'uid', 'email', 'role', 'active', 'verified', 'status',
+          'createdAt', 'requestedAt', 'requiresVerificationBy', 'permissions'
+        ]) &&
+        data.uid == request.auth.uid &&
+        data.email == request.auth.token.email &&
+        data.role == 'staff' &&
+        data.active == false &&
+        data.verified == false &&
+        data.status == 'pending_verification' &&
+        data.requiresVerificationBy == 'sharmaravi8392@gmail.com' &&
+        data.createdAt == request.time &&
+        data.requestedAt == request.time &&
+        data.permissions is map &&
+        data.permissions.keys().hasOnly([
+          'notices', 'enquiries', 'gallery', 'syllabus', 'homepagePopup'
+        ]) &&
+        data.permissions.get('notices', false) == false &&
+        data.permissions.get('enquiries', false) == false &&
+        data.permissions.get('gallery', false) == false &&
+        data.permissions.get('syllabus', false) == false &&
+        data.permissions.get('homepagePopup', false) == false;
+    }
+
+    function isSelfLoginUpdate(userId) {
+      return isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['lastLoginAt', 'lastLoginEmail']) &&
+        request.resource.data.lastLoginAt == request.time &&
+        request.resource.data.lastLoginEmail == resource.data.email;
+    }
+
+    function validStudentEnquiry() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'name', 'phone', 'email', 'course', 'city', 'query', 'source',
+          'contactConsent', 'status', 'staffNotes', 'createdAtFormatted',
+          'createdAtMs', 'createdAt'
+        ]) &&
+        data.keys().hasAll([
+          'name', 'phone', 'email', 'course', 'city', 'query', 'source',
+          'status', 'staffNotes', 'createdAtFormatted', 'createdAtMs', 'createdAt'
+        ]) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+        data.phone is string && data.phone.size() <= 32 &&
+        data.email is string && data.email.size() <= 254 &&
+        data.course is string && data.course.size() <= 160 &&
+        data.city is string && data.city.size() <= 120 &&
+        data.query is string && data.query.size() <= 3000 &&
+        data.source is string && data.source.size() <= 60 &&
+        data.status == 'new' &&
+        data.staffNotes == '' &&
+        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
+        data.createdAtMs is int &&
+        data.createdAt == request.time &&
+        (!('contactConsent' in data) || data.contactConsent is bool);
+    }
+
+    function validContactFeedback() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'feedbackId', 'name', 'phone', 'email', 'category', 'subject',
+          'websiteAddress', 'profession', 'howKnowSite', 'siteRating',
+          'message', 'status', 'source', 'createdAtFormatted', 'createdAtMs',
+          'createdAt'
+        ]) &&
+        data.keys().hasAll([
+          'feedbackId', 'name', 'phone', 'email', 'category', 'subject',
+          'websiteAddress', 'profession', 'howKnowSite', 'siteRating',
+          'message', 'status', 'source', 'createdAtFormatted', 'createdAtMs',
+          'createdAt'
+        ]) &&
+        data.feedbackId is string && data.feedbackId.size() <= 32 &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+        data.phone is string && data.phone.size() <= 32 &&
+        data.email is string && data.email.size() <= 254 &&
+        data.category is string && data.category.size() <= 120 &&
+        data.subject is string && data.subject.size() <= 200 &&
+        data.websiteAddress is string && data.websiteAddress.size() <= 300 &&
+        data.profession is string && data.profession.size() <= 120 &&
+        data.howKnowSite is string && data.howKnowSite.size() <= 160 &&
+        data.siteRating is string && data.siteRating.size() <= 40 &&
+        data.message is string && data.message.size() <= 5000 &&
+        data.status == 'new' &&
+        data.source == 'website_contact_guestbook' &&
+        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
+        data.createdAtMs is int &&
+        data.createdAt == request.time;
+    }
+
+    function validGrievance() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'grievanceId', 'name', 'rollNo', 'phone', 'email', 'category',
+          'subject', 'description', 'status', 'source', 'createdAtFormatted',
+          'createdAtMs', 'createdAt'
+        ]) &&
+        data.keys().hasAll([
+          'grievanceId', 'name', 'rollNo', 'phone', 'email', 'category',
+          'subject', 'description', 'status', 'source', 'createdAtFormatted',
+          'createdAtMs', 'createdAt'
+        ]) &&
+        data.grievanceId is string && data.grievanceId.size() <= 32 &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+        data.rollNo is string && data.rollNo.size() <= 80 &&
+        data.phone is string && data.phone.size() <= 32 &&
+        data.email is string && data.email.size() <= 254 &&
+        data.category is string && data.category.size() <= 120 &&
+        data.subject is string && data.subject.size() > 0 && data.subject.size() <= 200 &&
+        data.description is string && data.description.size() > 0 && data.description.size() <= 5000 &&
+        data.status == 'new' &&
+        data.source == 'website_grievance_portal' &&
+        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
+        data.createdAtMs is int &&
+        data.createdAt == request.time;
+    }
+
+    function validCampusTour() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'bookingReference', 'candidateName', 'candidatePhone', 'candidateEmail',
+          'guardianName', 'guardianPhone', 'relationship', 'city', 'programme',
+          'graduationStatus', 'graduationDegree', 'graduationPercentage',
+          'previousCollege', 'pedagogyInterests', 'preferredDate',
+          'preferredTimeSlot', 'visitorsCount', 'facilitiesToInspect',
+          'specialNotes', 'status', 'staffNotes', 'source',
+          'createdAtFormatted', 'createdAtMs', 'createdAt'
+        ]) &&
+        data.keys().hasAll([
+          'bookingReference', 'candidateName', 'candidatePhone', 'candidateEmail',
+          'guardianName', 'guardianPhone', 'relationship', 'city', 'programme',
+          'graduationStatus', 'graduationDegree', 'graduationPercentage',
+          'previousCollege', 'pedagogyInterests', 'preferredDate',
+          'preferredTimeSlot', 'visitorsCount', 'facilitiesToInspect',
+          'specialNotes', 'status', 'staffNotes', 'source',
+          'createdAtFormatted', 'createdAtMs', 'createdAt'
+        ]) &&
+        data.bookingReference is string && data.bookingReference.size() <= 40 &&
+        data.candidateName is string && data.candidateName.size() > 0 && data.candidateName.size() <= 120 &&
+        data.candidatePhone is string && data.candidatePhone.size() <= 32 &&
+        data.candidateEmail is string && data.candidateEmail.size() <= 254 &&
+        data.guardianName is string && data.guardianName.size() <= 120 &&
+        data.guardianPhone is string && data.guardianPhone.size() <= 32 &&
+        data.relationship is string && data.relationship.size() <= 80 &&
+        data.city is string && data.city.size() <= 120 &&
+        data.programme is string && data.programme.size() <= 200 &&
+        data.graduationStatus is string && data.graduationStatus.size() <= 100 &&
+        data.graduationDegree is string && data.graduationDegree.size() <= 160 &&
+        data.graduationPercentage is string && data.graduationPercentage.size() <= 20 &&
+        data.previousCollege is string && data.previousCollege.size() <= 200 &&
+        data.pedagogyInterests is list && data.pedagogyInterests.size() <= 20 &&
+        data.preferredDate is string && data.preferredDate.size() <= 40 &&
+        data.preferredTimeSlot is string && data.preferredTimeSlot.size() <= 100 &&
+        data.visitorsCount is int && data.visitorsCount >= 1 && data.visitorsCount <= 20 &&
+        data.facilitiesToInspect is list && data.facilitiesToInspect.size() <= 30 &&
+        data.specialNotes is string && data.specialNotes.size() <= 2000 &&
+        data.status == 'pending' &&
+        data.staffNotes == '' &&
+        data.source == 'website_book_a_tour' &&
+        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
+        data.createdAtMs is int &&
+        data.createdAt == request.time;
+    }
+
     match /gallery/{galleryId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if canReadPublished('gallery');
+      allow create, update: if hasPermission('gallery');
+      allow delete: if hasPermission('gallery');
     }
 
-    // 2. Notices collection (Latest & Admission Notices)
     match /notices/{noticeId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if canReadPublished('notices');
+      allow create, update, delete: if hasPermission('notices');
     }
 
-    // 3. Documents collection (Mandatory Disclosures, Affidavits, Forms)
     match /documents/{documentId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if isPrincipal() || isPublishedRecord();
+      allow create, update, delete: if isPrincipal();
     }
 
-    // 4. Faculty collection (Teaching & Administrative Staff)
     match /faculty/{facultyId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if canReadPublished('faculty');
+      allow create, update, delete: if hasPermission('faculty');
     }
 
-    // 5. Committees collection (Governing Body, Internal Committees)
     match /committees/{committeeId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if isPrincipal() || isPublishedRecord();
+      allow create, update, delete: if isPrincipal();
     }
 
-    // 6. Syllabus collection (B.Ed., D.El.Ed. Syllabi & Academic Calendars)
     match /syllabus/{syllabusId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if canReadPublished('syllabus');
+      allow create, update, delete: if hasPermission('syllabus');
     }
 
-    // 7. Campus Tours (Bookings & Inquiries)
     match /campusTours/{tourId} {
-      allow read: if true;
-      allow create: if true; // Public students/parents can schedule tours
-      allow update, delete: if isSignedIn();
+      allow read: if hasPermission('tours');
+      allow create: if validCampusTour();
+      allow update, delete: if hasPermission('tours');
     }
 
-    // 8. Homepage Popups (Admission Alerts & Dynamic Banners)
     match /homepagePopups/{popupId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if canReadPublished('homepagePopup');
+      allow create, update, delete: if hasPermission('homepagePopup');
     }
 
-    // 9. Homepage Messages (Principal & Chairman Statements)
     match /homepageMessages/{messageId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if isPrincipal() || isPublishedRecord();
+      allow create, update, delete: if isPrincipal();
     }
 
-    // 10. Site Content & Global Configurations
     match /siteContent/{documentId} {
-      allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow read: if isPrincipal() || isPublishedRecord();
+      allow create, update, delete: if isPrincipal();
     }
 
-    // 11. Admin Users & Permissions
     match /adminUsers/{userId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isPrincipal() || (isSignedIn() && request.auth.uid == userId);
+      allow create: if isPrincipal() || isSelfPendingAdminRequest(userId);
+      allow update: if isPrincipal() || isSelfLoginUpdate(userId);
+      allow delete: if isPrincipal();
     }
 
-    // 12. Staff Profiles (Individual Settings)
     match /staffProfiles/{profileId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isPrincipal() ||
+        (hasActivePortalRecord() && request.auth.uid == profileId);
+      allow create, update: if hasActivePortalRecord() &&
+        request.auth.uid == profileId &&
+        request.resource.data.keys().hasOnly([
+          'name', 'designation', 'employeeId', 'department', 'email',
+          'phone', 'qualification', 'subjects', 'officeHours', 'bio',
+          'updatedAt', 'updatedBy'
+        ]) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() <= 120 &&
+        request.resource.data.phone is string &&
+        request.resource.data.phone.size() <= 40;
+      allow delete: if isPrincipal();
     }
 
-    // 13. Security Audit Logs (Auth events, brute force protection)
+    match /principalProfiles/{profileId} {
+      allow read, write: if isPrincipal();
+    }
+
     match /securityLogs/{logId} {
-      allow create: if true;
-      allow read, update, delete: if isSignedIn();
+      allow read, create: if isPrincipal();
+      allow update, delete: if false;
     }
 
-    // 14. Student Enquiries (Admission Queries, Chatbot Submissions)
     match /studentEnquiries/{enquiryId} {
-      allow create: if true; // Public visitor submission
-      allow read, update, delete: if isSignedIn();
+      allow create: if validStudentEnquiry();
+      allow read, update, delete: if hasPermission('enquiries') ||
+        hasPermission('chatbotEnquiries');
     }
 
-    // 15. Contact & Feedback Submissions
     match /contactFeedback/{feedbackId} {
-      allow create: if true; // Public visitor submission
-      allow read, update, delete: if isSignedIn();
+      allow create: if validContactFeedback();
+      allow read, update, delete: if hasPermission('feedback');
     }
 
-    // 16. Grievance Submissions
     match /grievances/{grievanceId} {
-      allow create: if true; // Public student/parent submission
-      allow read, update, delete: if isSignedIn();
+      allow create: if validGrievance();
+      allow read, update, delete: if hasPermission('grievances');
     }
 
-    // Default fallback rule for any newly added collection
     match /{document=**} {
-      allow read: if isSignedIn() || resource.data.isPublished == true;
-      allow write: if isSignedIn();
+      allow read, write: if false;
     }
   }
 }
-

@@ -17,6 +17,38 @@ export const seoPages = [
     imageAlt: "Haryana Shakti College of Education campus",
     breadcrumbs: [],
     pageType: "home",
+    faqs: [
+      {
+        question:
+          "Is Haryana Shakti College of Education recognized by NCTE and affiliated to GGSIPU?",
+        answer:
+          "Yes, Haryana Shakti College of Education (HSCE), Kanjhawala is recognized by the National Council for Teacher Education (NCTE) Northern Regional Committee and affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi (College Code: 147). Current approval orders and regulatory affidavits are publicly displayed in our Mandatory Disclosures section.",
+      },
+      {
+        question:
+          "What is the minimum eligibility criteria for the 2-Year Regular B.Ed. programme?",
+        answer:
+          "Candidates need a Bachelor's Degree and/or Master's Degree with at least 50% marks in aggregate (45% for SC/ST/PwD candidates) from a recognized university. Admissions are processed through centralized GGSIPU CET / CUET counseling.",
+      },
+      {
+        question:
+          "Is the medium of instruction and examination available in both Hindi and English?",
+        answer:
+          "Yes, instruction is bilingual (English and Hindi). Students are permitted to write assignments, lesson plans, and university term examinations in either English or Hindi according to their preference.",
+      },
+      {
+        question:
+          "Is the school internship compulsory and where is it conducted?",
+        answer:
+          "Yes, as per NCTE and university norms, pupil-teachers undergo mandatory practical school teaching internship across Delhi Directorate of Education government and recognized secondary schools.",
+      },
+      {
+        question:
+          "Does the college provide coaching and guidance for CTET and teacher recruitment exams?",
+        answer:
+          "Yes, our experienced faculty conduct specialized CTET workshops, mock problem sessions, and recruitment orientation drills alongside the standard B.Ed curriculum.",
+      },
+    ],
   },
   {
     path: "/about",
@@ -296,6 +328,33 @@ export const seoPages = [
     image: campusImage,
     imageAlt: "Haryana Shakti College of Education campus",
     breadcrumbs: [{ name: "Privacy Policy" }],
+  },
+  {
+    path: "/website-developer",
+    title: `Website Developer in Uttarakhand | Ravi Sharma (RSDEV)`,
+    description:
+      "Ravi Sharma (RSDEV) is a website developer based in Nainital and Bhimtal, Uttarakhand, working on education, business, and eCommerce websites.",
+    image: campusImage,
+    imageAlt: "Haryana Shakti College of Education official website",
+    breadcrumbs: [{ name: "Website Developer" }],
+    pageType: "developer",
+    faqs: [
+      {
+        question: "Who developed the Haryana Shakti College website?",
+        answer:
+          "Ravi Sharma (RSDEV) is credited with designing, developing, and managing the official Haryana Shakti College of Education website.",
+      },
+      {
+        question: "How can I contact Ravi Sharma about a website project?",
+        answer:
+          "Call or WhatsApp +91 83928 56993, email ravisharmabhimtal@gmail.com, or message @raviiiiii._0 on Instagram.",
+      },
+      {
+        question: "What types of websites does Ravi Sharma develop?",
+        answer:
+          "Ravi Sharma develops websites for educational institutions, businesses, and online stores, along with React and Firebase web applications and admin panels.",
+      },
+    ],
   },
   {
     path: "/search",

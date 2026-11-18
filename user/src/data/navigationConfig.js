@@ -28,6 +28,11 @@ export const getAboutSidebarConfig = (isHindi) => ({
       label: isHindi ? "चेयरमैन का संदेश" : "Chairman's Desk",
     },
     {
+      id: "manager",
+      to: "/about/manager",
+      label: isHindi ? "प्रबंधक का संदेश" : "Manager's Desk",
+    },
+    {
       id: "principal",
       to: "/about/principal",
       label: isHindi ? "प्राचार्या का संदेश" : "Principal's Desk",

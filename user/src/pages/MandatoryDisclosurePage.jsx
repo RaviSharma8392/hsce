@@ -63,14 +63,8 @@ const disclosureTitles = [
 ];
 
 const ACCREDITATION_PDF_URL = "/documents/status-of-accreditation-nrcapp-81.pdf";
-const INSTITUTE_INFO_PDF_URL = "/documents/HSCE%20College%20Brochure.pdf";
 
 const documentUrls = {
-  // (A) Institute Information (HSCE College Brochure)
-  1: INSTITUTE_INFO_PDF_URL,
-  "(A) Institute Information": INSTITUTE_INFO_PDF_URL,
-  "Institute Information": INSTITUTE_INFO_PDF_URL,
-
   // 1. Status of Accreditation (NCTE NRC Recognition & Accreditation Order - NRCAPP-81)
   3: ACCREDITATION_PDF_URL,
   "1. Status of Accreditation": ACCREDITATION_PDF_URL,
@@ -116,11 +110,6 @@ export default function MandatoryDisclosurePage() {
     ? selectedSession
     : sessions[0];
 
-  const isInstituteInfoDoc = (title) => {
-    const t = String(title || "").toLowerCase();
-    return t.includes("institute information") || t.includes("brochure");
-  };
-
   const isAccreditationDoc = (title) => {
     const t = String(title || "").toLowerCase();
     return t.includes("status of accreditation") || t.includes("accreditation") || t.includes("nrcapp");
@@ -133,7 +122,6 @@ export default function MandatoryDisclosurePage() {
       title: document.title,
       url:
         document.url ||
-        (isInstituteInfoDoc(document.title) ? INSTITUTE_INFO_PDF_URL : "") ||
         (isAccreditationDoc(document.title) ? ACCREDITATION_PDF_URL : "") ||
         documentUrls[document.title] ||
         "",
@@ -143,15 +131,6 @@ export default function MandatoryDisclosurePage() {
 
   const sessionDocuments = liveDocuments.length
     ? [
-        ...(!liveDocuments.some((d) => isInstituteInfoDoc(d.title))
-          ? [
-              {
-                id: "statutory-institute-info",
-                title: "(A) Institute Information",
-                url: INSTITUTE_INFO_PDF_URL,
-              },
-            ]
-          : []),
         ...(!liveDocuments.some((d) => isAccreditationDoc(d.title))
           ? [
               {

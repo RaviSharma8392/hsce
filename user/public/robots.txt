@@ -12,6 +12,8 @@ Allow: /
 Allow: /assets/
 Allow: /assets/*.js
 Allow: /assets/*.css
+Disallow: /admin/
+Disallow: /*?*q=
 
 User-agent: Googlebot-Image
 Allow: /assets/

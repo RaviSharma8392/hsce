@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
@@ -130,6 +130,10 @@ export function Layout({ children }) {
     defaultCollegeInfo;
 
   const pathname = location.pathname.replace(/\/+$/, "") || "/";
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location.pathname]);
 
   const canonicalPath =
     CANONICAL_PATH_ALIASES[pathname] ||
