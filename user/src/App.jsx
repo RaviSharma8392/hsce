@@ -26,6 +26,7 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const BookATourPage = lazy(() => import("./pages/BookATourPage"));
 const SyllabusPage = lazy(() => import("./pages/SyllabusPage"));
 const EnquiryPage = lazy(() => import("./pages/EnquiryPage"));
+const WebsiteDeveloperPage = lazy(() => import("./pages/WebsiteDeveloperPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 
 function App() {
@@ -259,6 +260,7 @@ function App() {
           element={<Navigate to="/contact" replace />}
         />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/website-developer" element={<WebsiteDeveloperPage />} />
         <Route
           path="/privacy-policy"
           element={<Navigate to="/privacy" replace />}
