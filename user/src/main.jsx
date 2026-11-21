@@ -11,7 +11,11 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <HelmetProvider>
       <LanguageProvider>
-        <BrowserRouter>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}>
           <AdmissionModalProvider>
             <App />
           </AdmissionModalProvider>

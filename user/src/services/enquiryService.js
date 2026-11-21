@@ -1,38 +1,8 @@
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
 
-const LOCAL_STORAGE_KEY = "hsce_student_enquiries";
-
 /**
- * Get enquiries stored in localStorage (backup / offline sync)
- */
-export function getLocalEnquiries() {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn("Error reading local enquiries:", err);
-    return [];
-  }
-}
-
-/**
- * Save an enquiry to localStorage
- */
-function saveLocalEnquiry(enquiry) {
-  try {
-    const list = getLocalEnquiries();
-    list.unshift(enquiry);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    // Trigger storage event for cross-tab or same-origin sync
-    window.dispatchEvent(new Event("storage"));
-  } catch (err) {
-    console.warn("Error writing local enquiry:", err);
-  }
-}
-
-/**
- * Submit a student chatbot enquiry to Firestore & local storage
+ * Submit a student chatbot enquiry to Firestore
  * @param {Object} data
  * @param {string} data.name - Student Name
  * @param {string} data.phone - Phone / WhatsApp Number
@@ -77,13 +47,11 @@ export async function submitStudentEnquiry(data) {
     createdAt: serverTimestamp(),
   });
 
-  // 2. Always persist locally so Admin and Staff panel can see it immediately
   const localRecord = {
     ...enquiryPayload,
     id: docRef.id,
     createdAt: timestamp.toISOString(),
   };
-  saveLocalEnquiry(localRecord);
 
   return {
     success: true,

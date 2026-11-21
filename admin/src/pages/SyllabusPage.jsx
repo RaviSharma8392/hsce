@@ -38,9 +38,9 @@ import { uploadToCloudinary } from "../services/cloudinary";
 ========================================================= */
 
 const PAGE_CONFIG = {
-  title: "B.Ed. Syllabus & Course Documents",
+  title: "B.Ed. Syllabus",
   subtitle:
-    "Manage academic syllabus documents, update their status, and publish PDFs on the college website.",
+    "Add and publish syllabus files shown on the college website.",
   publicPageUrl: "/syllabus",
   defaultYear: "2026-27",
   toastDuration: 3500,
@@ -121,6 +121,7 @@ function IconButton({ title, onClick, children, danger = false }) {
 ========================================================= */
 
 export default function SyllabusPage({ currentUser, role, permissions }) {
+  const isPrincipal = role === "principal";
   const [syllabusList, setSyllabusList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -388,7 +389,7 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
   ------------------------------------------------------- */
 
   const handleConfirmDelete = async () => {
-    if (!deleteTarget?.id) return;
+    if (!isPrincipal || !deleteTarget?.id) return;
 
     setIsDeleting(true);
 
@@ -804,12 +805,14 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
                             )}
                           </IconButton>
 
-                          <IconButton
-                            title="Delete document"
-                            danger
-                            onClick={() => setDeleteTarget(item)}>
-                            <Trash2 size={16} />
-                          </IconButton>
+                          {isPrincipal && (
+                            <IconButton
+                              title="Delete document"
+                              danger
+                              onClick={() => setDeleteTarget(item)}>
+                              <Trash2 size={16} />
+                            </IconButton>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -898,13 +901,15 @@ export default function SyllabusPage({ currentUser, role, permissions }) {
                     Copy link
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setDeleteTarget(item)}
-                    className="inline-flex items-center justify-center gap-2 rounded-md border border-rose-200 bg-white px-2 py-2.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50">
-                    <Trash2 size={15} />
-                    Delete
-                  </button>
+                  {isPrincipal && (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(item)}
+                      className="inline-flex items-center justify-center gap-2 rounded-md border border-rose-200 bg-white px-2 py-2.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50">
+                      <Trash2 size={15} />
+                      Delete
+                    </button>
+                  )}
                 </div>
               </article>
             ))}

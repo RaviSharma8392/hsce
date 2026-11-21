@@ -73,15 +73,15 @@ export default function AdminMobileNav({
   const shortLabel = (label) =>
     ({
       "Admission requests": "Admissions",
-      "Website chat questions": "Chat",
+      "Chat messages": "Chat",
       "Contact messages": "Contact",
       "Student concerns": "Concerns",
-      "Campus visit requests": "Visits",
-      "Notices and circulars": "Notices",
+      "Campus tour requests": "Tours",
+      Notices: "Notices",
       "Homepage announcement": "Announcement",
-      "Campus photos": "Photos",
-      "Faculty and staff": "Faculty",
-      "Course documents": "Courses",
+      "Campus gallery": "Gallery",
+      "Faculty & staff": "Faculty",
+      "B.Ed. syllabus": "Syllabus",
       "Staff accounts": "Accounts",
     })[label] || label;
 

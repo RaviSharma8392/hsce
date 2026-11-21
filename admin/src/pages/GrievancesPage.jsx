@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { adminAlert, adminConfirm } from "../components/common/AdminDialog";
 import {
   ShieldAlert,
   Search,
@@ -160,7 +161,7 @@ export default function GrievancesPage({ role = "staff" }) {
 
   // Handle delete (Optimistic UI)
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to permanently delete this grievance complaint record?")) {
+    if (!(await adminConfirm("Are you sure you want to permanently delete this grievance complaint record?", "Delete complaint"))) {
       return;
     }
     const previous = [...grievanceList];
@@ -180,9 +181,9 @@ export default function GrievancesPage({ role = "staff" }) {
   };
 
   // Export CSV
-  const exportToCSV = () => {
+  const exportToCSV = async () => {
     if (grievanceList.length === 0) {
-      alert("No grievances to export.");
+      await adminAlert("No grievances to export.", "No records to export");
       return;
     }
 
@@ -247,14 +248,14 @@ export default function GrievancesPage({ role = "staff" }) {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
               <ShieldAlert className="text-[#363991]" size={26} />
-              <span>Student Grievance Redressal</span>
+              <span>Student Concerns</span>
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200">
-              Statutory Compliance &bull; UGC / NCTE
+              Private submissions
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Confidential redressal portal for student grievances, anti-ragging complaints, and academic cell submissions.
+            Review and update private concerns submitted by students.
           </p>
         </div>
 
@@ -291,7 +292,7 @@ export default function GrievancesPage({ role = "staff" }) {
         <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
           <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Resolved Cases</div>
           <div className="text-xl sm:text-3xl font-black text-emerald-600 mt-0.5 sm:mt-1">{stats.resolved}</div>
-          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Redressal completed</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Resolved</div>
         </div>
       </div>
 
@@ -394,17 +395,19 @@ export default function GrievancesPage({ role = "staff" }) {
                       type="button"
                       onClick={() => setSelectedGrievance(item)}
                       className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
-                      title="View Full Case Details">
+                      title="View concern details">
                       <ExternalLink size={16} />
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(item.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                      title="Delete Record">
-                      <Trash2 size={16} />
-                    </button>
+                    {isPrincipal && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        title="Delete concern">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -465,7 +468,7 @@ export default function GrievancesPage({ role = "staff" }) {
                     </div>
                   </div>
 
-                  {/* Column 3: Redressal Committee Action Notes */}
+                  {/* Column 3: Review notes */}
                   <div className="space-y-1.5 flex flex-col justify-between">
                     <div>
                       <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Committee Action Notes</div>

@@ -53,7 +53,7 @@ const COLORS = {
 };
 
 const CANONICAL_PATH_ALIASES = {
-  "/about/campus-life": "/campus-life",
+  "/about/campus-life": "/gallery",
   "/about/overview": "/about",
   "/about/history-genesis": "/about/history",
   "/about/vision": "/about/vision-mission",
@@ -63,9 +63,9 @@ const CANONICAL_PATH_ALIASES = {
   "/about/principal-desk": "/about/principal",
   "/about/recognition-affiliation": "/about/recognition",
   "/about/affiliation": "/about/recognition",
-  "/about/facilities": "/campus-life",
-  "/about/campus": "/campus-life",
-  "/about/campus-labs": "/campus-life",
+  "/about/facilities": "/gallery",
+  "/about/campus": "/gallery",
+  "/about/campus-labs": "/gallery",
   "/about/fact-sheet": "/about/facts",
   "/bed": "/course",
   "/curriculum": "/syllabus",

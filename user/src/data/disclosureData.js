@@ -10,7 +10,7 @@ export const disclosures = [
     category: "Regulatory Recognition",
     hiCategory: "विनियामक मान्यता",
     description:
-      "Statutory recognition order granted by Northern Regional Committee (NRC), National Council for Teacher Education (NCTE), New Delhi for conducting the 2-Year B.Ed. programme with a sanctioned annual intake of 100 seats.",
+      "Statutory recognition order granted by Northern Regional Committee (NRC), National Council for Teacher Education (NCTE), New Delhi for conducting the 2-Year B.Ed. programme with a sanctioned annual intake of 50 seats.",
     hiDescription:
       "राष्ट्रीय अध्यापक शिक्षा परिषद (एनसीटीई) की उत्तरी क्षेत्रीय समिति (NRC) द्वारा 100 सीटों के स्वीकृत वार्षिक प्रवेश के साथ 2-वर्षीय बी.एड. पाठ्यक्रम संचालन हेतु जारी वैधानिक मान्यता आदेश।",
     session: "2025-26 & Continuous",
@@ -58,7 +58,7 @@ export const disclosures = [
     category: "Intake & Fees",
     hiCategory: "प्रवेश एवं शुल्क",
     description:
-      "Official notification regarding the approved intake capacity of 100 students for 2-Year B.Ed. programme and breakdown of tuition, university charges, library, and examination fees as regulated by the State Fee Regulatory Committee (SFRC), Delhi.",
+      "Official notification regarding the approved intake capacity of 50 students for 2-Year B.Ed. programme and breakdown of tuition, university charges, library, and examination fees as regulated by the State Fee Regulatory Committee (SFRC), Delhi.",
     hiDescription:
       "2-वर्षीय बी.एड. पाठ्यक्रम हेतु 100 छात्रों की स्वीकृत प्रवेश क्षमता एवं दिल्ली राज्य शुल्क नियामक समिति (SFRC) द्वारा निर्धारित ट्यूशन, परीक्षा, पुस्तकालय एवं विश्वविद्यालय शुल्क का विस्तृत विवरण।",
     session: "2025-26",

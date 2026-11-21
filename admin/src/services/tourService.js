@@ -11,105 +11,55 @@ import {
 } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
 
-const LOCAL_STORAGE_KEY = "hsce_campus_tours";
-
-/**
- * Get tours stored in localStorage (backup / offline sync)
- */
-export function getLocalTours() {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn("Error reading local campus tours:", err);
-    return [];
-  }
-}
-
-/**
- * Save tours list to localStorage
- */
-export function setLocalTours(list) {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    window.dispatchEvent(new Event("storage"));
-  } catch (err) {
-    console.warn("Error writing local campus tours:", err);
-  }
-}
-
 /**
  * Real-time subscription to Campus Tour Bookings
  * Returns unsubscribe function
  */
 export function subscribeToTours(callback) {
-  if (firebaseReady) {
-    try {
-      const q = query(
-        collection(db, "campusTours"),
-        orderBy("createdAt", "desc"),
-        limit(150)
-      );
-
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const remoteList = snapshot.docs.map((d) => {
-            const data = d.data();
-            let dateStr = data.createdAtFormatted;
-            if (!dateStr && data.createdAt) {
-              const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-              dateStr = date.toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-            }
-            return {
-              id: d.id,
-              ...data,
-              createdAtFormatted: dateStr || "Recent",
-            };
-          });
-
-          // Merge with any local offline bookings
-          const localList = getLocalTours();
-          const mergedMap = new Map();
-          remoteList.forEach((item) => mergedMap.set(item.id, item));
-          localList.forEach((item) => {
-            if (!mergedMap.has(item.id)) {
-              mergedMap.set(item.id, item);
-            }
-          });
-
-          const combined = Array.from(mergedMap.values()).sort(
-            (a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0)
-          );
-
-          setLocalTours(combined);
-          callback(combined);
-        },
-        (error) => {
-          console.warn("Firestore tours subscription error, using local fallback:", error);
-          callback(getLocalTours());
-        }
-      );
-
-      return unsubscribe;
-    } catch (e) {
-      console.warn("Firestore error setting up tours listener:", e);
-      callback(getLocalTours());
-      return () => {};
-    }
+  if (!firebaseReady) {
+    callback([]);
+    return () => {};
   }
 
-  // Fallback to localStorage listener
-  callback(getLocalTours());
-  const handleStorage = () => callback(getLocalTours());
-  window.addEventListener("storage", handleStorage);
-  return () => window.removeEventListener("storage", handleStorage);
+  const q = query(
+    collection(db, "campusTours"),
+    orderBy("createdAt", "desc"),
+    limit(150)
+  );
+  return onSnapshot(
+    q,
+    { includeMetadataChanges: true },
+    (snapshot) => {
+      if (snapshot.metadata.fromCache) {
+        callback([]);
+        return;
+      }
+
+      callback(snapshot.docs.map((d) => {
+        const data = d.data();
+        let dateStr = data.createdAtFormatted;
+        if (!dateStr && data.createdAt) {
+          const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          dateStr = date.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+        return {
+          id: d.id,
+          ...data,
+          createdAtFormatted: dateStr || "Recent",
+        };
+      }));
+    },
+    (error) => {
+      console.error("Firestore tours subscription error:", error);
+      callback([]);
+    }
+  );
 }
 
 /**
@@ -124,26 +74,14 @@ export async function updateTourStatus(id, status, staffNotes = null) {
     updates.staffNotes = staffNotes;
   }
 
-  // 1. If remote Firestore doc exists
-  if (firebaseReady && !id.startsWith("tour_local_")) {
-    const ref = doc(db, "campusTours", id);
-    await updateDoc(ref, {
-      ...updates,
-      updatedAt: serverTimestamp(),
-    });
+  if (!firebaseReady || id.startsWith("tour_local_")) {
+    throw new Error("This tour is not synced to Firestore and cannot be updated.");
   }
 
-  // 2. Always update local storage
-  const list = getLocalTours();
-  const idx = list.findIndex((item) => item.id === id);
-  if (idx !== -1) {
-    list[idx] = {
-      ...list[idx],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    setLocalTours(list);
-  }
+  await updateDoc(doc(db, "campusTours", id), {
+    ...updates,
+    updatedAt: serverTimestamp(),
+  });
 
   return { success: true };
 }
@@ -152,12 +90,10 @@ export async function updateTourStatus(id, status, staffNotes = null) {
  * Delete a tour record
  */
 export async function deleteTour(id) {
-  if (firebaseReady && !id.startsWith("tour_local_")) {
-    const ref = doc(db, "campusTours", id);
-    await deleteDoc(ref);
+  if (!firebaseReady || id.startsWith("tour_local_")) {
+    throw new Error("This tour is not synced to Firestore and cannot be deleted.");
   }
 
-  const list = getLocalTours().filter((item) => item.id !== id);
-  setLocalTours(list);
+  await deleteDoc(doc(db, "campusTours", id));
   return { success: true };
 }

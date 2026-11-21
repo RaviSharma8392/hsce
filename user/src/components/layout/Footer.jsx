@@ -113,13 +113,12 @@ export function Footer({
     ],
     [
       ["/admissions", "navAdmissions", "Admissions"],
-      ["/committees", "footerGrievances", "Committees & Grievances"],
+      ["/committees", "footerGrievances", "Student Grievance & Complaint Lodging"],
       ["/contact/enquiry", "sendAnEnquiry", "Send an Enquiry"],
       ["/book-a-tour", "bookTour", "Book a Campus Tour"],
       ["/faculty", "facultyStaff", "Faculty & Staff"],
     ],
     [
-      ["/campus-life", "aboutFacilities", "Campus Life & Facilities"],
       ["/gallery", "gallery", "Photo Gallery"],
       ["/notices", "footerNoticeBoard", "Notices & Circulars"],
       ["/mandatory-disclosure", "navDisclosure", "Mandatory Disclosure"],
@@ -318,7 +317,14 @@ export function Footer({
               to="/website-developer"
               className="font-semibold text-white hover:text-[#FBDD23] hover:underline">
               Ravi Sharma
-            </Link>. Get
+            </Link>{" "}
+            <a
+              href="https://www.linkedin.com/in/ravi-sharma-13031b312"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-white hover:text-[#FBDD23] hover:underline">
+              (LinkedIn)
+            </a>. Get
             a premium, blazing-fast college, university, school portal or custom
             institutional website. Call or WhatsApp:{" "}
             <a

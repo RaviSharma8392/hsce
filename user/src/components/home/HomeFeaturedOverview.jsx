@@ -511,7 +511,7 @@ export function HomeFeaturedOverview() {
                       {isHindi ? "स्वीकृत वार्षिक सीटें" : "Sanctioned Seats"}
                     </p>
                     <p className="mt-0.5 text-2xl sm:text-[28px] font-extrabold text-slate-900 tracking-tight">
-                      100
+                      50
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5 font-medium truncate">
                       {isHindi ? "एनसीटीई एवं जीजीएसआईपीयू" : "Annual B.Ed. Intake"}

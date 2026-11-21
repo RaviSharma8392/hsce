@@ -1,66 +1,66 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function adminUserPath() {
+    function isPrincipal() {
+      return signedIn()
+        && request.auth.token.email == 'sharmaravi8392@gmail.com';
+    }
+
+    function adminPath() {
       return /databases/(default)/documents/adminUsers/$(request.auth.uid);
     }
 
-    function isPrincipal() {
-      return isSignedIn() &&
-        (request.auth.token.email == 'sharmaravi8392@gmail.com' ||
-          (firestore.exists(adminUserPath()) &&
-            firestore.get(adminUserPath()).data.active == true &&
-            firestore.get(adminUserPath()).data.verified == true &&
-            firestore.get(adminUserPath()).data.role == 'principal'));
-    }
-
     function hasPermission(permission) {
-      return isPrincipal() ||
-        (isSignedIn() &&
-          firestore.exists(adminUserPath()) &&
-          firestore.get(adminUserPath()).data.active == true &&
-          firestore.get(adminUserPath()).data.verified == true &&
-          (firestore.get(adminUserPath()).data.role == 'principal' ||
-            firestore.get(adminUserPath()).data.get('permissions', {}).get(permission, false) == true));
+      return isPrincipal()
+        || (signedIn()
+          && firestore.exists(adminPath())
+          && firestore.get(adminPath()).data.active == true
+          && firestore.get(adminPath()).data.verified == true
+          && firestore.get(adminPath()).data.permissions[permission] == true);
     }
 
-    function canManageCollection(collectionName) {
-      return (collectionName == 'notices' && hasPermission('notices')) ||
-        (collectionName == 'gallery' && hasPermission('gallery')) ||
-        (collectionName == 'faculty' && hasPermission('faculty')) ||
-        (collectionName == 'syllabus' && hasPermission('syllabus')) ||
-        (collectionName == 'homepagePopups' && hasPermission('homepagePopup')) ||
-        (collectionName == 'documents' && isPrincipal()) ||
-        (collectionName == 'homepageMessages' && isPrincipal()) ||
-        (collectionName == 'siteContent' && isPrincipal()) ||
-        (collectionName == 'uploads' && isPrincipal());
+    function canManageCollection(collection) {
+      return isPrincipal()
+        || (collection == 'notices' && hasPermission('notices'))
+        || (collection == 'gallery' && hasPermission('gallery'))
+        || (collection == 'faculty' && hasPermission('faculty'))
+        || (collection == 'syllabus' && hasPermission('syllabus'))
+        || (collection == 'homepagePopups' && hasPermission('homepagePopup'))
+        || (collection == 'homepage-popup' && hasPermission('homepagePopup'));
     }
 
     function validUpload() {
-      return request.resource != null &&
-        request.resource.size < 15 * 1024 * 1024 &&
-        request.resource.contentType.matches('(image/(jpeg|png|webp|gif)|application/pdf)');
+      return request.resource != null
+        && request.resource.size > 0
+        && request.resource.size <= 15 * 1024 * 1024
+        && (request.resource.contentType.matches('image/(jpeg|png|webp|gif)')
+          || request.resource.contentType == 'application/pdf');
     }
 
-    match /public/{collectionName}/{filePath=**} {
+    match /public/{collection}/{recordId}/{fileName} {
       allow read: if true;
-      allow create, update: if canManageCollection(collectionName) && validUpload();
-      allow delete: if canManageCollection(collectionName);
+      allow create, update: if canManageCollection(collection) && validUpload();
+      allow delete: if isPrincipal();
     }
 
-    match /public/hsce/{collectionName}/{filePath=**} {
+    match /public/hsce/{collection}/{fileName} {
       allow read: if true;
-      allow create, update: if canManageCollection(collectionName) && validUpload();
-      allow delete: if canManageCollection(collectionName);
+      allow create, update: if canManageCollection(collection) && validUpload();
+      allow delete: if isPrincipal();
+    }
+
+    match /public/homepage-popup/{fileName} {
+      allow read: if true;
+      allow create, update: if hasPermission('homepagePopup') && validUpload();
+      allow delete: if isPrincipal();
     }
 
     match /{allPaths=**} {
-      allow read: if true;
-      allow write: if false;
+      allow read, write: if false;
     }
   }
 }

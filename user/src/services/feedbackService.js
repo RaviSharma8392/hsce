@@ -1,37 +1,8 @@
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
 
-const LOCAL_STORAGE_KEY = "hsce_contact_feedback";
-
 /**
- * Get feedback stored in localStorage (offline / backup)
- */
-export function getLocalFeedback() {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn("Error reading local feedback:", err);
-    return [];
-  }
-}
-
-/**
- * Save feedback to localStorage
- */
-function saveLocalFeedback(record) {
-  try {
-    const list = getLocalFeedback();
-    list.unshift(record);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    window.dispatchEvent(new Event("storage"));
-  } catch (err) {
-    console.warn("Error saving local feedback:", err);
-  }
-}
-
-/**
- * Submit feedback / guestbook query to Firestore and localStorage
+ * Submit feedback / guestbook query to Firestore
  */
 export async function submitFeedback(data) {
   if (!firebaseReady) {
@@ -76,8 +47,6 @@ export async function submitFeedback(data) {
     id: docRef.id,
     createdAt: timestamp.toISOString(),
   };
-
-  saveLocalFeedback(localRecord);
 
   return {
     success: true,

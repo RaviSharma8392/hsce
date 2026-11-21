@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { adminAlert, adminConfirm } from "../components/common/AdminDialog";
 import {
   MessageSquareText,
   Search,
@@ -49,12 +50,12 @@ const STATUS_CONFIG = {
   },
 };
 
-export default function FeedbackPage() {
+export default function FeedbackPage({ role = "staff" }) {
+  const isPrincipal = role === "principal";
   const [feedbackList, setFeedbackList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
   const [notification, setNotification] = useState("");
 
   // Modal for Viewing Full Feedback Details
@@ -88,11 +89,6 @@ export default function FeedbackPage() {
       if (statusFilter !== "all" && (item.status || "new") !== statusFilter) {
         return false;
       }
-      if (categoryFilter !== "all") {
-        if (!item.category || !item.category.toLowerCase().includes(categoryFilter.toLowerCase())) {
-          return false;
-        }
-      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return [
@@ -108,7 +104,7 @@ export default function FeedbackPage() {
       }
       return true;
     });
-  }, [feedbackList, statusFilter, categoryFilter, searchQuery]);
+  }, [feedbackList, statusFilter, searchQuery]);
 
   // Statistics Counts
   const stats = useMemo(() => {
@@ -166,7 +162,7 @@ export default function FeedbackPage() {
 
   // Handle delete (Optimistic UI)
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to permanently delete this feedback message?")) {
+    if (!(await adminConfirm("Are you sure you want to permanently delete this feedback message?", "Delete feedback"))) {
       return;
     }
     const previous = [...feedbackList];
@@ -186,9 +182,9 @@ export default function FeedbackPage() {
   };
 
   // Export CSV
-  const exportToCSV = () => {
+  const exportToCSV = async () => {
     if (feedbackList.length === 0) {
-      alert("No feedback messages to export.");
+      await adminAlert("No feedback messages to export.", "No records to export");
       return;
     }
 
@@ -255,14 +251,14 @@ export default function FeedbackPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
               <MessageSquareText className="text-[#363991]" size={26} />
-              <span>Contact Feedback & Guestbook</span>
+              <span>Contact Messages</span>
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
               Visitor Desk &bull; Session 2026-27
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            General website feedback, guestbook entries, public suggestions, and visitor ratings.
+            Messages and feedback sent through the public contact form.
           </p>
         </div>
 
@@ -352,7 +348,7 @@ export default function FeedbackPage() {
           <p className="text-xs sm:text-sm text-slate-500 max-w-sm mt-1">
             {searchQuery || statusFilter !== "all"
               ? "Try adjusting your search query or status filter."
-              : "No feedback or guestbook messages have been received yet."}
+              : "No contact messages have been received yet."}
           </p>
         </div>
       ) : (
@@ -405,17 +401,19 @@ export default function FeedbackPage() {
                       type="button"
                       onClick={() => setSelectedFeedback(item)}
                       className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
-                      title="View Full Details">
+                      title="View message details">
                       <ExternalLink size={16} />
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(item.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                      title="Delete Record">
-                      <Trash2 size={16} />
-                    </button>
+                    {isPrincipal && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        title="Delete message">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 

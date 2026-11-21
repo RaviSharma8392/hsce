@@ -241,7 +241,7 @@ export default function CoursePage() {
                 {/* 3-Row Yellow Buttons (Image 1 Style) */}
                 <div className="space-y-2.5 pt-1">
                   <Link
-                    to="/campus-life?tab=ict-lab"
+                    to="/gallery"
                     className="bg-[#F5CB1E] hover:bg-[#eab308] text-slate-900 font-bold py-3.5 px-4 rounded text-center tracking-wider uppercase text-xs sm:text-sm shadow-xs transition transform active:scale-[0.99] block">
                     {isHindi ? "ई-मॉड्यूल / आईसीटी डिजिटल लर्निंग" : "E-MODULE / DIGITAL LEARNING"}
                   </Link>

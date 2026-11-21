@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { adminAlert, adminConfirm } from "../components/common/AdminDialog";
 import {
   Bot,
   Search,
@@ -80,7 +81,7 @@ export default function ChatbotEnquiriesPage({ role = "staff" }) {
     const unsubscribe = subscribeToEnquiries((list) => {
       setAllEnquiries(list);
       setLoading(false);
-    });
+    }, { categories: ["chatbot"] });
 
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
@@ -225,9 +226,10 @@ export default function ChatbotEnquiriesPage({ role = "staff" }) {
   // Handle Delete (Optimistic UI)
   const handleDelete = async (id, name) => {
     if (
-      !window.confirm(
-        `Are you sure you want to delete the enquiry from "${name || "Student"}"? This action cannot be undone.`
-      )
+      !(await adminConfirm(
+        `Are you sure you want to delete the enquiry from "${name || "Student"}"? This action cannot be undone.`,
+        "Delete chatbot enquiry",
+      ))
     ) {
       return;
     }
@@ -248,9 +250,9 @@ export default function ChatbotEnquiriesPage({ role = "staff" }) {
   };
 
   // Export CSV
-  const exportToCSV = () => {
+  const exportToCSV = async () => {
     if (chatbotLeads.length === 0) {
-      alert("No chatbot leads to export.");
+      await adminAlert("No chatbot leads to export.", "No records to export");
       return;
     }
 
@@ -313,7 +315,7 @@ export default function ChatbotEnquiriesPage({ role = "staff" }) {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
               <Bot className="text-[#363991]" size={26} />
-              <span>Website Chatbot Enquiries</span>
+              <span>Chat Messages</span>
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
               B.Ed. Academic Session 2026-27
@@ -517,16 +519,18 @@ export default function ChatbotEnquiriesPage({ role = "staff" }) {
                     <button
                       onClick={() => setSelectedLead(item)}
                       className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
-                      title="View Full Lead Details">
+                      title="View message details">
                       <Eye size={16} />
                     </button>
 
-                    <button
-                      onClick={() => handleDelete(item.id, item.name)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                      title="Delete Record">
-                      <Trash2 size={16} />
-                    </button>
+                    {isPrincipal && (
+                      <button
+                        onClick={() => handleDelete(item.id, item.name)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        title="Delete message">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 

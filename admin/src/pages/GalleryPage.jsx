@@ -28,9 +28,6 @@ import {
 } from "lucide-react";
 import {
   uploadToCloudinary,
-  compressImageFile,
-  getCloudinaryConfig,
-  setCloudinaryConfig,
   optimizeCloudinaryImageUrl,
 } from "../services/cloudinary";
 import {
@@ -49,7 +46,8 @@ const PRESET_CATEGORIES = [
   "Academic Seminar",
 ];
 
-export default function GalleryPage({ currentUser, role, permissions }) {
+export default function GalleryPage({ currentUser, role = "staff" }) {
+  const isPrincipal = role === "principal";
   // Gallery images from service
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -210,11 +208,6 @@ export default function GalleryPage({ currentUser, role, permissions }) {
     setUploadError("");
 
     const title = formTitle.trim();
-    if (!title) {
-      setUploadError("Please enter a descriptive photo title.");
-      return;
-    }
-
     const effectiveCategory = formCategory;
 
     let finalImageUrl =
@@ -241,22 +234,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
     setIsSubmitting(true);
     try {
       if (formImageFile) {
-        try {
-          const upload = await uploadToCloudinary(formImageFile, {
-            folder: "hsce_gallery",
-          });
-          finalImageUrl = upload.secure_url;
-        } catch (uploadErr) {
-          console.warn(
-            "Cloudinary upload failed, falling back to client-side compression:",
-            uploadErr,
-          );
-          finalImageUrl = await compressImageFile(formImageFile, 1400, 0.82);
-        }
-      }
-
-      if (!finalImageUrl && formImagePreview) {
-        finalImageUrl = formImagePreview;
+        const upload = await uploadToCloudinary(formImageFile, {
+          folder: "hsce_gallery",
+        });
+        finalImageUrl = upload.secure_url;
       }
 
       const photoData = {
@@ -287,32 +268,6 @@ export default function GalleryPage({ currentUser, role, permissions }) {
       }
     } catch (err) {
       console.error("Upload error:", err);
-      // Final resilient fallback: if formImagePreview is ready, persist directly
-      if (formImagePreview) {
-        try {
-          const photoData = {
-            title,
-            category: effectiveCategory,
-            date: formDate,
-            image: formImagePreview,
-            isPublished: formIsPublished,
-          };
-          const result = editingImageId
-            ? await updateGalleryImage(editingImageId, photoData)
-            : await addGalleryImage(photoData, currentUser);
-          if (result.success) {
-            showToast(
-              editingImageId ? "Photo updated." : "Photo saved to gallery.",
-            );
-            resetForm();
-            setIsUploadModalOpen(false);
-            return;
-          }
-        } catch (fallbackErr) {
-          console.error("Direct save fallback error:", fallbackErr);
-        }
-      }
-
       const isPermissionDenied =
         err?.code === "permission-denied" ||
         err?.message?.toLowerCase().includes("permission");
@@ -344,7 +299,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
 
   // Delete photo
   const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!isPrincipal || !deleteTarget) return;
     setIsDeleting(true);
     try {
       await deleteGalleryImage(deleteTarget.id);
@@ -436,11 +391,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
               <span>Campus Media & Gallery Operations</span>
             </div>
             <h1 className="text-2xl font-bold font-poppins text-slate-900 mt-1">
-              Campus Photo Gallery Manager
+              Campus Gallery
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Admin console for uploading, categorizing, and publishing
-              high-resolution campus photographs.
+              Add, organize, and publish photos shown on the public website.
             </p>
           </div>
 
@@ -681,22 +635,26 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                       <Copy size={16} />
                     )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setDeleteTarget(img)}
-                    className="p-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition"
-                    title="Delete Photo">
-                    <Trash2 size={16} />
-                  </button>
+                  {isPrincipal && (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(img)}
+                      className="p-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition"
+                      title="Delete Photo">
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
 
               {/* Card Body */}
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-snug line-clamp-1">
-                    {img.title}
-                  </h3>
+                   {img.title && (
+                     <h3 className="text-sm font-bold text-slate-900 leading-snug line-clamp-1">
+                       {img.title}
+                     </h3>
+                   )}
                 </div>
 
                 <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
@@ -758,7 +716,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                     </td>
                     <td className="py-3 px-4 max-w-xs">
                       <div className="font-bold text-slate-900">
-                        {img.title}
+                        {img.title || "—"}
                       </div>
                     </td>
                     <td className="py-3 px-4">
@@ -814,13 +772,15 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                             <Copy size={15} />
                           )}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(img)}
-                          className="p-1.5 text-rose-500 hover:text-rose-700 rounded-md hover:bg-rose-50"
-                          title="Delete">
-                          <Trash2 size={15} />
-                        </button>
+                        {isPrincipal && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(img)}
+                            className="p-1.5 text-rose-500 hover:text-rose-700 rounded-md hover:bg-rose-50"
+                            title="Delete">
+                            <Trash2 size={15} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -871,7 +831,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
                   <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                     {editingImageId
                       ? "Update photograph details and publication status."
-                      : "Add photograph with title, category, and date."}
+                      : "Add a photograph with optional title, category, and date."}
                   </p>
                 </div>
               </div>
@@ -1001,11 +961,10 @@ export default function GalleryPage({ currentUser, role, permissions }) {
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Photo / Activity Title{" "}
-                  <span className="text-rose-500">*</span>
+                  <span className="font-normal text-slate-400">(optional)</span>
                 </label>
                 <input
                   type="text"
-                  required
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="e.g. National Seminar on Innovative Pedagogies 2026"
@@ -1124,9 +1083,13 @@ export default function GalleryPage({ currentUser, role, permissions }) {
             </h3>
             <p className="text-xs text-center text-slate-500 mt-2">
               Are you sure you want to remove{" "}
-              <strong className="text-slate-800">
-                &quot;{deleteTarget.title}&quot;
-              </strong>
+              {deleteTarget.title ? (
+                 <strong className="text-slate-800">
+                   &quot;{deleteTarget.title}&quot;
+                 </strong>
+              ) : (
+                 <strong className="text-slate-800">this photo</strong>
+              )}
               ? This action cannot be undone.
             </p>
             <div className="mt-6 flex items-center justify-end gap-3">
@@ -1162,7 +1125,7 @@ export default function GalleryPage({ currentUser, role, permissions }) {
             onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-3.5 bg-black/50 text-white border-b border-white/10">
               <span className="text-xs font-semibold truncate max-w-md">
-                {lightboxItem.title}
+                {lightboxItem.title || "Gallery photo"}
               </span>
               <button
                 type="button"

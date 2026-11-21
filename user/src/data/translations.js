@@ -117,7 +117,7 @@ export const translations = {
     homeQuickHighlightsTitle: "Institutional Excellence",
     homeLatestNoticesTitle: "Latest Notices & Circulars",
     homeViewAllNotices: "View All Notices",
-    homeGalleryTitle: "Campus Life & Activities",
+    homeGalleryTitle: "Photo Gallery",
     homeViewFullGallery: "View Full Gallery",
 
     // 3-Column Home Widget Section
@@ -164,7 +164,7 @@ export const translations = {
     footerContactTitle: "Contact Details",
     footerRightsReserved: "All Rights Reserved.",
     footerPrivacyPolicy: "Privacy Policy",
-    footerGrievances: "Grievance & Committees",
+    footerGrievances: "Student Grievance & Complaint Lodging",
     footerNoticeBoard: "Notices & Circulars",
     footerConnectTitle: "Connect With Us",
     footerHelplineTitle: "Direct Admissions Helpline",
@@ -345,7 +345,7 @@ export const translations = {
     footerContactTitle: "संपर्क विवरण",
     footerRightsReserved: "सर्वाधिकार सुरक्षित।",
     footerPrivacyPolicy: "गोपनीयता नीति",
-    footerGrievances: "शिकायत एवं समितियां",
+    footerGrievances: "छात्र शिकायत एवं परिवाद पंजीकरण",
     footerNoticeBoard: "सूचनाएं एवं परिपत्र",
     footerConnectTitle: "हमसे जुड़ें",
     footerHelplineTitle: "सीधी प्रवेश हेल्पलाइन",

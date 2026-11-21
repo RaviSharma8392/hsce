@@ -144,13 +144,13 @@ export const seoPages = [
     ],
   },
   {
-    path: "/campus-life",
-    title: `College Facilities & Campus Life | HSCE`,
+    path: "/gallery",
+    title: `Photo Gallery | HSCE`,
     description:
       "Explore the learning spaces and student activities at Haryana Shakti College of Education in Kanjhawala, Delhi, including academic facilities and campus resources.",
     image: campusImage,
     imageAlt: "Haryana Shakti College of Education campus",
-    breadcrumbs: [{ name: "Campus Life" }],
+    breadcrumbs: [{ name: "Photo Gallery" }],
   },
   {
     path: "/course",
@@ -270,22 +270,13 @@ export const seoPages = [
     breadcrumbs: [{ name: "Mandatory Disclosure" }],
   },
   {
-    path: "/gallery",
-    title: `College Gallery & Campus Photos | HSCE`,
-    description:
-      "Browse campus photos of Haryana Shakti College of Education: smart classrooms, ICT and psychology labs, campus sports, cultural festivals, and community camps.",
-    image: campusImage,
-    imageAlt: "Haryana Shakti College of Education campus",
-    breadcrumbs: [{ name: "Photo Gallery" }],
-  },
-  {
     path: "/committees",
-    title: `Institutional Committees | HSCE Delhi`,
+    title: `Student Grievance & Complaint Lodging | HSCE Delhi`,
     description:
-      "Find information about the institutional committees and student grievance support at Haryana Shakti College of Education, Kanjhawala, Delhi.",
+      "Submit an academic, administrative, or campus grievance securely at Haryana Shakti College of Education, Kanjhawala, Delhi.",
     image: campusImage,
     imageAlt: "Haryana Shakti College of Education campus",
-    breadcrumbs: [{ name: "Committees & Grievance Redressal" }],
+    breadcrumbs: [{ name: "Student Grievance & Complaint Lodging" }],
   },
   {
     path: "/book-a-tour",

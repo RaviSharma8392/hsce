@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { adminConfirm } from "../components/common/AdminDialog";
 import { useSearchParams } from "react-router-dom";
 import {
   UsersRound,
@@ -31,7 +32,6 @@ import {
 import { db, firebaseReady } from "../config/firebase";
 import {
   optimizeCloudinaryImageUrl,
-  compressImageFile,
   uploadToCloudinary,
 } from "../services/cloudinary";
 
@@ -237,7 +237,8 @@ const INITIAL_FORM = {
 
 const ITEMS_PER_PAGE = 5;
 
-export default function FacultyPage() {
+export default function FacultyPage({ role = "staff" }) {
+  const isPrincipal = role === "principal";
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab") || "all";
 
@@ -438,9 +439,10 @@ export default function FacultyPage() {
   // One-click Seed into Firestore (Populates Firestore with real dynamic docs)
   const handleSeedDatabase = async () => {
     if (
-      !window.confirm(
-        "Import the official 15 HSCE Faculty & Staff profiles into Firestore? Each profile will become a real dynamic database record you can edit and delete."
-      )
+      !(await adminConfirm(
+        "Import the official 15 HSCE Faculty & Staff profiles into Firestore? Each profile will become a real dynamic database record you can edit and delete.",
+        "Import faculty profiles",
+      ))
     ) {
       return;
     }
@@ -520,10 +522,12 @@ export default function FacultyPage() {
 
   // Instant Optimistic Delete
   const handleDelete = async (member) => {
+    if (!isPrincipal) return;
     if (
-      !window.confirm(
-        `Are you sure you want to permanently delete "${member.name}" from the database?`
-      )
+      !(await adminConfirm(
+        `Are you sure you want to permanently delete "${member.name}" from the database?`,
+        "Delete faculty member",
+      ))
     ) {
       return;
     }
@@ -564,17 +568,10 @@ export default function FacultyPage() {
       // Upload image if file selected - ONLY for Teaching Staff
       const isTeaching = formData.staffType === "Teaching Staff";
       if (isTeaching && formImageFile) {
-        try {
-          const compressed = await compressImageFile(formImageFile, 800, 0.85);
-          const uploadRes = await uploadToCloudinary(formImageFile, {
-            folder: "hsce/faculty",
-          });
-          finalImageUrl = uploadRes?.secure_url || compressed || finalImageUrl;
-        } catch (uploadErr) {
-          console.warn("Upload fallback to dataUrl:", uploadErr);
-          const dataUrl = await compressImageFile(formImageFile, 800, 0.85);
-          finalImageUrl = dataUrl || finalImageUrl;
-        }
+        const uploadRes = await uploadToCloudinary(formImageFile, {
+          folder: "hsce/faculty",
+        });
+        finalImageUrl = uploadRes.secure_url;
       } else if (!isTeaching) {
         finalImageUrl = "";
       }
@@ -626,7 +623,7 @@ export default function FacultyPage() {
       setFormError(
         isPerm
           ? "Missing or insufficient permissions: Please ensure you are logged in and your Firestore rules in Firebase Console are published."
-          : "Failed to save changes. Please try again.",
+          : err?.message || "Failed to save changes. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -696,7 +693,7 @@ export default function FacultyPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
               <UsersRound className="text-[#363991]" size={26} />
-              <span>Faculty &amp; Staff Directory</span>
+              <span>Faculty &amp; Staff</span>
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
               Session 2026-27

@@ -61,7 +61,7 @@ const saveProfileToStorage = (profile) => {
 const BOT_CONTENT = {
   en: {
     welcome:
-      "Welcome to Haryana Shakti College of Education (HSCE) Admission Help Desk.\n\n• GGSIPU Affiliated (College Code: 147)\n• NCTE Approved • NAAC Accredited\n• B.Ed. (2-Year Regular, 100 Approved Seats)\n\nPlease select an option below:",
+      "Welcome to Haryana Shakti College of Education (HSCE) Admission Help Desk.\n\n• GGSIPU Affiliated (College Code: 147)\n• NCTE Approved • NAAC Accredited\n• B.Ed. (2-Year Regular, 50 Approved Seats)\n\nPlease select an option below:",
     menuOptions: [
       { id: "opt-bed", label: "🎓 B.Ed. Programme Details", action: "open_course" },
       { id: "opt-syllabus", label: "📑 4-Semester Syllabus (View Page)", action: "open_syllabus" },
@@ -555,7 +555,7 @@ export function EnquireNowTab() {
 
     if (action === "open_campus") {
       setIsOpen(false);
-      navigate("/campus-life");
+      navigate("/gallery");
       return;
     }
 
@@ -1094,3 +1094,4 @@ export function EnquireNowTab() {
 }
 
 export default EnquireNowTab;
+

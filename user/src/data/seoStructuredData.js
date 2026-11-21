@@ -193,7 +193,10 @@ export function createSeoStructuredData(page) {
         "React web applications",
         "Firebase web applications",
       ],
-      sameAs: ["https://www.instagram.com/raviiiiii._0/"],
+      sameAs: [
+        "https://www.instagram.com/raviiiiii._0/",
+        "https://www.linkedin.com/in/ravi-sharma-13031b312",
+      ],
       affiliation: {
         "@id": organizationId,
       },

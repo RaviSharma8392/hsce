@@ -1,38 +1,8 @@
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
 
-const LOCAL_STORAGE_KEY = "hsce_campus_tours";
-
 /**
- * Get tours stored in localStorage (backup / offline sync)
- */
-export function getLocalTours() {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn("Error reading local campus tours:", err);
-    return [];
-  }
-}
-
-/**
- * Save tour to localStorage
- */
-function saveLocalTour(tour) {
-  try {
-    const list = getLocalTours();
-    list.unshift(tour);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    // Trigger storage event for cross-tab or same-origin sync with admin
-    window.dispatchEvent(new Event("storage"));
-  } catch (err) {
-    console.warn("Error writing local campus tour:", err);
-  }
-}
-
-/**
- * Submit a Campus Tour Booking to Firestore & local storage
+ * Submit a Campus Tour Booking to Firestore
  * @param {Object} data
  */
 export async function submitTourBooking(data) {
@@ -91,13 +61,11 @@ export async function submitTourBooking(data) {
     createdAt: serverTimestamp(),
   });
 
-  // 2. Always persist locally so Admin and Staff panel can see it immediately
   const localRecord = {
     ...tourPayload,
     id: docRef.id,
     createdAt: timestamp.toISOString(),
   };
-  saveLocalTour(localRecord);
 
   return {
     success: true,

@@ -6,8 +6,6 @@ import { AdmissionCTA } from "../components/home/AdmissionCTA";
 import { CampusGallerySection } from "../components/home/CampusGallerySection";
 import { PrincipalMessageSection } from "../components/home/PrincipalMessageSection";
 import { FaqWidget } from "../components/home/FaqWidget";
-import StarAlumni from "../components/home/StarAlumni";
-
 import { WhyChooseSection } from "../components/home/HomepageFeatureSections";
 import { AffiliationTrustBarWidget } from "../components/home/AffiliationTrustBarWidget";
 import { LatestUpdatesMarquee } from "../components/home/LatestUpdatesMarquee";
@@ -110,11 +108,8 @@ export default function HomePage() {
         {/* 9. Key Reasons to Study at HSCE (6 Core Pillars) */}
         <WhyChooseSection />
 
-        {/* 10. Campus Life & Activities Gallery Bento */}
+        {/* 10. Photo Gallery */}
         <CampusGallerySection />
-
-        {/* 11. Pupil-Teacher Voice / Student Spotlight */}
-        <StarAlumni />
 
         {/* 12. Admission Helpline & Services Action Strip (Matching user screenshot 3) */}
         <AdmissionHelplineStrip />

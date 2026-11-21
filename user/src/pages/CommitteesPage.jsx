@@ -1,64 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import React, { useState } from "react";
 import {
-  ShieldAlert,
   CheckCircle2,
   AlertCircle,
-  Users,
   Send,
   Lock,
 } from "lucide-react";
 import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout";
 import { getGovernanceSidebarConfig } from "../data/navigationConfig";
-import { committeeData as seedCommittees } from "../data/siteData";
-import { usePublishedRecords } from "../hooks/usePublishedRecords";
 import { useLanguage } from "../context/LanguageContext";
 import { submitGrievance } from "../services/grievanceService";
 
 export default function CommitteesPage() {
   const { isHindi } = useLanguage();
-  const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const committeeData = usePublishedRecords("committees", seedCommittees);
-
-  const tabParam = searchParams.get("tab");
-  const hashVal = location.hash ? location.hash.replace("#", "") : null;
-  const activeTab =
-    tabParam === "lodge" ||
-    hashVal === "grievance" ||
-    hashVal === "complaint" ||
-    location.pathname.includes("grievance")
-      ? "lodge"
-      : "directory";
-
-  const handleTabSelect = (tabKey) => {
-    setSearchParams({ tab: tabKey });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
+  const activeTab = "lodge";
   const sidebarConfig = getGovernanceSidebarConfig(isHindi, activeTab);
-
-  const enhancedSidebarItems = sidebarConfig.items.map((item) => {
-    if (item.id === "committees") {
-      return {
-        ...item,
-        onClick: (e) => {
-          e?.preventDefault?.();
-          handleTabSelect("directory");
-        },
-      };
-    }
-    if (item.id === "grievance") {
-      return {
-        ...item,
-        onClick: (e) => {
-          e?.preventDefault?.();
-          handleTabSelect("lodge");
-        },
-      };
-    }
-    return item;
-  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -155,126 +110,23 @@ export default function CommitteesPage() {
     <CollegiatePageLayout
       bannerTitle={
         isHindi
-          ? "संस्थागत समितियाँ एवं शिकायत निवारण"
-          : "Institutional Committees & Grievance Cells"
+          ? "छात्र शिकायत एवं परिवाद पंजीकरण"
+          : "Student Grievance & Complaint Lodging"
       }
       bannerSubtitle={
         isHindi
-          ? "शैक्षणिक सलाहकार, छात्र शिकायत निवारण, महिला सेल (ICC) एवं एंटी-रैगिंग समितियाँ।"
-          : "Statutory committees ensuring institutional safety, equity, anti-ragging compliance, and student welfare."
+          ? "अपनी शैक्षणिक, प्रशासनिक या परिसर संबंधी शिकायत सुरक्षित रूप से दर्ज करें।"
+          : "Submit your academic, administrative, or campus concern securely."
       }
       breadcrumbs={[
         { label: isHindi ? "वैधानिक प्रकटीकरण" : "Governance" },
-        { label: isHindi ? "समितियाँ एवं प्रकोष्ठ" : "Committees & Cells" },
+        { label: isHindi ? "छात्र शिकायत एवं परिवाद" : "Student Grievance & Complaint" },
       ]}
       sidebarTitle={sidebarConfig.title}
-      sidebarItems={enhancedSidebarItems}
+      sidebarItems={sidebarConfig.items}
       quickActions={sidebarConfig.quickActions}>
       <div className="space-y-6">
-        {/* Tab Switcher Pills */}
-        <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
-          <button
-            type="button"
-            onClick={() => handleTabSelect("directory")}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded text-xs sm:text-sm font-bold transition border cursor-pointer ${
-              activeTab === "directory"
-                ? "bg-[#2E3A8C] text-white border-[#2E3A8C] shadow-xs"
-                : "bg-white text-slate-700 border-gray-200 hover:border-[#2E3A8C] hover:text-[#2E3A8C]"
-            }`}>
-            <Users size={15} />
-            <span>{isHindi ? "समिति निर्देशिका" : "Committees Directory"}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabSelect("lodge")}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded text-xs sm:text-sm font-bold transition border cursor-pointer ${
-              activeTab === "lodge"
-                ? "bg-[#800000] text-white border-[#800000] shadow-xs"
-                : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-            }`}>
-            <ShieldAlert size={15} />
-            <span>
-              {isHindi ? "ऑनलाइन शिकायत दर्ज करें" : "Lodge Online Grievance"}
-            </span>
-          </button>
-        </div>
-
-        {/* Tab 1: Directory */}
-        {activeTab === "directory" && (
-          <div className="space-y-6">
-            {/* Quick Grievance Callout Card */}
-            <div className="rounded-md border border-amber-200 bg-amber-50/70 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-amber-100 text-[#2E3A8C]">
-                  <ShieldAlert size={20} />
-                </div>
-                <div>
-                  <h4 className="font-serif font-bold text-sm sm:text-base text-slate-900">
-                    {isHindi
-                      ? "क्या आपकी कोई शैक्षणिक अथवा संस्थागत शिकायत है?"
-                      : "Have an Academic or Institutional Grievance?"}
-                  </h4>
-                  <p className="text-xs text-slate-600 mt-0.5 font-sans">
-                    {isHindi
-                      ? "कॉलेज के आधिकारिक शिकायत निवारण सेल को अपनी बात गोपनीय रूप से प्रेषित करें।"
-                      : "Submit your concern confidentially to our statutory Student Grievance Redressal Committee."}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveTab("lodge")}
-                className="shrink-0 px-4 py-2 rounded bg-[#800000] text-white text-xs font-bold hover:bg-[#660000] transition shadow-xs cursor-pointer">
-                {isHindi ? "शिकायत दर्ज करें" : "Lodge Complaint Now"} &rarr;
-              </button>
-            </div>
-
-            {/* Committee Cards (Image 4 Header Style) */}
-            {committeeData.map((committee) => (
-              <div
-                key={committee.name}
-                className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-7 shadow-xs">
-                {/* Header with Blue Underline */}
-                <div className="border-b border-gray-200 pb-3 mb-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#2E3A8C]">
-                    {isHindi ? "वैधानिक समिति" : "Statutory Cell"}
-                  </span>
-                  <h3 className="font-serif text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-                    {committee.name}
-                  </h3>
-                  <div className="mt-2 h-1 w-16 bg-[#2E3A8C] rounded-full" />
-                </div>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans mb-5">
-                  {committee.description}
-                </p>
-
-                {/* Member Roster (Image 3 Style Zebra Box) */}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {committee.members.map((member, mIdx) => (
-                    <div
-                      key={`${committee.name}-${member.name}-${mIdx}`}
-                      className="rounded border border-gray-200 bg-slate-50/60 p-3.5 flex items-center justify-between gap-2">
-                      <div>
-                        <h4 className="font-serif font-bold text-xs sm:text-sm text-slate-900">
-                          {member.name}
-                        </h4>
-                        <p className="text-xs text-[#2E3A8C] font-semibold mt-0.5">
-                          {member.designation}
-                        </p>
-                      </div>
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tab 2: Online Grievance Form (Guest Book Style from Image 6) */}
-        {activeTab === "lodge" && (
+        {/* Student Grievance & Complaint Lodging Form */}
           <div className="rounded-md border border-gray-200/90 bg-white p-6 sm:p-8 shadow-xs">
             {/* Header with Maroon Accent (Image 6 Style) */}
             <div className="border-b border-[#800000] pb-3 mb-6">
@@ -475,7 +327,6 @@ export default function CommitteesPage() {
               </form>
             )}
           </div>
-        )}
       </div>
     </CollegiatePageLayout>
   );

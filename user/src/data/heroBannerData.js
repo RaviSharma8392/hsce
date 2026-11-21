@@ -21,6 +21,6 @@ export const heroSlides = [
     id: 3,
     desktopImage: imageData.sliderImage,
     mobileImage: cloudinaryImageUrl(imageData.sliderImage, 800),
-    alt: "Haryana Shakti College of Education — Campus Life",
+    alt: "Haryana Shakti College of Education — Campus",
   },
 ];

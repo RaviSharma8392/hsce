@@ -197,7 +197,7 @@ export function HeroBanner({ slides = heroSlides }) {
                     width="1672"
                     height="941"
                     alt={slide.alt || `College banner ${index + 1}`}
-                    fetchPriority={index === 0 ? "high" : "auto"}
+                    fetchpriority={index === 0 ? "high" : "auto"}
                     loading={index === 0 ? "eager" : "lazy"}
                     draggable="false"
                     className="block h-full w-full select-none object-cover object-center"

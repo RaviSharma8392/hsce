@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { adminAlert, adminConfirm } from "../components/common/AdminDialog";
 import {
   Compass,
   Search,
@@ -71,8 +71,8 @@ const LAB_LABELS = {
   principal_desk: "Principal & Faculty Consultation",
 };
 
-export default function CampusToursPage({ currentUser, role = "staff" }) {
-  const navigate = useNavigate();
+export default function CampusToursPage({ role = "staff" }) {
+  const isPrincipal = role === "principal";
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -184,7 +184,7 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this campus tour booking?")) {
+    if (!(await adminConfirm("Are you sure you want to delete this campus tour booking?", "Delete booking"))) {
       return;
     }
     const previousTours = [...tours];
@@ -204,9 +204,9 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
   };
 
   // Export CSV
-  const exportToCSV = () => {
+  const exportToCSV = async () => {
     if (tours.length === 0) {
-      alert("No campus tour records to export.");
+      await adminAlert("No campus tour records to export.", "No records");
       return;
     }
 
@@ -282,14 +282,14 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
               <Compass className="text-[#363991]" size={26} />
-              <span>Campus Tour Bookings</span>
+              <span>Campus Tour Requests</span>
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
               B.Ed. Admissions 2026-27
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real-time prospective candidate & parent campus tour requests submitted via public website.
+            Review visit requests sent by students and families through the public website.
           </p>
         </div>
 
@@ -425,16 +425,18 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
                     <button
                       onClick={() => setSelectedTour(tour)}
                       className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition"
-                      title="View Full Booking Details">
+                      title="View request details">
                       <Eye size={16} />
                     </button>
 
-                    <button
-                      onClick={() => handleDelete(tour.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                      title="Delete Record">
-                      <Trash2 size={16} />
-                    </button>
+                    {isPrincipal && (
+                      <button
+                        onClick={() => handleDelete(tour.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                        title="Delete request">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -604,7 +606,7 @@ export default function CampusToursPage({ currentUser, role = "staff" }) {
                   <Compass size={18} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">Campus Tour Application Details</h3>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">Campus Tour Request</h3>
                   <div className="text-xs text-slate-500 mt-0.5 font-mono">Ref: {selectedTour.bookingReference}</div>
                 </div>
               </div>

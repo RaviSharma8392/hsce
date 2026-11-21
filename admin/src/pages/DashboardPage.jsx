@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   GraduationCap,
@@ -22,7 +22,10 @@ import {
 } from "lucide-react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
-import { subscribeToEnquiries } from "../services/enquiryService";
+import {
+  isChatbotEnquiry,
+  subscribeToEnquiries,
+} from "../services/enquiryService";
 
 export default function DashboardPage({
   user,
@@ -31,8 +34,11 @@ export default function DashboardPage({
   permissions = {},
 }) {
   const isPrincipal = role === "principal";
-  const canAccess = (perm) =>
-    isPrincipal || permissions.all === true || permissions[perm] === true;
+  const canAccess = useCallback(
+    (perm) =>
+      isPrincipal || permissions[perm] === true,
+    [isPrincipal, permissions],
+  );
 
   // Real-time institutional counters
   const [enquiriesCount, setEnquiriesCount] = useState(0);
@@ -42,55 +48,69 @@ export default function DashboardPage({
 
   // Subscribe to admission form & chatbot leads
   useEffect(() => {
+    const categories = [
+      ...(canAccess("enquiries") ? ["admission"] : []),
+      ...(canAccess("chatbotEnquiries") ? ["chatbot"] : []),
+    ];
+    if (categories.length === 0) {
+      return undefined;
+    }
     const unsubscribe = subscribeToEnquiries((list) => {
-      const admissionOnly = list.filter((item) => {
-        const src = (item.source || "").toLowerCase();
-        return !src.includes("chatbot");
-      });
-      const chatbotOnly = list.filter((item) => {
-        const src = (item.source || "").toLowerCase();
-        return src.includes("chatbot");
-      });
+      const admissionOnly = list.filter((item) => !isChatbotEnquiry(item));
+      const chatbotOnly = list.filter(isChatbotEnquiry);
       setEnquiriesCount(admissionOnly.length);
       setChatbotCount(chatbotOnly.length);
-    });
+    }, { categories });
 
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
     };
-  }, []);
+  }, [canAccess]);
 
   // Subscribe to notices count
   useEffect(() => {
-    if (!firebaseReady) return undefined;
-    const unsubscribe = onSnapshot(collection(db, "notices"), (snap) => {
-      setNoticesCount(snap.size);
-    }, () => {});
+    if (!firebaseReady || !canAccess("notices")) {
+      return undefined;
+    }
+    const unsubscribe = onSnapshot(
+      collection(db, "notices"),
+      (snap) => {
+        setNoticesCount(snap.size);
+      },
+      () => {},
+    );
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
     };
-  }, []);
+  }, [canAccess]);
 
   // Subscribe to faculty count
   useEffect(() => {
-    if (!firebaseReady) return undefined;
-    const unsubscribe = onSnapshot(collection(db, "faculty"), (snap) => {
-      setFacultyCount(snap.size);
-    }, () => {});
+    if (!firebaseReady || !canAccess("faculty")) {
+      return undefined;
+    }
+    const unsubscribe = onSnapshot(
+      collection(db, "faculty"),
+      (snap) => {
+        setFacultyCount(snap.size);
+      },
+      () => {},
+    );
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
     };
-  }, []);
+  }, [canAccess]);
 
   // Organized Work Areas
   const taskCategories = [
     {
-      title: "Student & Visitor Desk",
-      description: "Direct prospective student leads, inquiries, visits, and messages",
+      title: "Enquiries & public requests",
+      description:
+        "Review forms and requests submitted through the public website",
       tasks: [
         {
-          label: "Admission Form Requests",
-          description: "Review and process submitted B.Ed. registration forms",
+          label: "Admission requests",
+          description: "Review admission forms submitted through the public website",
           path: "/manage/enquiries",
           permission: "enquiries",
           icon: GraduationCap,
@@ -98,8 +118,8 @@ export default function DashboardPage({
           count: enquiriesCount > 0 ? `${enquiriesCount} Leads` : null,
         },
         {
-          label: "Website Chat Questions",
-          description: "Inquiries submitted via live website assistant chatbot",
+          label: "Chat messages",
+          description: "Review questions submitted through the website chatbot",
           path: "/manage/chatbot-enquiries",
           permission: "chatbotEnquiries",
           icon: Bot,
@@ -107,24 +127,24 @@ export default function DashboardPage({
           count: chatbotCount > 0 ? `${chatbotCount} Chats` : null,
         },
         {
-          label: "Contact Us Messages",
-          description: "General feedback & questions from public contact page",
+          label: "Contact messages",
+          description: "Review messages submitted through the public contact form",
           path: "/manage/feedback",
           permission: "feedback",
           icon: MessageSquareText,
           iconBg: "bg-purple-50 text-purple-700",
         },
         {
-          label: "Campus Visit Requests",
-          description: "Scheduled candidate & parent tour appointments",
+          label: "Campus tour requests",
+          description: "Review tour requests submitted through the public website",
           path: "/manage/tours",
           permission: "tours",
           icon: CalendarDays,
           iconBg: "bg-emerald-50 text-emerald-700",
         },
         {
-          label: "Student Concerns & Grievances",
-          description: "Statutory grievance redressal committee files",
+          label: "Student concerns",
+          description: "Review grievances submitted through the student portal",
           path: "/manage/grievances",
           permission: "grievances",
           icon: ShieldAlert,
@@ -133,12 +153,13 @@ export default function DashboardPage({
       ],
     },
     {
-      title: "Website Operations & Media",
+      title: "Public website content",
       description: "Live content published directly to college public website",
       tasks: [
         {
-          label: "Notices & Circulars",
-          description: "Publish official notifications, exam dates, and updates",
+          label: "Notices",
+          description:
+            "Publish official notifications, exam dates, and updates",
           path: "/manage/notices",
           permission: "notices",
           icon: Megaphone,
@@ -146,24 +167,26 @@ export default function DashboardPage({
           count: noticesCount > 0 ? `${noticesCount} Active` : null,
         },
         {
-          label: "Homepage Announcement Popup",
-          description: "Toggle or update the alert flyer banner on the homepage",
+          label: "Homepage announcement",
+          description:
+            "Toggle or update the alert flyer banner on the homepage",
           path: "/manage/homepage-popup",
           permission: "homepagePopup",
           icon: PanelsTopLeft,
           iconBg: "bg-amber-50 text-amber-700",
         },
         {
-          label: "Campus Photo Gallery",
-          description: "High-resolution photographs of labs, library, and campus",
+          label: "Campus gallery",
+          description:
+            "High-resolution photographs of labs, library, and campus",
           path: "/manage/gallery",
           permission: "gallery",
           icon: Images,
           iconBg: "bg-cyan-50 text-cyan-700",
         },
         {
-          label: "Course Documents & Syllabus",
-          description: "Official B.Ed. curriculum & academic regulations PDFs",
+          label: "B.Ed. syllabus",
+          description: "Publish syllabus files shown on the public website",
           path: "/manage/syllabus",
           permission: "syllabus",
           icon: BookOpenCheck,
@@ -172,12 +195,14 @@ export default function DashboardPage({
       ],
     },
     {
-      title: "Institutional Governance & Directory",
-      description: "College staff profiles, statutory cells, and security controls",
+      title: "College information",
+      description:
+        "Manage the public staff directory",
       tasks: [
         {
-          label: "Faculty & Staff Directory",
-          description: "Teaching pedagogy mentors & administrative staff records",
+          label: "Faculty & staff",
+          description:
+            "Teaching pedagogy mentors & administrative staff records",
           path: "/manage/faculty",
           permission: "faculty",
           icon: UsersRound,
@@ -187,8 +212,9 @@ export default function DashboardPage({
         ...(isPrincipal
           ? [
               {
-                label: "Admin Access & Staff Governance",
-                description: "Authorize new administrative users and assign work areas",
+                label: "Staff accounts",
+                description:
+                  "Create staff logins and manage access",
                 path: "/manage/admin-users",
                 permission: "all",
                 icon: ShieldCheck,
@@ -202,43 +228,46 @@ export default function DashboardPage({
   ];
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className="admin-dashboard space-y-6 font-sans">
       {/* Mobile App Quick Action Chips (PW App Action Bar) */}
       <div className="flex lg:hidden items-center gap-2 overflow-x-auto pb-1 max-w-full">
-        <Link
+        {canAccess("faculty") && (
+          <Link
           to="/manage/faculty"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-[#363991] text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs"
-        >
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-[#363991] text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs">
           <Plus size={14} />
           <span>Add Faculty</span>
-        </Link>
-        <Link
+          </Link>
+        )}
+        {canAccess("notices") && (
+          <Link
           to="/manage/notices"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs"
-        >
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs">
           <Megaphone size={14} />
           <span>New Notice</span>
-        </Link>
-        <Link
+          </Link>
+        )}
+        {canAccess("enquiries") && (
+          <Link
           to="/manage/enquiries"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs"
-        >
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs">
           <GraduationCap size={14} />
           <span>Review Leads</span>
-        </Link>
-        <Link
+          </Link>
+        )}
+        {canAccess("tours") && (
+          <Link
           to="/manage/tours"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs"
-        >
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs">
           <CalendarDays size={14} />
           <span>Campus Tours</span>
-        </Link>
+          </Link>
+        )}
         <a
           href="https://www.hscekanjhawala.com/"
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs"
-        >
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shrink-0 transition active:scale-95 shadow-2xs">
           <ExternalLink size={13} />
           <span>Public Website</span>
         </a>
@@ -246,10 +275,10 @@ export default function DashboardPage({
 
       {/* 2. REAL-TIME INSTITUTIONAL KPI STATS CARDS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        {canAccess("enquiries") && (
         <Link
           to="/manage/enquiries"
-          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group"
-        >
+          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Admission Leads
@@ -263,14 +292,18 @@ export default function DashboardPage({
           </div>
           <div className="text-[10px] sm:text-[11px] text-blue-700 font-semibold mt-0.5 sm:mt-1 flex items-center gap-1">
             <span>Direct form applicants</span>
-            <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight
+              size={11}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </Link>
+        )}
 
+        {canAccess("chatbotEnquiries") && (
         <Link
           to="/manage/chatbot-enquiries"
-          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group"
-        >
+          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Chatbot Leads
@@ -284,14 +317,18 @@ export default function DashboardPage({
           </div>
           <div className="text-[10px] sm:text-[11px] text-[#363991] font-semibold mt-0.5 sm:mt-1 flex items-center gap-1">
             <span>AI assistant inquiries</span>
-            <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight
+              size={11}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </Link>
+        )}
 
+        {canAccess("notices") && (
         <Link
           to="/manage/notices"
-          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group"
-        >
+          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Published Notices
@@ -305,14 +342,18 @@ export default function DashboardPage({
           </div>
           <div className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold mt-0.5 sm:mt-1 flex items-center gap-1">
             <span>Live on public website</span>
-            <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight
+              size={11}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </Link>
+        )}
 
+        {canAccess("faculty") && (
         <Link
           to="/manage/faculty"
-          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group"
-        >
+          className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs hover:border-indigo-300 hover:shadow-sm transition group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Faculty &amp; Staff
@@ -326,15 +367,21 @@ export default function DashboardPage({
           </div>
           <div className="text-[10px] sm:text-[11px] text-purple-700 font-semibold mt-0.5 sm:mt-1 flex items-center gap-1">
             <span>Directory profiles</span>
-            <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight
+              size={11}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </Link>
+        )}
       </div>
 
       {/* 3. WORK AREAS & ASSIGNED TASKS (Categorized & App-Friendly) */}
       <div className="space-y-6">
         {taskCategories.map((category) => {
-          const visibleTasks = category.tasks.filter((t) => canAccess(t.permission));
+          const visibleTasks = category.tasks.filter((t) =>
+            canAccess(t.permission),
+          );
           if (visibleTasks.length === 0) return null;
 
           return (
@@ -355,11 +402,9 @@ export default function DashboardPage({
                     <Link
                       key={task.path}
                       to={task.path}
-                      className="group relative flex items-start gap-3.5 rounded-xl border border-slate-200 bg-white p-4 shadow-2xs hover:border-[#363991]/50 hover:shadow-sm transition"
-                    >
+                      className="group relative flex items-start gap-3.5 rounded-xl border border-slate-200 bg-white p-4 shadow-2xs hover:border-[#363991]/50 hover:shadow-sm transition">
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${task.iconBg} shadow-2xs group-hover:scale-105 transition-transform`}
-                      >
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${task.iconBg} shadow-2xs group-hover:scale-105 transition-transform`}>
                         <Icon size={19} />
                       </div>
 
@@ -404,21 +449,25 @@ export default function DashboardPage({
               Haryana Shakti College of Education
             </span>
             <span className="text-xs text-slate-400">&bull;</span>
-            <span className="text-xs font-semibold text-slate-500">Kanjhawala, Delhi – 110081</span>
+            <span className="text-xs font-semibold text-slate-500">
+              Kanjhawala, Delhi – 110081
+            </span>
           </div>
           <p className="text-xs text-slate-500">
-            NCTE Approved (Code: 147) &bull; Affiliated to Guru Gobind Singh Indraprastha University (GGSIPU), Delhi &bull; 100 B.Ed. Seats
+            NCTE Approved (Code: 147) &bull; Affiliated to Guru Gobind Singh
+            Indraprastha University (GGSIPU), Delhi &bull; 50 B.Ed. Seats
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <span className="text-xs font-semibold text-slate-400">Session 2026-27</span>
+          <span className="text-xs font-semibold text-slate-400">
+            Session 2026-27
+          </span>
           <a
             href="https://www.hscekanjhawala.com/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition"
-          >
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition">
             <span>Visit College Portal</span>
             <ExternalLink size={12} />
           </a>

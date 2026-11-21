@@ -6,8 +6,7 @@ export const SUPER_ADMIN_EMAIL = "sharmaravi8392@gmail.com";
 export function normalizePermissions(permissions = {}) {
   return {
     ...permissions,
-    chatbotEnquiries:
-      permissions.chatbotEnquiries ?? permissions.enquiries ?? false,
+    chatbotEnquiries: permissions.chatbotEnquiries === true,
     grievances: permissions.grievances ?? permissions.feedback ?? false,
     faculty: permissions.faculty ?? false,
   };

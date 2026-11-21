@@ -850,7 +850,7 @@ export default function FacultyPage() {
 
                 <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-[#2E3A8C]">
                   <span>Code: 147</span>
-                  <span>100 B.Ed. Seats</span>
+                  <span>50 B.Ed. Seats</span>
                 </div>
               </div>
             </aside>
@@ -1007,7 +1007,7 @@ export default function FacultyPage() {
 
                 <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-[#2E3A8C]">
                   <span>Code: 147</span>
-                  <span>100 B.Ed. Seats</span>
+                  <span>50 B.Ed. Seats</span>
                 </div>
               </div>
             </section>
@@ -1017,3 +1017,4 @@ export default function FacultyPage() {
     </>
   );
 }
+

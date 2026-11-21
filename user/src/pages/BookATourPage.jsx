@@ -506,7 +506,7 @@ export default function BookATourPage() {
                 </div>
 
                 <Link
-                  to="/campus-life"
+                  to="/gallery"
                   className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
                   <span>{t("Curriculum Labs & Facilities", "शिक्षण लैब्स एवं सुविधाएं")}</span>
                   <ArrowUpRight size={14} className="text-gray-400" />
@@ -976,7 +976,7 @@ export default function BookATourPage() {
                   </div>
 
                   <Link
-                    to="/campus-life"
+                    to="/gallery"
                     className="flex items-center justify-between px-5 py-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#2E3A8C] transition-colors">
                     <span>{t("Curriculum Labs & Facilities", "शिक्षण लैब्स एवं सुविधाएं")}</span>
                     <ArrowUpRight size={14} className="text-gray-400" />

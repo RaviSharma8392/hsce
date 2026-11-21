@@ -1,7 +1,11 @@
-import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  where,
+} from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
-
-const LOCAL_STORAGE_KEY = "hsce_syllabus_items";
 
 /**
  * Built-in Core B.Ed. Syllabus Items (Combined 1st & 2nd Year by Academic Year)
@@ -79,69 +83,12 @@ export const defaultSyllabusItems = [
   },
 ];
 
-/**
- * Get locally stored syllabus items
- */
-export function getLocalSyllabusItems() {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn("Error reading local syllabus items:", err);
-    return [];
-  }
-}
-
-/**
- * Fetch all syllabus items (combining Firestore + localStorage + core seed)
- */
-export async function fetchAllSyllabusItems() {
-  let remoteItems = [];
-
-  if (firebaseReady) {
-    try {
-      try {
-        const q = query(
-          collection(db, "syllabus"),
-          where("isPublished", "==", true),
-          orderBy("createdAt", "desc"),
-        );
-        const snapshot = await getDocs(q);
-        remoteItems = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data(),
-          isBackend: true,
-        }));
-      } catch {
-        const snapshot = await getDocs(
-          query(collection(db, "syllabus"), where("isPublished", "==", true)),
-        );
-        remoteItems = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data(),
-          isBackend: true,
-        }));
-      }
-    } catch (err) {
-      console.warn("Firestore syllabus fetch error:", err);
-    }
-  }
-
-  // Also read locally uploaded syllabus items
-  const localItems = getLocalSyllabusItems();
-
+function mergePublishedSyllabusItems(remoteItems) {
   const map = new Map();
 
-  // Add default core items
   defaultSyllabusItems.forEach((item) => map.set(item.id, item));
 
-  // Override / append with backend items
   remoteItems.forEach((item) => {
-    if (item.isPublished === false) {
-      map.delete(item.id);
-      return;
-    }
-
     const yearLabel = item.year || item.session || "Session";
     map.set(item.id, {
       ...map.get(item.id),
@@ -152,23 +99,43 @@ export async function fetchAllSyllabusItems() {
     });
   });
 
-  // Append local offline items
-  localItems.forEach((item) => {
-    if (item.isPublished === false) {
-      map.delete(item.id);
-      return;
-    }
-
-    if (map.has(item.id)) return;
-
-    const yearLabel = item.year || item.session || "Session";
-    map.set(item.id, {
-      ...item,
-      year: yearLabel,
-      title: item.title || `B.Ed. Syllabus (${yearLabel})`,
-      pdfUrl: item.pdfUrl || item.url || item.fileUrl || "",
-    });
-  });
-
   return Array.from(map.values());
+}
+
+function publishedSyllabusQuery() {
+  return query(
+    collection(db, "syllabus"),
+    where("isPublished", "==", true),
+    orderBy("createdAt", "desc"),
+  );
+}
+
+export function subscribeToPublishedSyllabus(callback, onError) {
+  if (!firebaseReady) {
+    callback(defaultSyllabusItems);
+    return () => {};
+  }
+
+  return onSnapshot(
+    publishedSyllabusQuery(),
+    { includeMetadataChanges: true },
+    (snapshot) => {
+      if (snapshot.metadata.fromCache) {
+        callback(defaultSyllabusItems);
+        return;
+      }
+
+      const remoteItems = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+        isBackend: true,
+      }));
+      callback(mergePublishedSyllabusItems(remoteItems));
+    },
+    (error) => {
+      console.error("Firestore syllabus subscription error:", error);
+      onError?.(error);
+      callback(defaultSyllabusItems);
+    }
+  );
 }

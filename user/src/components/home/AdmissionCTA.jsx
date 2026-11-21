@@ -45,7 +45,10 @@ export function AdmissionCTA() {
   const { isHindi } = useLanguage();
   const { openAdmissionModal } = useAdmissionModal();
 
-  const phone1 = collegeInfo.phone || admissionModalData.helplinePhoneFallback || "9953155054";
+  const phone1 =
+    collegeInfo.phone ||
+    admissionModalData.helplinePhoneFallback ||
+    "9953155054";
   const phone2 = "8056777077";
 
   return (
@@ -64,7 +67,9 @@ export function AdmissionCTA() {
             <div className="mb-4 flex items-center gap-2.5">
               <span className="h-0.5 w-6 bg-[#FBDD23]" />
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#2E3A8C]">
-                {isHindi ? "प्रवेश आमंत्रण" : "Your Teaching Journey Starts Here"}
+                {isHindi
+                  ? "प्रवेश आमंत्रण"
+                  : "Your Teaching Journey Starts Here"}
               </span>
             </div>
 
@@ -98,10 +103,14 @@ export function AdmissionCTA() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-900">
-                    {isHindi ? "शिक्षक शिक्षा (बी.एड.)" : "Teacher Education (B.Ed.)"}
+                    {isHindi
+                      ? "शिक्षक शिक्षा (बी.एड.)"
+                      : "Teacher Education (B.Ed.)"}
                   </p>
                   <p className="text-[11px] text-slate-500">
-                    {isHindi ? "स्वीकृत सीटें: 100" : "Approved Intake: 100 Seats"}
+                    {isHindi
+                      ? "स्वीकृत सीटें: 100"
+                      : "Approved Intake: 50 Seats"}
                   </p>
                 </div>
               </div>
@@ -112,10 +121,14 @@ export function AdmissionCTA() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-900">
-                    {isHindi ? "दो वर्षीय नियमित पाठ्यक्रम" : "Two-Year Regular Programme"}
+                    {isHindi
+                      ? "दो वर्षीय नियमित पाठ्यक्रम"
+                      : "Two-Year Regular Programme"}
                   </p>
                   <p className="text-[11px] text-slate-500">
-                    {isHindi ? "एनसीटीई एवं जीजीएसआईपीयू" : "NCTE & GGSIPU Recognized"}
+                    {isHindi
+                      ? "एनसीटीई एवं जीजीएसआईपीयू"
+                      : "NCTE & GGSIPU Recognized"}
                   </p>
                 </div>
               </div>
@@ -127,14 +140,18 @@ export function AdmissionCTA() {
                 type="button"
                 onClick={() => openAdmissionModal()}
                 className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sm bg-[#2E3A8C] px-7 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all hover:bg-[#202965] active:scale-[0.98] cursor-pointer">
-                <span>{isHindi ? "प्रवेश पूछताछ करें" : "Enquire About Admission"}</span>
+                <span>
+                  {isHindi ? "प्रवेश पूछताछ करें" : "Enquire About Admission"}
+                </span>
                 <ArrowRight size={14} className="text-[#FBDD23]" />
               </button>
 
               <Link
                 to="/course/bed"
                 className="inline-flex min-h-[44px] items-center justify-center rounded-sm bg-[#FBDD23] px-7 py-3 text-xs font-bold uppercase tracking-wider text-slate-900 shadow-xs transition-all hover:bg-[#FFDC13] active:scale-[0.98]">
-                <span>{isHindi ? "बी.एड. विवरण देखें" : "Explore B.Ed. Course"}</span>
+                <span>
+                  {isHindi ? "बी.एड. विवरण देखें" : "Explore B.Ed. Course"}
+                </span>
               </Link>
             </div>
           </div>
@@ -158,7 +175,11 @@ export function AdmissionCTA() {
                 <Link
                   to="/contact"
                   className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#2E3A8C] hover:underline">
-                  <span>{isHindi ? "स्थान व मानचित्र देखें →" : "View Map & Directions →"}</span>
+                  <span>
+                    {isHindi
+                      ? "स्थान व मानचित्र देखें →"
+                      : "View Map & Directions →"}
+                  </span>
                 </Link>
               </div>
             </div>
@@ -186,7 +207,9 @@ export function AdmissionCTA() {
                   </a>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  {isHindi ? "सोम - शनि, 9:00 AM - 4:00 PM" : "Mon - Sat, 9:00 AM - 4:00 PM"}
+                  {isHindi
+                    ? "सोम - शनि, 9:00 AM - 4:00 PM"
+                    : "Mon - Sat, 9:00 AM - 4:00 PM"}
                 </p>
               </div>
             </div>
@@ -207,7 +230,11 @@ export function AdmissionCTA() {
                 </a>
                 <div className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
                   <ShieldCheck size={13} />
-                  <span>{isHindi ? "आधिकारिक संस्थान प्रतिक्रिया" : "Official College Helpdesk"}</span>
+                  <span>
+                    {isHindi
+                      ? "आधिकारिक संस्थान प्रतिक्रिया"
+                      : "Official College Helpdesk"}
+                  </span>
                 </div>
               </div>
             </div>

@@ -10,7 +10,7 @@ import {
 import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout";
 import { getAcademicsSidebarConfig } from "../data/navigationConfig";
 import {
-  fetchAllSyllabusItems,
+  subscribeToPublishedSyllabus,
   defaultSyllabusItems,
 } from "../services/syllabusService";
 import { useLanguage } from "../context/LanguageContext";
@@ -37,29 +37,24 @@ export default function SyllabusPage() {
 
   useEffect(() => {
     let isMounted = true;
-
-    async function loadSyllabus() {
-      try {
-        const items = await fetchAllSyllabusItems();
-        if (isMounted && items?.length > 0) {
-          setSyllabusList(items);
-          setSelectedId((currentId) =>
-            items.some((item) => item.id === currentId)
-              ? currentId
-              : items[0].id,
-          );
-        }
-      } catch (error) {
-        console.error("Unable to load syllabus:", error);
-      } finally {
+    const unsubscribe = subscribeToPublishedSyllabus(
+      (items) => {
+        if (!isMounted) return;
+        setSyllabusList(items);
+        setSelectedId((currentId) =>
+          items.some((item) => item.id === currentId) ? currentId : items[0]?.id,
+        );
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Unable to subscribe to syllabus updates:", error);
         if (isMounted) setLoading(false);
-      }
-    }
-
-    loadSyllabus();
+      },
+    );
 
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 

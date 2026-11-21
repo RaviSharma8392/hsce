@@ -325,7 +325,7 @@ export default function SearchPage() {
         if (activeCategory === "About College") {
           return /about/i.test(item.category || "");
         }
-        if (activeCategory === "Campus Life") {
+        if (activeCategory === "Gallery") {
           return /campus|facility|tour|gallery/i.test(item.category || "");
         }
         if (activeCategory === "Contact") {
@@ -385,7 +385,7 @@ export default function SearchPage() {
       else if (/syllabus|curriculum/i.test(item.category || "")) key = "Academic Syllabus";
       else if (/faculty|staff/i.test(item.category || "")) key = "Faculty & Staff";
       else if (/about/i.test(item.category || "")) key = "About College";
-      else if (/campus|tour|gallery/i.test(item.category || "")) key = "Campus Life";
+      else if (/campus|tour|gallery/i.test(item.category || "")) key = "Gallery";
       else if (/contact/i.test(item.category || "")) key = "Contact";
 
       counts[key] = (counts[key] || 0) + 1;
@@ -400,7 +400,7 @@ export default function SearchPage() {
     { key: "Faculty & Staff", label: isHindi ? "संकाय" : "Faculty" },
     { key: "Notices & Circulars", label: isHindi ? "सूचनाएं" : "Notices" },
     { key: "About College", label: isHindi ? "कॉलेज परिचय" : "About HSCE" },
-    { key: "Campus Life", label: isHindi ? "कैंपस" : "Campus" },
+    { key: "Gallery", label: isHindi ? "गैलरी" : "Gallery" },
     { key: "Contact", label: isHindi ? "संपर्क" : "Contact" },
   ];
 

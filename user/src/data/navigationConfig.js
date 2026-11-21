@@ -192,50 +192,8 @@ export const getAcademicsSidebarConfig = (isHindi, activeTab = null) => ({
 });
 
 export const getCampusLifeSidebarConfig = (isHindi, activeTab = null) => ({
-  title: isHindi ? "सुविधाएं एवं परिसर" : "Facilities",
+  title: isHindi ? "गैलरी" : "Gallery",
   items: [
-    {
-      id: "overview",
-      to: "/campus-life?tab=overview",
-      active: activeTab ? activeTab === "overview" : undefined,
-      label: isHindi ? "परिसर का जीवन (अवलोकन)" : "Campus Life Overview",
-    },
-    {
-      id: "classrooms",
-      to: "/campus-life?tab=classrooms",
-      active: activeTab ? activeTab === "classrooms" : undefined,
-      label: isHindi ? "स्मार्ट क्लासरूम" : "Smart Classrooms",
-    },
-    {
-      id: "ict-lab",
-      to: "/campus-life?tab=ict-lab",
-      active: activeTab ? activeTab === "ict-lab" : undefined,
-      label: isHindi ? "आईसीटी व कंप्यूटर लैब" : "ICT & Computer Lab",
-    },
-    {
-      id: "science-lab",
-      to: "/campus-life?tab=science-lab",
-      active: activeTab ? activeTab === "science-lab" : undefined,
-      label: isHindi ? "पाठ्यक्रम संसाधन लैब" : "Curriculum Resource Lab",
-    },
-    {
-      id: "library",
-      to: "/campus-life?tab=library",
-      active: activeTab ? activeTab === "library" : undefined,
-      label: isHindi ? "पुस्तकालय एवं वाचनालय" : "Library & Resource Center",
-    },
-    {
-      id: "auditorium",
-      to: "/campus-life?tab=auditorium",
-      active: activeTab ? activeTab === "auditorium" : undefined,
-      label: isHindi ? "बहुउद्देशीय सभागार" : "Multipurpose Hall",
-    },
-    {
-      id: "sports",
-      to: "/campus-life?tab=sports",
-      active: activeTab ? activeTab === "sports" : undefined,
-      label: isHindi ? "खेल एवं योग केंद्र" : "Sports & Yoga Ground",
-    },
     {
       id: "gallery",
       to: "/gallery",
@@ -271,16 +229,10 @@ export const getGovernanceSidebarConfig = (isHindi, activeTab = null) => ({
       label: isHindi ? "अनिवार्य प्रकटीकरण (NCTE)" : "Mandatory Disclosure (NCTE)",
     },
     {
-      id: "committees",
-      to: "/committees?tab=directory",
-      active: activeTab === "directory",
-      label: isHindi ? "संस्थागत समितियां व प्रकोष्ठ" : "Committees & Cells",
-    },
-    {
       id: "grievance",
       to: "/committees?tab=lodge",
       active: activeTab === "lodge",
-      label: isHindi ? "ऑनलाइन शिकायत निवारण" : "Lodge Online Grievance",
+      label: isHindi ? "छात्र शिकायत एवं परिवाद पंजीकरण" : "Student Grievance & Complaint Lodging Form",
     },
     {
       id: "notices",

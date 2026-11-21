@@ -52,12 +52,14 @@ export function CollegiateSidebarNav({
     if (item.active !== undefined) return item.active;
     if (item.to) {
       if (item.to.includes("?")) {
-        return (location.pathname + location.search) === item.to;
+        return location.pathname + location.search === item.to;
       }
       if (item.to.includes("#")) {
         return currentFullPath === item.to;
       }
-      return location.pathname === item.to && !location.hash && !location.search;
+      return (
+        location.pathname === item.to && !location.hash && !location.search
+      );
     }
     return false;
   };
@@ -164,7 +166,8 @@ export function CollegiateSidebarNav({
     return (
       <div className="space-y-2.5">
         {quickActions.map((action, idx) => {
-          const isYellow = action.variant === "yellow" || action.variant === "gold";
+          const isYellow =
+            action.variant === "yellow" || action.variant === "gold";
           const btnClass = isYellow
             ? "bg-[#F5CB1E] hover:bg-[#eab308] text-slate-900 shadow-xs border border-yellow-400/50"
             : "bg-[#2E3A8C] hover:bg-[#232d70] text-white shadow-xs border border-blue-900/20";
@@ -244,7 +247,7 @@ export function CollegiateSidebarNav({
 
         <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-[#2E3A8C]">
           <span>Code: 147</span>
-          <span>100 B.Ed. Seats</span>
+          <span>50 B.Ed. Seats</span>
         </div>
       </div>
     );
@@ -264,7 +267,9 @@ export function CollegiateSidebarNav({
             </h3>
           </div>
 
-          <nav aria-label={title} className="divide-y divide-gray-100 font-sans">
+          <nav
+            aria-label={title}
+            className="divide-y divide-gray-100 font-sans">
             {items.map(renderMenuItem)}
           </nav>
 

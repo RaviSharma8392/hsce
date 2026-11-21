@@ -11,83 +11,44 @@ import {
 } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
 
-const LOCAL_STORAGE_KEY = "hsce_syllabus_items";
-
-/**
- * Get syllabus items from localStorage
- */
-export function getLocalSyllabusItems() {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn("Error reading local syllabus items:", err);
-    return [];
-  }
-}
-
-/**
- * Save syllabus items to localStorage
- */
-export function setLocalSyllabusItems(list) {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    window.dispatchEvent(new Event("storage"));
-  } catch (err) {
-    console.warn("Error saving local syllabus items:", err);
-  }
-}
-
 /**
  * Subscribe to syllabus items in real time
  */
-export function subscribeToSyllabus(callback) {
-  if (firebaseReady) {
-    try {
-      const q = query(collection(db, "syllabus"), orderBy("createdAt", "desc"));
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const remoteList = snapshot.docs.map((docSnap) => ({
-            id: docSnap.id,
-            ...docSnap.data(),
-          }));
-
-          // Merge with local list
-          const localList = getLocalSyllabusItems();
-          const mergedMap = new Map();
-          remoteList.forEach((item) => mergedMap.set(item.id, item));
-          localList.forEach((item) => {
-            if (!mergedMap.has(item.id)) mergedMap.set(item.id, item);
-          });
-
-          const combined = Array.from(mergedMap.values());
-          setLocalSyllabusItems(combined);
-          callback(combined);
-        },
-        (error) => {
-          console.warn("Firestore syllabus subscription error, fallback local:", error);
-          callback(getLocalSyllabusItems());
-        }
-      );
-      return unsubscribe;
-    } catch (e) {
-      console.warn("Firestore syllabus listener error:", e);
-      callback(getLocalSyllabusItems());
-      return () => {};
-    }
+export function subscribeToSyllabus(callback, onError) {
+  if (!firebaseReady) {
+    onError?.(new Error("The syllabus service is not connected to Firestore."));
+    return () => {};
   }
 
-  callback(getLocalSyllabusItems());
-  const handleStorage = () => callback(getLocalSyllabusItems());
-  window.addEventListener("storage", handleStorage);
-  return () => window.removeEventListener("storage", handleStorage);
+  const q = query(collection(db, "syllabus"), orderBy("createdAt", "desc"));
+  return onSnapshot(
+    q,
+    { includeMetadataChanges: true },
+    (snapshot) => {
+      callback(
+        snapshot.metadata.fromCache
+          ? []
+          : snapshot.docs.map((docSnap) => ({
+              id: docSnap.id,
+              ...docSnap.data(),
+            }))
+      );
+    },
+    (error) => {
+      console.error("Firestore syllabus subscription error:", error);
+      onError?.(error);
+    }
+  );
 }
 
 /**
  * Add / Upload a new syllabus item
  */
 export async function addSyllabusItem(data, currentUser = null) {
+  if (!firebaseReady) {
+    throw new Error("The syllabus service is not connected to Firestore.");
+  }
+
   const timestamp = new Date();
   const isPub = data.isPublished !== false;
   const year = String(data.year || "2026-27").trim();
@@ -117,33 +78,26 @@ export async function addSyllabusItem(data, currentUser = null) {
     createdAtMs: timestamp.getTime(),
   };
 
-  let firestoreDocId = `syll_local_${yearKey}`;
-
-  if (firebaseReady) {
-    firestoreDocId = `bed_${yearKey}`;
-    await setDoc(doc(db, "syllabus", firestoreDocId), {
-      ...payload,
-      publishedAt: isPub ? serverTimestamp() : null,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
-  }
-
-  const localRecord = {
+  const firestoreDocId = `bed_${yearKey}`;
+  await setDoc(doc(db, "syllabus", firestoreDocId), {
     ...payload,
-    id: firestoreDocId || `syll_local_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-    createdAt: timestamp.toISOString(),
+    publishedAt: isPub ? serverTimestamp() : null,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+
+  return {
+    success: true,
+    id: firestoreDocId,
+    record: { ...payload, id: firestoreDocId, createdAt: timestamp.toISOString() },
   };
-
-  const list = getLocalSyllabusItems();
-  list.unshift(localRecord);
-  setLocalSyllabusItems(list);
-
-  return { success: true, id: localRecord.id, record: localRecord };
 }
 
 export async function updateSyllabusItem(id, data) {
   if (!id) throw new Error("A syllabus record ID is required.");
+  if (!firebaseReady || id.startsWith("syll_local_")) {
+    throw new Error("This syllabus record is not synced to Firestore and cannot be updated.");
+  }
 
   const year = String(data.year || "").trim();
   const pdfUrl = String(data.pdfUrl || "").trim();
@@ -160,20 +114,11 @@ export async function updateSyllabusItem(id, data) {
     updatedAt: timestamp.toISOString(),
   };
 
-  if (firebaseReady && !id.startsWith("syll_local_")) {
-    await updateDoc(doc(db, "syllabus", id), {
-      ...payload,
-      updatedAt: serverTimestamp(),
-      publishedAt: isPublished ? serverTimestamp() : null,
-    });
-  }
-
-  const list = getLocalSyllabusItems();
-  const index = list.findIndex((item) => item.id === id);
-  if (index !== -1) {
-    list[index] = { ...list[index], ...payload };
-    setLocalSyllabusItems(list);
-  }
+  await updateDoc(doc(db, "syllabus", id), {
+    ...payload,
+    updatedAt: serverTimestamp(),
+    publishedAt: isPublished ? serverTimestamp() : null,
+  });
 
   return { success: true };
 }
@@ -182,26 +127,16 @@ export async function updateSyllabusItem(id, data) {
  * Toggle publish status of a syllabus item
  */
 export async function toggleSyllabusPublish(id, isPublished) {
-  if (firebaseReady && !id.startsWith("syll_local_")) {
-    const ref = doc(db, "syllabus", id);
-    await updateDoc(ref, {
-      isPublished,
-      status: isPublished ? "published" : "draft",
-      publishedAt: isPublished ? serverTimestamp() : null,
-      updatedAt: serverTimestamp(),
-    });
+  if (!firebaseReady || id.startsWith("syll_local_")) {
+    throw new Error("This syllabus record is not synced to Firestore and cannot be updated.");
   }
 
-  const list = getLocalSyllabusItems();
-  const idx = list.findIndex((item) => item.id === id);
-  if (idx !== -1) {
-    list[idx] = {
-      ...list[idx],
-      isPublished,
-      status: isPublished ? "published" : "draft",
-    };
-    setLocalSyllabusItems(list);
-  }
+  await updateDoc(doc(db, "syllabus", id), {
+    isPublished,
+    status: isPublished ? "published" : "draft",
+    publishedAt: isPublished ? serverTimestamp() : null,
+    updatedAt: serverTimestamp(),
+  });
 
   return { success: true };
 }
@@ -210,12 +145,10 @@ export async function toggleSyllabusPublish(id, isPublished) {
  * Delete a syllabus item
  */
 export async function deleteSyllabusItem(id) {
-  if (firebaseReady && !id.startsWith("syll_local_")) {
-    const ref = doc(db, "syllabus", id);
-    await deleteDoc(ref);
+  if (!firebaseReady || id.startsWith("syll_local_")) {
+    throw new Error("This syllabus record is not synced to Firestore and cannot be deleted.");
   }
 
-  const list = getLocalSyllabusItems().filter((item) => item.id !== id);
-  setLocalSyllabusItems(list);
+  await deleteDoc(doc(db, "syllabus", id));
   return { success: true };
 }

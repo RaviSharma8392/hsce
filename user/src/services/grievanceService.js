@@ -1,37 +1,8 @@
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, firebaseReady } from "../config/firebase";
 
-const LOCAL_STORAGE_KEY = "hsce_student_grievances";
-
 /**
- * Get grievances stored in localStorage (offline / backup)
- */
-export function getLocalGrievances() {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.warn("Error reading local grievances:", err);
-    return [];
-  }
-}
-
-/**
- * Save grievance to localStorage
- */
-function saveLocalGrievance(record) {
-  try {
-    const list = getLocalGrievances();
-    list.unshift(record);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    window.dispatchEvent(new Event("storage"));
-  } catch (err) {
-    console.warn("Error saving local grievance:", err);
-  }
-}
-
-/**
- * Submit student complaint / grievance to Firestore and localStorage
+ * Submit student complaint / grievance to Firestore
  */
 export async function submitGrievance(data) {
   if (!firebaseReady) {
@@ -73,8 +44,6 @@ export async function submitGrievance(data) {
     id: docRef.id,
     createdAt: timestamp.toISOString(),
   };
-
-  saveLocalGrievance(localRecord);
 
   return {
     success: true,

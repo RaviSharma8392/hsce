@@ -1,84 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function adminUserPath() {
-      return /databases/$(database)/documents/adminUsers/$(request.auth.uid);
-    }
-
     function isPrincipal() {
-      return isSignedIn() &&
-        (request.auth.token.email == 'sharmaravi8392@gmail.com' ||
-          (exists(adminUserPath()) &&
-            get(adminUserPath()).data.active == true &&
-            get(adminUserPath()).data.verified == true &&
-            get(adminUserPath()).data.role == 'principal'));
+      return signedIn()
+        && request.auth.token.email == 'sharmaravi8392@gmail.com';
     }
 
-    function hasActivePortalRecord() {
-      return isSignedIn() &&
-        exists(adminUserPath()) &&
-        get(adminUserPath()).data.active == true &&
-        get(adminUserPath()).data.verified == true;
+    function adminPath(uid) {
+      return /databases/$(database)/documents/adminUsers/$(uid);
+    }
+
+    function isActiveAdmin() {
+      return signedIn()
+        && exists(adminPath(request.auth.uid))
+        && get(adminPath(request.auth.uid)).data.active == true
+        && get(adminPath(request.auth.uid)).data.verified == true;
     }
 
     function hasPermission(permission) {
-      return isPrincipal() ||
-        (hasActivePortalRecord() &&
-          (get(adminUserPath()).data.role == 'principal' ||
-            get(adminUserPath()).data.get('permissions', {}).get(permission, false) == true));
-    }
-
-    function isPublishedRecord() {
-      return resource != null && resource.data.isPublished == true;
-    }
-
-    function canReadPublished(permission) {
-      return isPublishedRecord() || hasPermission(permission);
-    }
-
-    function isSelfPendingAdminRequest(userId) {
-      let data = request.resource.data;
-      return isSignedIn() &&
-        request.auth.uid == userId &&
-        data.keys().hasOnly([
-          'uid', 'email', 'role', 'active', 'verified', 'status',
-          'createdAt', 'requestedAt', 'requiresVerificationBy', 'permissions'
-        ]) &&
-        data.keys().hasAll([
-          'uid', 'email', 'role', 'active', 'verified', 'status',
-          'createdAt', 'requestedAt', 'requiresVerificationBy', 'permissions'
-        ]) &&
-        data.uid == request.auth.uid &&
-        data.email == request.auth.token.email &&
-        data.role == 'staff' &&
-        data.active == false &&
-        data.verified == false &&
-        data.status == 'pending_verification' &&
-        data.requiresVerificationBy == 'sharmaravi8392@gmail.com' &&
-        data.createdAt == request.time &&
-        data.requestedAt == request.time &&
-        data.permissions is map &&
-        data.permissions.keys().hasOnly([
-          'notices', 'enquiries', 'gallery', 'syllabus', 'homepagePopup'
-        ]) &&
-        data.permissions.get('notices', false) == false &&
-        data.permissions.get('enquiries', false) == false &&
-        data.permissions.get('gallery', false) == false &&
-        data.permissions.get('syllabus', false) == false &&
-        data.permissions.get('homepagePopup', false) == false;
-    }
-
-    function isSelfLoginUpdate(userId) {
-      return isSignedIn() &&
-        request.auth.uid == userId &&
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['lastLoginAt', 'lastLoginEmail']) &&
-        request.resource.data.lastLoginAt == request.time &&
-        request.resource.data.lastLoginEmail == resource.data.email;
+      return isPrincipal()
+        || (isActiveAdmin()
+          && get(adminPath(request.auth.uid)).data.permissions[permission] == true);
     }
 
     function validStudentEnquiry() {
@@ -87,56 +33,38 @@ service cloud.firestore {
           'name', 'phone', 'email', 'course', 'city', 'query', 'source',
           'contactConsent', 'status', 'staffNotes', 'createdAtFormatted',
           'createdAtMs', 'createdAt'
-        ]) &&
-        data.keys().hasAll([
+        ])
+        && data.keys().hasAll([
           'name', 'phone', 'email', 'course', 'city', 'query', 'source',
           'status', 'staffNotes', 'createdAtFormatted', 'createdAtMs', 'createdAt'
-        ]) &&
-        data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
-        data.phone is string && data.phone.size() <= 32 &&
-        data.email is string && data.email.size() <= 254 &&
-        data.course is string && data.course.size() <= 160 &&
-        data.city is string && data.city.size() <= 120 &&
-        data.query is string && data.query.size() <= 3000 &&
-        data.source is string && data.source.size() <= 60 &&
-        data.status == 'new' &&
-        data.staffNotes == '' &&
-        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
-        data.createdAtMs is int &&
-        data.createdAt == request.time &&
-        (!('contactConsent' in data) || data.contactConsent is bool);
+        ])
+        && data.name is string && data.name.size() <= 120
+        && data.phone is string && data.phone.size() <= 40
+        && data.email is string && data.email.size() <= 254
+        && data.course is string && data.course.size() <= 200
+        && data.city is string && data.city.size() <= 120
+        && data.query is string && data.query.size() <= 5000
+        && data.source in [
+          'admission_modal', 'course_page_enquiry', 'website_enquiry_page',
+          'website_chatbot', 'chatbot_button_enquiry'
+        ]
+        && (!('contactConsent' in data.keys()) || data.contactConsent is bool)
+        && data.status == 'new'
+        && data.staffNotes == ''
+        && data.createdAtFormatted is string
+        && data.createdAtFormatted.size() <= 100
+        && data.createdAtMs is int
+        && data.createdAt == request.time;
     }
 
-    function validContactFeedback() {
-      let data = request.resource.data;
-      return data.keys().hasOnly([
-          'feedbackId', 'name', 'phone', 'email', 'category', 'subject',
-          'websiteAddress', 'profession', 'howKnowSite', 'siteRating',
-          'message', 'status', 'source', 'createdAtFormatted', 'createdAtMs',
-          'createdAt'
-        ]) &&
-        data.keys().hasAll([
-          'feedbackId', 'name', 'phone', 'email', 'category', 'subject',
-          'websiteAddress', 'profession', 'howKnowSite', 'siteRating',
-          'message', 'status', 'source', 'createdAtFormatted', 'createdAtMs',
-          'createdAt'
-        ]) &&
-        data.feedbackId is string && data.feedbackId.size() <= 32 &&
-        data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
-        data.phone is string && data.phone.size() <= 32 &&
-        data.email is string && data.email.size() <= 254 &&
-        data.category is string && data.category.size() <= 120 &&
-        data.subject is string && data.subject.size() <= 200 &&
-        data.websiteAddress is string && data.websiteAddress.size() <= 300 &&
-        data.profession is string && data.profession.size() <= 120 &&
-        data.howKnowSite is string && data.howKnowSite.size() <= 160 &&
-        data.siteRating is string && data.siteRating.size() <= 40 &&
-        data.message is string && data.message.size() <= 5000 &&
-        data.status == 'new' &&
-        data.source == 'website_contact_guestbook' &&
-        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
-        data.createdAtMs is int &&
-        data.createdAt == request.time;
+    function canReadEnquiry(source) {
+      return isPrincipal()
+        || (source in [
+            'admission_modal', 'course_page_enquiry', 'website_enquiry_page'
+          ] && hasPermission('enquiries'))
+        || (source in [
+            'website_chatbot', 'chatbot_button_enquiry'
+          ] && hasPermission('chatbotEnquiries'));
     }
 
     function validGrievance() {
@@ -145,28 +73,62 @@ service cloud.firestore {
           'grievanceId', 'name', 'rollNo', 'phone', 'email', 'category',
           'subject', 'description', 'status', 'source', 'createdAtFormatted',
           'createdAtMs', 'createdAt'
-        ]) &&
-        data.keys().hasAll([
+        ])
+        && data.keys().hasAll([
           'grievanceId', 'name', 'rollNo', 'phone', 'email', 'category',
           'subject', 'description', 'status', 'source', 'createdAtFormatted',
           'createdAtMs', 'createdAt'
-        ]) &&
-        data.grievanceId is string && data.grievanceId.size() <= 32 &&
-        data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
-        data.rollNo is string && data.rollNo.size() <= 80 &&
-        data.phone is string && data.phone.size() <= 32 &&
-        data.email is string && data.email.size() <= 254 &&
-        data.category is string && data.category.size() <= 120 &&
-        data.subject is string && data.subject.size() > 0 && data.subject.size() <= 200 &&
-        data.description is string && data.description.size() > 0 && data.description.size() <= 5000 &&
-        data.status == 'new' &&
-        data.source == 'website_grievance_portal' &&
-        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
-        data.createdAtMs is int &&
-        data.createdAt == request.time;
+        ])
+        && data.grievanceId is string && data.grievanceId.size() <= 40
+        && data.name is string && data.name.size() <= 120
+        && data.rollNo is string && data.rollNo.size() <= 80
+        && data.phone is string && data.phone.size() <= 40
+        && data.email is string && data.email.size() <= 254
+        && data.category is string && data.category.size() <= 160
+        && data.subject is string && data.subject.size() <= 240
+        && data.description is string && data.description.size() <= 10000
+        && data.status == 'new'
+        && data.source == 'website_grievance_portal'
+        && data.createdAtFormatted is string
+        && data.createdAtFormatted.size() <= 100
+        && data.createdAtMs is int
+        && data.createdAt == request.time;
     }
 
-    function validCampusTour() {
+    function validFeedback() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'feedbackId', 'name', 'phone', 'email', 'category', 'subject',
+          'websiteAddress', 'profession', 'howKnowSite', 'siteRating',
+          'message', 'status', 'source', 'createdAtFormatted', 'createdAtMs',
+          'createdAt'
+        ])
+        && data.keys().hasAll([
+          'feedbackId', 'name', 'phone', 'email', 'category', 'subject',
+          'websiteAddress', 'profession', 'howKnowSite', 'siteRating',
+          'message', 'status', 'source', 'createdAtFormatted', 'createdAtMs',
+          'createdAt'
+        ])
+        && data.feedbackId is string && data.feedbackId.size() <= 40
+        && data.name is string && data.name.size() <= 120
+        && data.phone is string && data.phone.size() <= 40
+        && data.email is string && data.email.size() <= 254
+        && data.category is string && data.category.size() <= 160
+        && data.subject is string && data.subject.size() <= 240
+        && data.websiteAddress is string && data.websiteAddress.size() <= 500
+        && data.profession is string && data.profession.size() <= 160
+        && data.howKnowSite is string && data.howKnowSite.size() <= 240
+        && data.siteRating is string && data.siteRating.size() <= 80
+        && data.message is string && data.message.size() <= 10000
+        && data.status == 'new'
+        && data.source == 'website_contact_guestbook'
+        && data.createdAtFormatted is string
+        && data.createdAtFormatted.size() <= 100
+        && data.createdAtMs is int
+        && data.createdAt == request.time;
+    }
+
+    function validTourBooking() {
       let data = request.resource.data;
       return data.keys().hasOnly([
           'bookingReference', 'candidateName', 'candidatePhone', 'candidateEmail',
@@ -174,144 +136,179 @@ service cloud.firestore {
           'graduationStatus', 'graduationDegree', 'graduationPercentage',
           'previousCollege', 'pedagogyInterests', 'preferredDate',
           'preferredTimeSlot', 'visitorsCount', 'facilitiesToInspect',
-          'specialNotes', 'status', 'staffNotes', 'source',
-          'createdAtFormatted', 'createdAtMs', 'createdAt'
-        ]) &&
-        data.keys().hasAll([
+          'specialNotes', 'status', 'staffNotes', 'source', 'createdAtFormatted',
+          'createdAtMs', 'createdAt'
+        ])
+        && data.keys().hasAll([
           'bookingReference', 'candidateName', 'candidatePhone', 'candidateEmail',
           'guardianName', 'guardianPhone', 'relationship', 'city', 'programme',
           'graduationStatus', 'graduationDegree', 'graduationPercentage',
           'previousCollege', 'pedagogyInterests', 'preferredDate',
           'preferredTimeSlot', 'visitorsCount', 'facilitiesToInspect',
-          'specialNotes', 'status', 'staffNotes', 'source',
-          'createdAtFormatted', 'createdAtMs', 'createdAt'
-        ]) &&
-        data.bookingReference is string && data.bookingReference.size() <= 40 &&
-        data.candidateName is string && data.candidateName.size() > 0 && data.candidateName.size() <= 120 &&
-        data.candidatePhone is string && data.candidatePhone.size() <= 32 &&
-        data.candidateEmail is string && data.candidateEmail.size() <= 254 &&
-        data.guardianName is string && data.guardianName.size() <= 120 &&
-        data.guardianPhone is string && data.guardianPhone.size() <= 32 &&
-        data.relationship is string && data.relationship.size() <= 80 &&
-        data.city is string && data.city.size() <= 120 &&
-        data.programme is string && data.programme.size() <= 200 &&
-        data.graduationStatus is string && data.graduationStatus.size() <= 100 &&
-        data.graduationDegree is string && data.graduationDegree.size() <= 160 &&
-        data.graduationPercentage is string && data.graduationPercentage.size() <= 20 &&
-        data.previousCollege is string && data.previousCollege.size() <= 200 &&
-        data.pedagogyInterests is list && data.pedagogyInterests.size() <= 20 &&
-        data.preferredDate is string && data.preferredDate.size() <= 40 &&
-        data.preferredTimeSlot is string && data.preferredTimeSlot.size() <= 100 &&
-        data.visitorsCount is int && data.visitorsCount >= 1 && data.visitorsCount <= 20 &&
-        data.facilitiesToInspect is list && data.facilitiesToInspect.size() <= 30 &&
-        data.specialNotes is string && data.specialNotes.size() <= 2000 &&
-        data.status == 'pending' &&
-        data.staffNotes == '' &&
-        data.source == 'website_book_a_tour' &&
-        data.createdAtFormatted is string && data.createdAtFormatted.size() <= 100 &&
-        data.createdAtMs is int &&
-        data.createdAt == request.time;
+          'specialNotes', 'status', 'staffNotes', 'source', 'createdAtFormatted',
+          'createdAtMs', 'createdAt'
+        ])
+        && data.bookingReference is string && data.bookingReference.size() <= 60
+        && data.candidateName is string && data.candidateName.size() <= 120
+        && data.candidatePhone is string && data.candidatePhone.size() <= 40
+        && data.candidateEmail is string && data.candidateEmail.size() <= 254
+        && data.guardianName is string && data.guardianName.size() <= 120
+        && data.guardianPhone is string && data.guardianPhone.size() <= 40
+        && data.relationship is string && data.relationship.size() <= 80
+        && data.city is string && data.city.size() <= 120
+        && data.programme is string && data.programme.size() <= 200
+        && data.graduationStatus is string && data.graduationStatus.size() <= 100
+        && data.graduationDegree is string && data.graduationDegree.size() <= 160
+        && data.graduationPercentage is string && data.graduationPercentage.size() <= 40
+        && data.previousCollege is string && data.previousCollege.size() <= 200
+        && data.pedagogyInterests is list && data.pedagogyInterests.size() <= 20
+        && data.preferredDate is string && data.preferredDate.size() <= 40
+        && data.preferredTimeSlot is string && data.preferredTimeSlot.size() <= 100
+        && data.visitorsCount is int && data.visitorsCount >= 1 && data.visitorsCount <= 50
+        && data.facilitiesToInspect is list && data.facilitiesToInspect.size() <= 30
+        && data.specialNotes is string && data.specialNotes.size() <= 5000
+        && data.status == 'pending'
+        && data.staffNotes == ''
+        && data.source == 'website_book_a_tour'
+        && data.createdAtFormatted is string
+        && data.createdAtFormatted.size() <= 100
+        && data.createdAtMs is int
+        && data.createdAt == request.time;
     }
 
-    match /gallery/{galleryId} {
-      allow read: if canReadPublished('gallery');
-      allow create, update: if hasPermission('gallery');
-      allow delete: if hasPermission('gallery');
+    function validSecurityLog() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'email', 'outcome', 'details', 'timestamp', 'deviceInfo'
+        ])
+        && data.keys().hasAll(['email', 'outcome', 'details', 'timestamp'])
+        && data.email is string && data.email.size() <= 254
+        && data.outcome is string && data.outcome.size() <= 80
+        && data.details is string && data.details.size() <= 1000
+        && data.timestamp == request.time
+        && (!('deviceInfo' in data.keys())
+          || (data.deviceInfo is string && data.deviceInfo.size() <= 1000));
     }
 
-    match /notices/{noticeId} {
-      allow read: if canReadPublished('notices');
-      allow create, update, delete: if hasPermission('notices');
-    }
-
-    match /documents/{documentId} {
-      allow read: if isPrincipal() || isPublishedRecord();
-      allow create, update, delete: if isPrincipal();
-    }
-
-    match /faculty/{facultyId} {
-      allow read: if canReadPublished('faculty');
-      allow create, update, delete: if hasPermission('faculty');
-    }
-
-    match /committees/{committeeId} {
-      allow read: if isPrincipal() || isPublishedRecord();
-      allow create, update, delete: if isPrincipal();
-    }
-
-    match /syllabus/{syllabusId} {
-      allow read: if canReadPublished('syllabus');
-      allow create, update, delete: if hasPermission('syllabus');
-    }
-
-    match /campusTours/{tourId} {
-      allow read: if hasPermission('tours');
-      allow create: if validCampusTour();
-      allow update, delete: if hasPermission('tours');
-    }
-
-    match /homepagePopups/{popupId} {
-      allow read: if canReadPublished('homepagePopup');
-      allow create, update, delete: if hasPermission('homepagePopup');
-    }
-
-    match /homepageMessages/{messageId} {
-      allow read: if isPrincipal() || isPublishedRecord();
-      allow create, update, delete: if isPrincipal();
-    }
-
-    match /siteContent/{documentId} {
-      allow read: if isPrincipal() || isPublishedRecord();
-      allow create, update, delete: if isPrincipal();
-    }
-
-    match /adminUsers/{userId} {
-      allow read: if isPrincipal() || (isSignedIn() && request.auth.uid == userId);
-      allow create: if isPrincipal() || isSelfPendingAdminRequest(userId);
-      allow update: if isPrincipal() || isSelfLoginUpdate(userId);
+    match /adminUsers/{uid} {
+      allow get: if isPrincipal() || (signedIn() && request.auth.uid == uid);
+      allow list: if isPrincipal();
+      allow create: if isPrincipal();
+      allow update: if isPrincipal()
+        || (signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['lastLoginAt', 'lastLoginEmail'])
+          && request.resource.data.lastLoginAt == request.time
+          && request.resource.data.lastLoginEmail == request.auth.token.email);
       allow delete: if isPrincipal();
-    }
-
-    match /staffProfiles/{profileId} {
-      allow read: if isPrincipal() ||
-        (hasActivePortalRecord() && request.auth.uid == profileId);
-      allow create, update: if hasActivePortalRecord() &&
-        request.auth.uid == profileId &&
-        request.resource.data.keys().hasOnly([
-          'name', 'designation', 'employeeId', 'department', 'email',
-          'phone', 'qualification', 'subjects', 'officeHours', 'bio',
-          'updatedAt', 'updatedBy'
-        ]) &&
-        request.resource.data.name is string &&
-        request.resource.data.name.size() <= 120 &&
-        request.resource.data.phone is string &&
-        request.resource.data.phone.size() <= 40;
-      allow delete: if isPrincipal();
-    }
-
-    match /principalProfiles/{profileId} {
-      allow read, write: if isPrincipal();
     }
 
     match /securityLogs/{logId} {
-      allow read, create: if isPrincipal();
+      allow read: if isPrincipal();
+      allow create: if isPrincipal()
+        || (signedIn()
+          && validSecurityLog()
+          && request.resource.data.email == request.auth.token.email);
       allow update, delete: if false;
     }
 
     match /studentEnquiries/{enquiryId} {
       allow create: if validStudentEnquiry();
-      allow read, update, delete: if hasPermission('enquiries') ||
-        hasPermission('chatbotEnquiries');
-    }
-
-    match /contactFeedback/{feedbackId} {
-      allow create: if validContactFeedback();
-      allow read, update, delete: if hasPermission('feedback');
+      allow get, list: if canReadEnquiry(resource.data.source);
+      allow update: if canReadEnquiry(resource.data.source)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'staffNotes', 'isRead', 'updatedAt'])
+        && request.resource.data.status in [
+          'new', 'contacted', 'in-progress', 'enrolled', 'closed'
+        ]
+        && request.resource.data.staffNotes is string
+        && request.resource.data.staffNotes.size() <= 5000
+        && (!('isRead' in request.resource.data.keys())
+          || request.resource.data.isRead is bool)
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if canReadEnquiry(resource.data.source);
     }
 
     match /grievances/{grievanceId} {
       allow create: if validGrievance();
-      allow read, update, delete: if hasPermission('grievances');
+      allow get, list: if hasPermission('grievances');
+      allow update: if hasPermission('grievances')
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'adminNotes', 'updatedAt'])
+        && request.resource.data.status in ['new', 'under-review', 'resolved', 'closed']
+        && request.resource.data.adminNotes is string
+        && request.resource.data.adminNotes.size() <= 5000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if hasPermission('grievances');
+    }
+
+    match /contactFeedback/{feedbackId} {
+      allow create: if validFeedback();
+      allow get, list: if hasPermission('feedback');
+      allow update: if hasPermission('feedback')
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'adminNotes', 'updatedAt'])
+        && request.resource.data.status is string
+        && request.resource.data.status.size() <= 80
+        && request.resource.data.adminNotes is string
+        && request.resource.data.adminNotes.size() <= 5000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if hasPermission('feedback');
+    }
+
+    match /campusTours/{tourId} {
+      allow create: if validTourBooking();
+      allow get, list: if hasPermission('tours');
+      allow update: if hasPermission('tours')
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'staffNotes', 'updatedAt'])
+        && request.resource.data.status in [
+          'pending', 'confirmed', 'completed', 'cancelled', 'rescheduled'
+        ]
+        && request.resource.data.staffNotes is string
+        && request.resource.data.staffNotes.size() <= 5000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if hasPermission('tours');
+    }
+
+    match /notices/{noticeId} {
+      allow read: if resource.data.isPublished == true || hasPermission('notices');
+      allow create, update: if hasPermission('notices');
+      allow delete: if isPrincipal();
+    }
+
+    match /gallery/{imageId} {
+      allow read: if resource.data.isPublished == true || hasPermission('gallery');
+      allow create, update: if hasPermission('gallery');
+      allow delete: if isPrincipal();
+    }
+
+    match /faculty/{facultyId} {
+      allow read: if resource.data.isPublished == true || hasPermission('faculty');
+      allow create, update: if hasPermission('faculty');
+      allow delete: if isPrincipal();
+    }
+
+    match /syllabus/{itemId} {
+      allow read: if resource.data.isPublished == true || hasPermission('syllabus');
+      allow create, update: if hasPermission('syllabus');
+      allow delete: if isPrincipal();
+    }
+
+    match /homepagePopups/{popupId} {
+      allow get: if popupId == 'active'
+        || resource.data.isPublished == true
+        || hasPermission('homepagePopup');
+      allow list: if resource.data.isPublished == true
+        || hasPermission('homepagePopup');
+      allow create, update: if hasPermission('homepagePopup');
+      allow delete: if isPrincipal();
+    }
+
+    match /siteContent/{contentId} {
+      allow read: if resource.data.isPublished == true || isPrincipal();
+      allow write: if isPrincipal();
     }
 
     match /{document=**} {

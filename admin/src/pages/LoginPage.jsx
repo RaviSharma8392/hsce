@@ -165,9 +165,9 @@ export default function LoginPage() {
       {/* LEFT SECTION: Vibrant University Blue Hero (as in Image 2)*/}
       {/* ======================================================== */}
       <div
-        className="relative flex flex-col justify-between w-full lg:w-1/2 p-8 sm:p-12 lg:p-16 text-white min-h-[380px] lg:min-h-screen overflow-hidden"
+        className="admin-login-hero relative flex flex-col justify-between w-full lg:w-1/2 p-8 sm:p-12 lg:p-16 text-white min-h-[380px] lg:min-h-screen overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(14, 115, 240, 0.90) 0%, rgba(2, 85, 205, 0.94) 100%), url(${CAMPUS_HERO_BG})`,
+          backgroundImage: `linear-gradient(135deg, rgba(48, 55, 131, 0.90) 0%, rgba(36, 42, 104, 0.94) 100%), url(${CAMPUS_HERO_BG})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

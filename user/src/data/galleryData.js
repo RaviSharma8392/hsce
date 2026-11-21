@@ -7,13 +7,13 @@ export const galleryItems = [
   {
     id: "local-campus-entrance",
     title: "College Campus",
-    category: "Campus Life",
+    category: "Gallery",
     image: imageData.campusHero,
   },
   {
     id: "local-campus-outdoors",
     title: "Campus Outdoors",
-    category: "Campus Life",
+    category: "Gallery",
     image: imageData.campusOutdoor,
   },
   {

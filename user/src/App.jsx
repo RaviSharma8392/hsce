@@ -5,9 +5,9 @@ const AboutPage = lazy(() => import("./pages/AboutPage"));
 const AboutHistoryPage = lazy(() => import("./pages/AboutHistoryPage"));
 const AboutVisionMissionPage = lazy(() => import("./pages/AboutVisionMissionPage"));
 const AboutChairmanPage = lazy(() => import("./pages/AboutChairmanPage"));
+const AboutManagerPage = lazy(() => import("./pages/AboutManagerPage"));
 const AboutPrincipalPage = lazy(() => import("./pages/AboutPrincipalPage"));
 const AboutRecognitionPage = lazy(() => import("./pages/AboutRecognitionPage"));
-const CampusLifePage = lazy(() => import("./pages/CampusLifePage"));
 const AboutFactsPage = lazy(() => import("./pages/AboutFactsPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const AdmissionsPage = lazy(() => import("./pages/AdmissionsPage"));
@@ -48,7 +48,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route
           path="/about/campus-life"
-          element={<Navigate to="/campus-life" replace />}
+          element={<Navigate to="/gallery" replace />}
         />
         <Route
           path="/about/overview"
@@ -80,6 +80,7 @@ function App() {
           path="/about/chairman-message"
           element={<Navigate to="/about/chairman" replace />}
         />
+        <Route path="/about/manager" element={<AboutManagerPage />} />
         <Route path="/about/principal" element={<AboutPrincipalPage />} />
         <Route
           path="/about/principal-desk"
@@ -94,18 +95,25 @@ function App() {
           path="/about/affiliation"
           element={<Navigate to="/about/recognition" replace />}
         />
-        <Route path="/campus-life" element={<CampusLifePage />} />
+        <Route
+          path="/campus-life"
+          element={<Navigate to="/gallery" replace />}
+        />
+        <Route
+          path="/campus-life/*"
+          element={<Navigate to="/gallery" replace />}
+        />
         <Route
           path="/about/facilities"
-          element={<Navigate to="/campus-life" replace />}
+          element={<Navigate to="/gallery" replace />}
         />
         <Route
           path="/about/campus"
-          element={<Navigate to="/campus-life" replace />}
+          element={<Navigate to="/gallery" replace />}
         />
         <Route
           path="/about/campus-labs"
-          element={<Navigate to="/campus-life" replace />}
+          element={<Navigate to="/gallery" replace />}
         />
         <Route path="/about/facts" element={<AboutFactsPage />} />
         <Route

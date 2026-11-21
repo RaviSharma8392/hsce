@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { adminConfirm } from "../components/common/AdminDialog";
 import {
   PanelsTopLeft,
   Upload,
@@ -15,8 +16,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { doc, getDoc, onSnapshot, serverTimestamp, setDoc, deleteDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, firebaseReady, storage } from "../config/firebase";
+import { db, firebaseReady } from "../config/firebase";
 import {
   optimizeCloudinaryImageUrl,
   uploadToCloudinary,
@@ -122,22 +122,11 @@ export default function HomepagePopupPage({ currentUser }) {
 
       // Upload newly selected file if provided
       if (selectedFile) {
-        try {
-          const uploadRes = await uploadToCloudinary(selectedFile, {
-            folder: "hsce/homepage-popup",
-            resourceType: "image",
-          });
-          if (uploadRes?.secure_url) {
-            finalImageUrl = uploadRes.secure_url;
-          }
-        } catch (cloudErr) {
-          console.warn("Cloudinary fallback to Firebase Storage:", cloudErr);
-          const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-          const storagePath = `public/homepage-popup/active-${Date.now()}-${safeName}`;
-          const fileRef = ref(storage, storagePath);
-          await uploadBytes(fileRef, selectedFile, { contentType: selectedFile.type });
-          finalImageUrl = await getDownloadURL(fileRef);
-        }
+        const uploadRes = await uploadToCloudinary(selectedFile, {
+          folder: "hsce/homepage-popup",
+          resourceType: "image",
+        });
+        finalImageUrl = uploadRes.secure_url;
       }
 
       if (!finalImageUrl) {
@@ -165,7 +154,7 @@ export default function HomepagePopupPage({ currentUser }) {
       setFilePreview("");
       setNotice(
         isEnabled
-          ? "Homepage popup saved and activated on live website!"
+          ? "Homepage announcement saved and published!"
           : "Popup saved (Currently Inactive / Hidden)."
       );
     } catch (saveErr) {
@@ -203,8 +192,8 @@ export default function HomepagePopupPage({ currentUser }) {
         );
         setNotice(
           nextState
-            ? "Homepage popup is now Active on the website!"
-            : "Homepage popup is now Disabled / Hidden."
+            ? "Homepage announcement is now visible on the website."
+            : "Homepage announcement is now hidden."
         );
       } catch (err) {
         setError("Failed to update status. Please try again.");
@@ -215,7 +204,7 @@ export default function HomepagePopupPage({ currentUser }) {
   };
 
   const handleClearPopup = async () => {
-    if (!window.confirm("Are you sure you want to completely remove this homepage popup?")) {
+    if (!(await adminConfirm("Are you sure you want to completely remove this homepage popup?", "Remove homepage popup"))) {
       return;
     }
     setSaving(true);
@@ -228,7 +217,7 @@ export default function HomepagePopupPage({ currentUser }) {
       setRedirectUrl("");
       setSelectedFile(null);
       setFilePreview("");
-      setNotice("Homepage popup removed successfully.");
+      setNotice("Homepage announcement removed.");
     } catch (err) {
       setError("Failed to remove popup.");
     } finally {
@@ -248,10 +237,10 @@ export default function HomepagePopupPage({ currentUser }) {
             <span>WEBSITE ENGAGEMENT</span>
           </div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Homepage Popup / Modal Banner
+            Homepage Announcement
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Displays an attractive flyer or promotional banner when visitors land on the homepage.
+            Manage the image and link visitors see in the homepage announcement.
           </p>
         </div>
 

@@ -66,6 +66,13 @@ export default function WebsiteDeveloperPage() {
                   rel="noopener noreferrer">
                   Instagram: @raviiiiii._0
                 </a>
+                <a
+                  className="rounded-lg border border-white/40 px-4 py-3 text-center font-semibold text-white hover:bg-white/10"
+                  href="https://www.linkedin.com/in/ravi-sharma-13031b312"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  LinkedIn: Ravi Sharma
+                </a>
               </div>
             </aside>
           </div>

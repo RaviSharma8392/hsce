@@ -26,7 +26,6 @@ const FacultyPage = lazy(() => import("./pages/FacultyPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const HomepagePopupPage = lazy(() => import("./pages/HomepagePopupPage"));
 const NoticesPage = lazy(() => import("./pages/NoticesPage"));
-const SiteSettingsPage = lazy(() => import("./pages/SiteSettingsPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const EnquiriesPage = lazy(() => import("./pages/EnquiriesPage"));
 const ChatbotEnquiriesPage = lazy(() => import("./pages/ChatbotEnquiriesPage"));
@@ -64,28 +63,28 @@ function PendingVerificationNotice({ user, logout, checkAuth }) {
           />
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block">
-              Awaiting Principal Verification
+              Waiting for approval
             </span>
-            <h1 className="text-xl font-bold text-slate-900 mt-1">Account Pending Approval</h1>
+            <h1 className="text-xl font-bold text-slate-900 mt-1">Account awaiting approval</h1>
           </div>
         </div>
 
         <div className="space-y-4">
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            Welcome, <strong className="text-slate-900">{user.email}</strong>. Your administrative account has been registered, but your portal access and role permissions must be verified and granted by the college administrator.
+            Welcome, <strong className="text-slate-900">{user.email}</strong>. Your account is registered. The principal must approve your access before you can use the admin portal.
           </p>
 
           <div className="rounded-xl bg-slate-50/80 p-4 border border-slate-200 text-xs space-y-2">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="font-semibold uppercase tracking-wider text-[10px]">Verification Authority</span>
-              <span className="font-bold text-slate-800">Principal / Administrator</span>
+              <span className="font-semibold uppercase tracking-wider text-[10px]">Approval by</span>
+              <span className="font-bold text-slate-800">College principal</span>
             </div>
             <div className="flex items-center justify-between text-slate-700 font-medium">
-              <span>Authority Name:</span>
+              <span>Principal:</span>
               <span className="font-bold text-slate-900">Ravi Sharma</span>
             </div>
             <div className="flex items-center justify-between text-slate-700 font-medium">
-              <span>Official Email:</span>
+              <span>Email:</span>
               <span className="font-mono text-blue-700 font-bold">sharmaravi8392@gmail.com</span>
             </div>
           </div>
@@ -93,9 +92,7 @@ function PendingVerificationNotice({ user, logout, checkAuth }) {
           <div className="rounded-lg bg-blue-50/70 p-3.5 border border-blue-200/70 text-xs text-blue-950 flex items-start gap-2.5">
             <Clock size={16} className="text-blue-700 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong>You do not need to verify your own account.</strong>{" "}
-              The principal reviews your request and chooses which areas you
-              can manage.
+              The principal will review your request and approve access to the admin portal.
             </p>
           </div>
 
@@ -126,89 +123,89 @@ function PendingVerificationNotice({ user, logout, checkAuth }) {
 
 const navigationGroups = [
   {
-    label: "Start here",
+    label: "Overview",
     links: [
       {
         path: "/manage/home",
-        label: "Home",
+        label: "Dashboard",
         description: "See the tasks available to you",
         Icon: LayoutDashboard,
       },
     ],
   },
   {
-    label: "Manage accounts",
+    label: "Accounts",
     principalOnly: true,
     links: [
       {
         path: "/manage/admin-users",
         label: "Staff accounts",
-        description: "Approve access and assign work",
+        description: "Create staff accounts and manage their portal access",
         Icon: UserCheck,
       },
     ],
   },
   {
-    label: "Student and visitor messages",
+    label: "Incoming requests",
     links: [
       {
         path: "/manage/enquiries",
         label: "Admission requests",
-        description: "Review submitted admission forms",
+        description: "Review forms sent from the public admissions pages",
         permission: "enquiries",
         Icon: GraduationCap,
       },
       {
         path: "/manage/chatbot-enquiries",
-        label: "Website chat questions",
-        description: "Read questions sent through the website chat",
+        label: "Chat messages",
+        description: "Read questions sent through the website chatbot",
         permission: "chatbotEnquiries",
         Icon: Bot,
       },
       {
         path: "/manage/feedback",
         label: "Contact messages",
-        description: "Read messages sent from Contact Us",
+        description: "Read messages sent from the public contact form",
         permission: "feedback",
         Icon: MessageSquareText,
       },
       {
         path: "/manage/grievances",
         label: "Student concerns",
-        description: "Review and respond to student concerns",
+        description: "Review private concerns submitted by students",
         permission: "grievances",
         Icon: ShieldAlert,
       },
       {
         path: "/manage/tours",
-        label: "Campus visit requests",
-        description: "Confirm or update requested visits",
+        label: "Campus tour requests",
+        description: "Review visit requests sent from the public website",
         permission: "tours",
         Icon: CalendarDays,
       },
     ],
   },
   {
-    label: "Update the website",
+    label: "Website content",
     links: [
       {
         path: "/manage/notices",
-        label: "Notices and circulars",
-        description: "Add, update, or remove a notice",
+        label: "Notices",
+        description: "Publish notices shown on the public website",
         permission: "notices",
         Icon: Megaphone,
       },
       {
         path: "/manage/homepage-popup",
         label: "Homepage announcement",
-        description: "Show or hide the homepage announcement",
+        description: "Manage the announcement shown on the homepage",
         permission: "homepagePopup",
         Icon: PanelsTopLeft,
       },
       {
         path: "/manage/gallery",
-        label: "Campus photos",
-        description: "Add or update campus photos",
+        label: "Campus gallery",
+        description: "Manage photos displayed in the public campus gallery",
         permission: "gallery",
         Icon: Images,
       },
@@ -219,15 +216,15 @@ const navigationGroups = [
     links: [
       {
         path: "/manage/faculty",
-        label: "Faculty and staff",
-        description: "Update the public staff directory",
+        label: "Faculty & staff",
+        description: "Manage profiles shown on the public college website",
         permission: "faculty",
         Icon: UsersRound,
       },
       {
         path: "/manage/syllabus",
-        label: "Course documents",
-        description: "Update published syllabus files",
+        label: "B.Ed. syllabus",
+        description: "Publish syllabus documents displayed on the public website",
         permission: "syllabus",
         Icon: BookOpenCheck,
       },
@@ -243,7 +240,6 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
     (user?.email || "").toLowerCase() === SUPER_ADMIN_EMAIL;
   const canAccess = (permission) =>
     isPrincipalUser ||
-    permissions.all === true ||
     permissions[permission] === true;
   const visibleNavigationGroups = navigationGroups
     .filter((group) => !group.principalOnly || isPrincipalUser)
@@ -468,28 +464,6 @@ function AdminPortal({ user, role, permissions = {}, logout }) {
                     role={isPrincipalUser ? "principal" : "staff"}
                     permissions={permissions}
                   />)
-                }
-              />
-              <Route
-                path="documents"
-                element={<Navigate to="/manage/home" replace />}
-              />
-              <Route
-                path="homepage-messages"
-                element={<Navigate to="/manage/home" replace />}
-              />
-              <Route
-                path="committees"
-                element={<Navigate to="/manage/home" replace />}
-              />
-              <Route
-                path="settings"
-                element={
-                  <SiteSettingsPage
-                    currentUser={user}
-                    role={isPrincipalUser ? "principal" : "staff"}
-                    permissions={permissions}
-                  />
                 }
               />
               <Route

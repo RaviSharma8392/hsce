@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { adminAlert, adminConfirm } from "../components/common/AdminDialog";
 import {
   GraduationCap,
   Search,
@@ -65,7 +66,6 @@ export default function EnquiriesPage({ role = "staff" }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [courseFilter, setCourseFilter] = useState("all");
   const [notification, setNotification] = useState("");
 
   // Modal for Viewing Full Enquiry Details
@@ -79,14 +79,9 @@ export default function EnquiriesPage({ role = "staff" }) {
   useEffect(() => {
     setLoading(true);
     const unsubscribe = subscribeToEnquiries((list) => {
-      // Filter out chatbot messages - chatbot has its own dedicated page
-      const admissionOnly = list.filter((item) => {
-        const src = (item.source || "").toLowerCase();
-        return !src.includes("chatbot");
-      });
-      setEnquiries(admissionOnly);
+      setEnquiries(list);
       setLoading(false);
-    });
+    }, { categories: ["admission"] });
 
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
@@ -107,11 +102,6 @@ export default function EnquiriesPage({ role = "staff" }) {
       }
 
       // Course Filter
-      if (courseFilter !== "all") {
-        if (!item.course || !item.course.toLowerCase().includes(courseFilter.toLowerCase())) {
-          return false;
-        }
-      }
 
       // Text Search
       if (searchQuery.trim()) {
@@ -130,7 +120,7 @@ export default function EnquiriesPage({ role = "staff" }) {
 
       return true;
     });
-  }, [enquiries, statusFilter, courseFilter, searchQuery]);
+  }, [enquiries, statusFilter, searchQuery]);
 
   // Statistics Counts
   const stats = useMemo(() => {
@@ -204,7 +194,7 @@ export default function EnquiriesPage({ role = "staff" }) {
 
   // Handle delete (Optimistic UI)
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to permanently delete this admission enquiry?")) {
+    if (!(await adminConfirm("Are you sure you want to permanently delete this admission enquiry?", "Delete admission enquiry"))) {
       return;
     }
     const previous = [...enquiries];
@@ -224,9 +214,9 @@ export default function EnquiriesPage({ role = "staff" }) {
   };
 
   // Export CSV
-  const exportToCSV = () => {
+  const exportToCSV = async () => {
     if (enquiries.length === 0) {
-      alert("No admission enquiries to export.");
+      await adminAlert("No admission enquiries to export.", "No records to export");
       return;
     }
 
@@ -291,7 +281,7 @@ export default function EnquiriesPage({ role = "staff" }) {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
               <GraduationCap className="text-[#363991]" size={26} />
-              <span>Admission Form Enquiries</span>
+              <span>Admission Requests</span>
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
               B.Ed. Academic Session 2026-27
@@ -453,17 +443,19 @@ export default function EnquiriesPage({ role = "staff" }) {
                       type="button"
                       onClick={() => setSelectedEnquiry(item)}
                       className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
-                      title="View Full Enquiry Details">
+                      title="View request details">
                       <ExternalLink size={16} />
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(item.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                      title="Delete Record">
-                      <Trash2 size={16} />
-                    </button>
+                    {isPrincipal && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        title="Delete request">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -596,7 +588,7 @@ export default function EnquiriesPage({ role = "staff" }) {
                   <GraduationCap size={18} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">Admission Enquiry Details</h3>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">Admission Request Details</h3>
                   <p className="text-xs text-slate-500 mt-0.5 font-mono">ID: {selectedEnquiry.id}</p>
                 </div>
               </div>

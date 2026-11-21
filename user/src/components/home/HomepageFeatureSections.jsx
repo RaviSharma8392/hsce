@@ -114,10 +114,10 @@ const OPPORTUNITIES = {
         icon: BookOpenCheck,
       },
       {
-        title: "Campus & Facilities",
+        title: "Photo Gallery",
         description:
-          "Explore the library, learning spaces and facilities that support college life.",
-        href: "/campus-life",
+          "View photographs of campus and college activities.",
+        href: "/gallery",
         icon: GraduationCap,
       },
       {
@@ -144,10 +144,10 @@ const OPPORTUNITIES = {
         icon: BookOpenCheck,
       },
       {
-        title: "परिसर एवं सुविधाएँ",
+        title: "छायाचित्र दीर्घा",
         description:
-          "कॉलेज जीवन में सहायक पुस्तकालय, अध्ययन स्थलों और सुविधाओं को जानें।",
-        href: "/campus-life",
+          "परिसर और कॉलेज गतिविधियों के फोटो देखें।",
+        href: "/gallery",
         icon: GraduationCap,
       },
       {

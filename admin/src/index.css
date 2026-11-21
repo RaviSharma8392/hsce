@@ -3,16 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --admin-accent: #1e40af;
-  --admin-accent-dark: #1e3a8a;
-  --admin-accent-soft: #eff6ff;
-  --admin-border: #e2e8f0;
+  --admin-accent: #303783;
+  --admin-accent-dark: #242a68;
+  --admin-accent-soft: #eef0fb;
+  --admin-highlight: #fbdd23;
+  --admin-border: #e2e5ef;
   --admin-muted: #64748b;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: #0f172a;
-  background: #f8fafc;
+  background: #f5f6fb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -26,7 +27,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #f8fafc;
+  background: #f5f6fb;
 }
 
 * {
@@ -121,7 +122,9 @@ textarea {
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
-  background: #f8fafc;
+  background-color: #f5f6fb;
+  background-image: radial-gradient(rgba(48, 55, 131, 0.075) 1px, transparent 1px);
+  background-size: 26px 26px;
   color: #1e293b;
 }
 
@@ -261,14 +264,14 @@ textarea {
 }
 
 .admin-navigation a.active {
-  background: var(--admin-accent-soft);
-  color: var(--admin-accent);
+  background: var(--admin-accent);
+  color: #fff;
   font-weight: 600;
-  box-shadow: inset 3px 0 var(--admin-accent);
+  box-shadow: inset 3px 0 var(--admin-highlight);
 }
 
 .admin-navigation a.active svg {
-  color: var(--admin-accent);
+  color: var(--admin-highlight);
 }
 
 .admin-navigation a:focus-visible,
@@ -1330,4 +1333,228 @@ textarea {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+/* HSCE public-site palette and card language for the admin portal. */
+.admin-navigation-group h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-navigation-group h2::before {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--admin-highlight);
+  content: "";
+}
+
+.admin-navigation a {
+  border-radius: 4px;
+}
+
+.admin-topbar {
+  border-bottom-color: #e1e4ef;
+}
+
+.admin-content .admin-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--admin-accent);
+}
+
+.admin-content .admin-kicker::before {
+  width: 3px;
+  height: 15px;
+  border-radius: 2px;
+  background: var(--admin-highlight);
+  content: "";
+}
+
+.admin-content h1,
+.admin-content h2 {
+  color: #252d70;
+}
+
+.content-heading,
+.manager-form,
+.manager-list,
+.academic-admin-page .bg-white {
+  border-radius: 8px;
+  border-color: var(--admin-border);
+  box-shadow: 0 2px 8px rgba(32, 40, 100, 0.045);
+}
+
+.manager-modal {
+  border-top: 4px solid var(--admin-highlight);
+  border-radius: 10px;
+}
+
+.manager-form-heading,
+.manager-form-actions {
+  background: #f7f8fc;
+}
+
+.admin-content .primary-button,
+.admin-content button[class~="bg-blue-600"],
+.admin-content button[class~="bg-blue-700"],
+.admin-content a[class~="bg-blue-600"],
+.admin-content a[class~="bg-blue-700"],
+[class~="bg-blue-600"] {
+  background-color: var(--admin-accent) !important;
+}
+
+.admin-content .primary-button:hover,
+.admin-content button[class~="hover:bg-blue-700"]:hover,
+.admin-content a[class~="hover:bg-blue-700"]:hover,
+[class~="hover:bg-blue-700"]:hover {
+  background-color: var(--admin-accent-dark) !important;
+}
+
+.admin-content [class~="text-blue-600"],
+.admin-content [class~="text-blue-700"],
+.admin-content [class~="text-[#363991]"] {
+  color: var(--admin-accent) !important;
+}
+
+.admin-content [class~="bg-blue-50"] {
+  background-color: var(--admin-accent-soft);
+}
+
+.admin-content [class~="bg-indigo-50"],
+.admin-content [class~="bg-purple-50"],
+.admin-content [class~="bg-cyan-50"] {
+  background-color: var(--admin-accent-soft);
+}
+
+.admin-content [class~="text-indigo-600"],
+.admin-content [class~="text-indigo-700"],
+.admin-content [class~="text-purple-600"],
+.admin-content [class~="text-purple-700"],
+.admin-content [class~="text-cyan-600"],
+.admin-content [class~="text-cyan-700"] {
+  color: var(--admin-accent) !important;
+}
+
+.admin-content [class~="border-indigo-100"],
+.admin-content [class~="border-indigo-200"],
+.admin-content [class~="border-indigo-300"],
+.admin-content [class~="border-purple-100"],
+.admin-content [class~="border-purple-200"],
+.admin-content [class~="border-purple-300"],
+.admin-content [class~="border-cyan-100"],
+.admin-content [class~="border-cyan-200"],
+.admin-content [class~="border-cyan-300"] {
+  border-color: #d7dbf1;
+}
+
+.admin-content button[class~="bg-indigo-600"],
+.admin-content button[class~="bg-indigo-700"],
+.admin-content a[class~="bg-indigo-600"],
+.admin-content a[class~="bg-indigo-700"] {
+  background-color: var(--admin-accent) !important;
+}
+
+.admin-content button[class~="hover:bg-indigo-700"]:hover,
+.admin-content a[class~="hover:bg-indigo-700"]:hover {
+  background-color: var(--admin-accent-dark) !important;
+}
+
+.admin-content [class~="border-blue-200"] {
+  border-color: #d7dbf1;
+}
+
+.admin-content [class~="bg-yellow-400"],
+.admin-content [class~="bg-[#FBDD23]"] {
+  background-color: var(--admin-highlight) !important;
+  color: #151a44 !important;
+}
+
+.admin-content .dashboard-shortcut:hover {
+  background: #fffdf0;
+}
+
+.admin-dashboard > div:first-child > a {
+  border-color: #d7dbf1;
+  background-color: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+
+.admin-dashboard > div:first-child > a:nth-child(even) {
+  border-color: #e8cf35;
+  background-color: var(--admin-highlight);
+  color: #151a44;
+}
+
+.admin-dashboard > div:first-child > a:nth-child(even) svg {
+  color: #151a44;
+}
+
+.admin-dashboard > div:nth-child(2) > a > div > div {
+  background-color: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+
+.admin-dashboard > div:nth-child(2) > a:nth-child(2n) > div > div {
+  background-color: var(--admin-highlight);
+  color: #151a44;
+}
+
+.admin-dashboard h2 {
+  border-left: 3px solid var(--admin-highlight);
+  padding-left: 9px;
+}
+
+.login-blur-hero {
+  background: linear-gradient(135deg, #303783 0%, #242a68 100%);
+}
+
+.login-blur-card {
+  box-shadow:
+    0 4px 20px -2px rgba(48, 55, 131, 0.07),
+    0 2px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+[class~="bg-blue-600"] {
+  background-color: var(--admin-accent) !important;
+}
+
+[class~="hover:bg-blue-700"]:hover {
+  background-color: var(--admin-accent-dark) !important;
+}
+
+[class~="text-blue-600"],
+[class~="text-blue-700"] {
+  color: var(--admin-accent) !important;
+}
+
+[class~="bg-[#363991]"] {
+  background-color: var(--admin-accent) !important;
+}
+
+[class~="text-[#363991]"] {
+  color: var(--admin-accent) !important;
+}
+
+.admin-login-hero::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--admin-highlight);
+  content: "";
+}
+
+@media (max-width: 1023px) {
+  .admin-login-hero::after {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+  }
 }

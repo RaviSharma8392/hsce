@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
+import { adminAlert, adminConfirm } from "../components/common/AdminDialog";
 import { initializeApp, getApps } from "firebase/app";
 import {
   getAuth,
@@ -49,17 +50,21 @@ import {
 } from "../hooks/useAuthState";
 
 const PERMISSION_OPTIONS = [
-  { key: "notices", label: "Publish notices" },
+  { key: "notices", label: "Notices" },
   { key: "enquiries", label: "Admission requests" },
-  { key: "chatbotEnquiries", label: "Website chat questions" },
+  { key: "chatbotEnquiries", label: "Chat messages" },
   { key: "feedback", label: "Contact messages" },
   { key: "grievances", label: "Student concerns" },
-  { key: "tours", label: "Campus visits" },
-  { key: "gallery", label: "Campus photos" },
-  { key: "faculty", label: "Faculty and staff" },
-  { key: "syllabus", label: "Course documents" },
+  { key: "tours", label: "Campus tour requests" },
+  { key: "gallery", label: "Campus gallery" },
+  { key: "faculty", label: "Faculty & staff" },
+  { key: "syllabus", label: "B.Ed. syllabus" },
   { key: "homepagePopup", label: "Homepage announcement" },
 ];
+
+const ALL_STAFF_PERMISSIONS = Object.fromEntries(
+  PERMISSION_OPTIONS.map(({ key }) => [key, true]),
+);
 
 function formatTimestamp(ts) {
   if (!ts) return null;
@@ -113,11 +118,6 @@ export default function AdminUsersPage({ currentUser }) {
   const [isProvisionOpen, setIsProvisionOpen] = useState(false);
   const [provisionEmail, setProvisionEmail] = useState("");
   const [provisionName, setProvisionName] = useState("");
-  const [provisionRole, setProvisionRole] = useState("staff");
-  const [provisionPermissions, setProvisionPermissions] = useState({
-    notices: true,
-    enquiries: true,
-  });
   const [provisioning, setProvisioning] = useState(false);
   const [provisionError, setProvisionError] = useState("");
 
@@ -383,7 +383,10 @@ export default function AdminUsersPage({ currentUser }) {
   // 3. Suspend / Deactivate Access (Optimistic UI)
   const handleToggleActive = async (userRecord, newActiveState) => {
     if (userRecord.email?.toLowerCase() === SUPER_ADMIN_EMAIL) {
-      alert("The Super Administrator (Principal) account cannot be deactivated.");
+      await adminAlert(
+        "The Super Administrator (Principal) account cannot be deactivated.",
+        "Protected account",
+      );
       return;
     }
 
@@ -459,11 +462,11 @@ export default function AdminUsersPage({ currentUser }) {
   // 5. Delete Access Record (Optimistic UI)
   const handleDeleteUser = async (userRecord) => {
     if (userRecord.email?.toLowerCase() === SUPER_ADMIN_EMAIL) {
-      alert("The Super Administrator account cannot be deleted.");
+      await adminAlert("The Super Administrator account cannot be deleted.", "Protected account");
       return;
     }
 
-    if (!window.confirm(`Permanently remove administrative access record for ${userRecord.email}?`)) {
+    if (!(await adminConfirm(`Permanently remove administrative access record for ${userRecord.email}?`, "Remove staff access"))) {
       return;
     }
 
@@ -538,8 +541,8 @@ export default function AdminUsersPage({ currentUser }) {
         id: newUid,
         email: targetEmail,
         displayName: provisionName.trim() || targetEmail.split("@")[0],
-        role: provisionRole,
-        permissions: provisionPermissions,
+        role: "staff",
+        permissions: { ...ALL_STAFF_PERMISSIONS },
         active: true,
         verified: true, // Pre-verified by Principal Ravi Sharma!
         status: "active",
@@ -554,8 +557,8 @@ export default function AdminUsersPage({ currentUser }) {
       setEditStates((prev) => ({
         ...prev,
         [newUid]: {
-          role: provisionRole,
-          permissions: provisionPermissions,
+          role: "staff",
+          permissions: { ...ALL_STAFF_PERMISSIONS },
         },
       }));
 
@@ -572,7 +575,7 @@ export default function AdminUsersPage({ currentUser }) {
       await addDoc(collection(db, "securityLogs"), {
         email: targetEmail,
         outcome: "USER_PROVISIONED",
-        details: `Account provisioned by Principal Ravi Sharma with role ${provisionRole}. Verification email dispatched.`,
+        details: "Staff account provisioned by the principal. Verification email dispatched.",
         timestamp: serverTimestamp(),
         deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : "Admin Terminal",
       }).catch(() => { });
@@ -584,8 +587,6 @@ export default function AdminUsersPage({ currentUser }) {
       // Reset form and close modal
       setProvisionEmail("");
       setProvisionName("");
-      setProvisionRole("staff");
-      setProvisionPermissions({ notices: true, enquiries: true });
       setIsProvisionOpen(false);
     } catch (err) {
       console.error("Provisioning error:", err);
@@ -661,10 +662,10 @@ export default function AdminUsersPage({ currentUser }) {
             <Lock size={24} />
           </div>
           <h2 className="text-lg font-bold text-slate-900">
-            Access Restricted to Principal Authority
+            Only the principal can manage staff accounts
           </h2>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Administrative user governance and permission provisioning is strictly restricted to Principal Ravi Sharma ({SUPER_ADMIN_EMAIL}).
+            Sign in with the principal account to create staff logins and change their access.
           </p>
         </div>
       </div>
@@ -695,21 +696,21 @@ export default function AdminUsersPage({ currentUser }) {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
               <ShieldCheck className="text-[#363991]" size={26} />
-              <span>Admin Access &amp; Staff Governance</span>
+              <span>Staff Accounts</span>
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-[#363991] border border-indigo-100">
-              Principal Authority
+              Principal Only
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Authorized provisioning, verification &amp; permission governance managed by Principal <strong>Ravi Sharma ({SUPER_ADMIN_EMAIL})</strong>.
+            Create staff logins, approve access, and manage account permissions.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Policy: Admin-Only Provisioning</span>
+            <span>Only the principal can add staff</span>
           </div>
 
           <button
@@ -718,7 +719,7 @@ export default function AdminUsersPage({ currentUser }) {
             className="inline-flex items-center gap-1.5 rounded-lg bg-[#363991] hover:bg-[#2A3178] px-3.5 py-2 text-xs font-bold text-white shadow-xs transition cursor-pointer"
           >
             <UserPlus size={15} />
-            <span>Provision New User</span>
+            <span>Add staff account</span>
           </button>
         </div>
       </div>
@@ -735,7 +736,7 @@ export default function AdminUsersPage({ currentUser }) {
           <div className="text-xl sm:text-3xl font-black text-slate-900 mt-0.5 sm:mt-1">
             {users.length}
           </div>
-          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Registered administrators</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 sm:mt-1 truncate">Staff accounts</div>
         </div>
 
         <div
@@ -921,7 +922,7 @@ export default function AdminUsersPage({ currentUser }) {
                     : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
                   }`}
               >
-                Provisioned
+                Created
               </button>
             </div>
           </div>
@@ -1087,7 +1088,7 @@ export default function AdminUsersPage({ currentUser }) {
           {/* Lavender Header Bar (Matching Image 1 & FacultyPage line 1119) */}
           <div className="bg-[#E4E7F5] px-5 py-3 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-              Administration
+              Staff accounts
             </h3>
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/90 text-slate-700 border border-slate-300">
               {filteredUsers.length} Staff Members
@@ -1098,7 +1099,7 @@ export default function AdminUsersPage({ currentUser }) {
             <div className="flex flex-col items-center justify-center py-20 bg-white">
               <div className="h-8 w-8 rounded-full border-3 border-indigo-100 border-t-[#363991] animate-spin mb-3" />
               <p className="text-sm font-semibold text-slate-600">
-                Loading administrative access records...
+                Loading staff accounts...
               </p>
             </div>
           ) : filteredUsers.length === 0 ? (
@@ -1106,11 +1107,11 @@ export default function AdminUsersPage({ currentUser }) {
               <div className="p-3 bg-indigo-50 text-[#363991] rounded-lg mb-3">
                 <Users size={28} />
               </div>
-              <h3 className="text-base font-bold text-slate-800">No account records found</h3>
+              <h3 className="text-base font-bold text-slate-800">No staff accounts found</h3>
               <p className="text-xs sm:text-sm text-slate-500 max-w-sm mt-1">
                 {activeTab === "pending"
                   ? "All pending account registration requests have been reviewed."
-                  : "No administrative accounts match your search filter."}
+                  : "No staff accounts match your search."}
               </p>
               <button
                 type="button"
@@ -1118,7 +1119,7 @@ export default function AdminUsersPage({ currentUser }) {
                 className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#363991] hover:bg-[#2A3178] text-white text-xs font-bold transition shadow-xs cursor-pointer"
               >
                 <UserPlus size={14} />
-                <span>Provision an Account Now</span>
+                <span>Add a staff account</span>
               </button>
             </div>
           ) : (
@@ -1258,13 +1259,13 @@ export default function AdminUsersPage({ currentUser }) {
                               <div className="space-y-1">
                                 <span className="font-semibold text-slate-800 flex items-center gap-1.5 text-xs">
                                   <GraduationCap size={14} className="text-[#363991] shrink-0" />
-                                  <span>Campus Administration &amp; Institutional Governance</span>
+                                  <span>Principal account</span>
                                 </span>
                                 <p className="text-xs text-slate-500 leading-relaxed">
-                                  Full unhindered master access across all modules, notices, admissions, syllabus, faculty, and system security controls.
+                                  Full access to all admin features.
                                 </p>
                                 <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-[#363991] border border-indigo-100 mt-1">
-                                  Full Master Access (10/10)
+                                  Full access
                                 </span>
                               </div>
                             ) : (
@@ -1272,14 +1273,14 @@ export default function AdminUsersPage({ currentUser }) {
                                 <div className="flex items-center justify-between gap-2">
                                   <span className="font-semibold text-slate-800 flex items-center gap-1.5 text-xs">
                                     <GraduationCap size={14} className="text-[#363991] shrink-0" />
-                                    <span>Work Areas &amp; Tasks</span>
+                                    <span>Areas they can manage</span>
                                   </span>
                                   <button
                                     type="button"
                                     onClick={() => grantAllPermissions(u.id)}
                                     className="text-[11px] font-bold text-[#363991] hover:underline cursor-pointer"
                                   >
-                                    Choose all tasks
+                                    Select all areas
                                   </button>
                                 </div>
 
@@ -1475,7 +1476,7 @@ export default function AdminUsersPage({ currentUser }) {
                         </span>
                       </div>
 
-                      {/* Work Areas & Tasks */}
+                      {/* Staff access areas */}
                       <div className="pt-2 border-t border-slate-100">
                         {isSuperAdmin ? (
                           <p className="text-xs text-slate-500">
@@ -1484,13 +1485,13 @@ export default function AdminUsersPage({ currentUser }) {
                         ) : (
                           <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-slate-700">Work Areas & Tasks</span>
+                              <span className="text-xs font-bold text-slate-700">Areas they can manage</span>
                               <button
                                 type="button"
                                 onClick={() => grantAllPermissions(u.id)}
                                 className="text-[11px] font-bold text-[#363991] hover:underline cursor-pointer"
                               >
-                                Choose all
+                                Select all
                               </button>
                             </div>
                             <div className="grid grid-cols-2 gap-1.5">
@@ -1624,10 +1625,10 @@ export default function AdminUsersPage({ currentUser }) {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900 leading-tight">
-                    Provision New Portal User
+                    Create staff account
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Create administrative account with automatic verification link
+                    Enter the person's details. We'll email them a link to set their password.
                   </p>
                 </div>
               </div>
@@ -1653,7 +1654,7 @@ export default function AdminUsersPage({ currentUser }) {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Full Name / Designation <span className="text-rose-500">*</span>
+                  Name <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1667,7 +1668,7 @@ export default function AdminUsersPage({ currentUser }) {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Institutional Email Address <span className="text-rose-500">*</span>
+                  Email address <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -1679,57 +1680,14 @@ export default function AdminUsersPage({ currentUser }) {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Assigned Administrative Role
-                </label>
-                <select
-                  value={provisionRole}
-                  onChange={(e) => setProvisionRole(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-800 outline-none focus:border-[#363991] focus:ring-2 focus:ring-[#363991]/15 font-medium transition bg-white"
-                >
-                  <option value="staff">Staff</option>
-                  <option value="principal">Principal</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  Choose the work areas for this person
-                </label>
-                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
-                  {PERMISSION_OPTIONS.map((opt) => {
-                    const isChecked = Boolean(provisionPermissions[opt.key]);
-                    return (
-                      <label
-                        key={opt.key}
-                        className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer select-none transition ${isChecked
-                            ? "bg-[#1F242C] text-white border-[#1F242C] font-semibold"
-                            : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
-                          }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() =>
-                            setProvisionPermissions((prev) => ({
-                              ...prev,
-                              [opt.key]: !prev[opt.key],
-                            }))
-                          }
-                          className="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900 accent-black"
-                        />
-                        <span className="truncate">{opt.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-700">
+                Account role: <strong>Staff</strong>
               </div>
 
               <div className="rounded-lg bg-indigo-50/80 p-3 border border-indigo-100 text-xs text-[#363991] flex items-start gap-2.5">
                 <Mail size={16} className="text-[#363991] shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  <strong>Verification &amp; Password link:</strong> An official invitation will be sent to the user&apos;s email allowing them to securely set their password and verify access.
+                  <strong>Password setup link:</strong> We&apos;ll email the new staff member a link to set their password.
                 </p>
               </div>
 
@@ -1751,12 +1709,12 @@ export default function AdminUsersPage({ currentUser }) {
                   {provisioning ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Provisioning Account…</span>
+                      <span>Creating account…</span>
                     </>
                   ) : (
                     <>
                       <Send size={14} />
-                      <span>Provision &amp; Send Verification Email</span>
+                      <span>Create account &amp; send link</span>
                     </>
                   )}
                 </button>

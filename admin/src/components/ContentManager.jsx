@@ -16,9 +16,7 @@ import {
 } from "firebase/firestore";
 import {
   deleteObject,
-  getDownloadURL,
   ref,
-  uploadBytes,
 } from "firebase/storage";
 import { db, firebaseReady, storage } from "../config/firebase";
 import {
@@ -27,6 +25,7 @@ import {
 } from "../services/cloudinary";
 import AdobePdfIcon from "./common/AdobePdfIcon";
 import { Upload, ExternalLink, X, PlusCircle, Pencil, Check, RefreshCw } from "lucide-react";
+import { adminAlert, adminConfirm } from "./common/AdminDialog";
 
 const emptyValue = (field) => field.defaultValue ?? "";
 const PAGE_SIZE = 20;
@@ -298,34 +297,17 @@ export default function ContentManager({
         ) {
           throw new Error("Choose a supported file smaller than 15 MB.");
         }
-        let uploadedUrl = "";
-        let storagePath = "";
-        try {
-          const uploadRes = await uploadToCloudinary(selectedFile, {
-            folder: `hsce/${collectionName}`,
-            resourceType:
-              selectedFile.type === "application/pdf" ? "raw" : "image",
-          });
-          uploadedUrl = uploadRes?.secure_url || "";
-        } catch {
-          try {
-            const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-            storagePath = `public/${collectionName}/${recordRef.id}/${safeName}`;
-            const fileRef = ref(storage, storagePath);
-            await uploadBytes(fileRef, selectedFile, {
-              contentType: selectedFile.type,
-            });
-            uploadedUrl = await getDownloadURL(fileRef);
-          } catch (storageErr) {
-            console.error("Storage upload fallback error:", storageErr);
-          }
+        const uploadRes = await uploadToCloudinary(selectedFile, {
+          folder: `hsce/${collectionName}`,
+          resourceType:
+            selectedFile.type === "application/pdf" ? "raw" : "image",
+        });
+        if (!uploadRes.secure_url) {
+          throw new Error("Cloudinary did not return an uploaded file URL.");
         }
-        if (uploadedUrl) {
-          payload[fileField] = uploadedUrl;
-          if (fileField === "image" || collectionName === "faculty") {
-            payload.imageUrl = uploadedUrl;
-          }
-          if (storagePath) payload[`${fileField}Path`] = storagePath;
+        payload[fileField] = uploadRes.secure_url;
+        if (fileField === "image" || collectionName === "faculty") {
+          payload.imageUrl = uploadRes.secure_url;
         }
       }
 
@@ -415,9 +397,10 @@ export default function ContentManager({
       return;
     }
     if (
-      !window.confirm(
+      !(await adminConfirm(
         `Delete “${record.title || record.name || title}”? This cannot be undone.`,
-      )
+        "Delete record",
+      ))
     )
       return;
     setError("");
@@ -757,7 +740,7 @@ export default function ContentManager({
                                       }));
                                     }
                                   } catch (err) {
-                                    alert(
+                                    await adminAlert(
                                       "Image upload failed: " +
                                         (err.message || "Please check the file"),
                                     );

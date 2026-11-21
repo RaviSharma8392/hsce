@@ -44,7 +44,8 @@ export function UniversityAffiliationSection() {
       titleLead: "Guru Gobind Singh",
       titleAccent: "Indraprastha University (GGSIPU)",
       badge: "Govt. of NCT of Delhi • UGC 12B Recognized",
-      affiliationBadge: "HSCE Affiliation Code: 147 • Approved B.Ed. Intake: 100 Seats",
+      affiliationBadge:
+        "HSCE Affiliation Code: 147 • Approved B.Ed. Intake: 50 Seats",
 
       para1:
         "Guru Gobind Singh Indraprastha University (GGSIPU) is the premier affiliating state university established in 1998 by the Govt. of NCT of Delhi under the Guru Gobind Singh Indraprastha University Act. The university is duly recognized by the University Grants Commission (UGC) under section 12B. GGSIPU oversees admissions, academic curricula, syllabus standards, and examinations for HSCE.",
@@ -92,7 +93,8 @@ export function UniversityAffiliationSection() {
       titleLead: "गुरु गोबिंद सिंह",
       titleAccent: "इंद्रप्रस्थ विश्वविद्यालय (GGSIPU)",
       badge: "दिल्ली सरकार • यूजीसी 12B मान्यता प्राप्त",
-      affiliationBadge: "HSCE संबद्धता कोड: 147 • बी.एड. स्वीकृत वार्षिक सीटें: 100",
+      affiliationBadge:
+        "HSCE संबद्धता कोड: 147 • बी.एड. स्वीकृत वार्षिक सीटें: 100",
 
       para1:
         "गुरु गोबिंद सिंह इंद्रप्रस्थ विश्वविद्यालय (GGSIPU) दिल्ली राष्ट्रीय राजधानी क्षेत्र सरकार द्वारा 1998 में स्थापित प्रथम राज्य विश्वविद्यालय है। यह विश्वविद्यालय यूजीसी अधिनियम की धारा 12B के अंतर्गत विश्वविद्यालय अनुदान आयोग (UGC) द्वारा विधिवत मान्यता प्राप्त है। विश्वविद्यालय HSCE में प्रवेश, पाठ्यक्रम और परीक्षाओं का नियमन करता है।",
@@ -239,7 +241,9 @@ export function UniversityAffiliationSection() {
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                 <CheckCircle2 size={13} className="text-emerald-600" />
-                <span>{isHindi ? "सक्रिय एवं मान्यता प्राप्त" : "Active & Approved"}</span>
+                <span>
+                  {isHindi ? "सक्रिय एवं मान्यता प्राप्त" : "Active & Approved"}
+                </span>
               </span>
             </div>
           </div>
@@ -255,7 +259,9 @@ export function UniversityAffiliationSection() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="h-0.5 w-5 bg-[#FBDD23]" />
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#1A4298]">
-                    {isHindi ? "सांविधिक मार्गदर्शक सिद्धांत" : "Statutory Framework"}
+                    {isHindi
+                      ? "सांविधिक मार्गदर्शक सिद्धांत"
+                      : "Statutory Framework"}
                   </span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
@@ -276,7 +282,6 @@ export function UniversityAffiliationSection() {
                 <div
                   key={pillar.num}
                   className="group relative overflow-hidden rounded-xl bg-[#16429A] hover:bg-[#133A8A] text-white p-4 sm:p-5 shadow-md transition-all duration-300 border border-white/10 flex flex-col sm:flex-row items-stretch gap-4 sm:gap-5">
-                  
                   {/* Left Side: Graphic Plaque (Replaces photo with collegiate design - zero photos, clean geometry) */}
                   <div className="shrink-0 sm:w-28 md:w-32 self-stretch rounded-lg bg-[#0E2864]/90 border border-white/15 flex flex-col items-center justify-center p-3 text-center shadow-inner min-h-[85px] sm:min-h-0">
                     <span className="text-2xl sm:text-3xl font-black text-[#FBDD23] tracking-tight leading-none">
@@ -319,7 +324,9 @@ export function UniversityAffiliationSection() {
                     <div className="mt-3 pt-2.5 flex items-center justify-between border-t border-white/15 text-[11px]">
                       <span className="text-[11px] font-medium text-blue-200 flex items-center gap-1.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#FBDD23]" />
-                        {isHindi ? "संस्थागत मार्गदर्शक सिद्धांत" : "Statutory Directive"}
+                        {isHindi
+                          ? "संस्थागत मार्गदर्शक सिद्धांत"
+                          : "Statutory Directive"}
                       </span>
                       <span className="inline-flex items-center rounded-sm bg-[#FBDD23] px-2.5 py-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-900 shadow-2xs">
                         {pillar.badgeLabel}

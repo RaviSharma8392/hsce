@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, ExternalLink } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db, firebaseReady } from "../../config/firebase";
 import { fetchPublishedRecords } from "../../hooks/usePublishedRecords";
 import { cloudinaryImageUrl } from "../../data/imagesData";
@@ -35,66 +35,45 @@ export default function HomepagePopup() {
   const [activeDocPopup, setActiveDocPopup] = useState(null);
   const [visibleVersion, setVisibleVersion] = useState("");
 
-  // Read active popup with 5-minute session caching to save Firestore reads
+  // Subscribe to the active popup so admin changes appear immediately.
   useEffect(() => {
     if (!firebaseReady) return undefined;
 
     let active = true;
-    const cacheKey = "hsce_cached_popup_active";
-    try {
-      const raw = sessionStorage.getItem(cacheKey);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Date.now() - parsed.timestamp < 5 * 60 * 1000) {
-          setActiveDocPopup(parsed.data);
-          return undefined;
+    const unsubscribe = onSnapshot(
+      doc(db, "homepagePopups", "active"),
+      { includeMetadataChanges: true },
+      async (snapshot) => {
+        if (!active) return;
+        if (snapshot.metadata.fromCache) {
+          setActiveDocPopup(null);
+          return;
         }
-      }
-    } catch {}
 
-    const loadPopup = async () => {
-      try {
-        const docSnap = await getDoc(doc(db, "homepagePopups", "active"));
-        if (docSnap.exists()) {
-          const activePopup = { id: docSnap.id, ...docSnap.data() };
-          if (
-            activePopup.isPublished !== false &&
-            (activePopup.image || activePopup.imageUrl)
-          ) {
-            if (active) {
-              setActiveDocPopup(activePopup);
-              try {
-                sessionStorage.setItem(
-                  cacheKey,
-                  JSON.stringify({ data: activePopup, timestamp: Date.now() })
-                );
-              } catch {}
-            }
-            return;
-          }
-        }
-      } catch (error) {
-        console.warn("Could not load homepage popup doc:", error);
-      }
-
-      const [legacyPopup] = await fetchPublishedRecords("homepagePopups", {
-        limitCount: 1,
-      });
-      if (active) {
-        setActiveDocPopup(legacyPopup || null);
-        try {
-          sessionStorage.setItem(
-            cacheKey,
-            JSON.stringify({ data: legacyPopup || null, timestamp: Date.now() })
+        if (snapshot.exists()) {
+          const popup = { id: snapshot.id, ...snapshot.data() };
+          setActiveDocPopup(
+            popup.isPublished === true && (popup.image || popup.imageUrl)
+              ? popup
+              : null,
           );
-        } catch {}
-      }
-    };
+          return;
+        }
 
-    loadPopup();
+        const [legacyPopup] = await fetchPublishedRecords("homepagePopups", {
+          limitCount: 1,
+        });
+        if (active) setActiveDocPopup(legacyPopup || null);
+      },
+      (error) => {
+        console.error("Could not subscribe to homepage popup updates:", error);
+        if (active) setActiveDocPopup(null);
+      },
+    );
 
     return () => {
       active = false;
+      unsubscribe();
     };
   }, []);
 

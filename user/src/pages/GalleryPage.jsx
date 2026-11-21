@@ -14,7 +14,7 @@ import { CollegiatePageLayout } from "../components/common/CollegiatePageLayout"
 import { getCampusLifeSidebarConfig } from "../data/navigationConfig";
 import { galleryItems as codeFileGallery } from "../data/galleryData";
 import { cloudinaryImageUrl } from "../data/imagesData";
-import { fetchBackendGalleryImages } from "../services/galleryService";
+import { subscribeToPublishedGallery } from "../services/galleryService";
 import { useLanguage } from "../context/LanguageContext";
 
 function formatDate(dateStr) {
@@ -34,10 +34,10 @@ export default function GalleryPage() {
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [backendImages, setBackendImages] = useState([]);
-  const [isLoadingBackend, setIsLoadingBackend] = useState(false);
-  const [hasLoadedBackend, setHasLoadedBackend] = useState(false);
+  const [isLoadingBackend, setIsLoadingBackend] = useState(true);
   const [backendError, setBackendError] = useState("");
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const localImages = useMemo(
     () =>
@@ -49,39 +49,51 @@ export default function GalleryPage() {
     [],
   );
 
-  const loadBackendImages = useCallback(async () => {
-    if (isLoadingBackend || hasLoadedBackend) return;
+  const retryBackendLoad = useCallback(() => {
     setIsLoadingBackend(true);
     setBackendError("");
-
-    try {
-      const fetched = await fetchBackendGalleryImages({ limitCount: 40 });
-      const localUrls = new Set(
-        localImages.map((item) => item.image).filter(Boolean),
-      );
-      const uniqueImages = fetched
-        .filter((item) => item.image && !localUrls.has(item.image))
-        .map((item, index) => ({
-          ...item,
-          id: item.id ?? `backend_${index}`,
-          isFromCodeFile: false,
-        }));
-      setBackendImages(uniqueImages);
-      setHasLoadedBackend(true);
-    } catch {
-      setBackendError(
-        isHindi
-          ? "अतिरिक्त छायाचित्र लोड नहीं हो पाए।"
-          : "Unable to load additional photos.",
-      );
-    } finally {
-      setIsLoadingBackend(false);
-    }
-  }, [isLoadingBackend, hasLoadedBackend, localImages, isHindi]);
+    setBackendImages([]);
+    setRetryCount((count) => count + 1);
+  }, []);
 
   useEffect(() => {
-    loadBackendImages();
-  }, [loadBackendImages]);
+    let active = true;
+
+    const unsubscribe = subscribeToPublishedGallery(
+      (fetched) => {
+        if (!active) return;
+        const localUrls = new Set(
+          localImages.map((item) => item.image).filter(Boolean),
+        );
+        setBackendImages(
+          fetched
+            .filter((item) => item.image && !localUrls.has(item.image))
+            .map((item, index) => ({
+              ...item,
+              id: item.id ?? `backend_${index}`,
+              isFromCodeFile: false,
+            })),
+        );
+        setIsLoadingBackend(false);
+      },
+      (error) => {
+        console.error("Unable to load published gallery images:", error);
+        if (!active) return;
+        setBackendError(
+          isHindi
+            ? "अतिरिक्त छायाचित्र लोड नहीं हो पाए।"
+            : "Unable to load additional photos.",
+        );
+        setIsLoadingBackend(false);
+      },
+      { limitCount: 40 },
+    );
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [localImages, isHindi, retryCount]);
 
   const categories = useMemo(() => {
     const uniqueCategories = [
@@ -156,7 +168,7 @@ export default function GalleryPage() {
             : "Photographs of campus life, workshops, sports meets, laboratory sessions, and celebratory milestones."
         }
         breadcrumbs={[
-          { label: isHindi ? "सुविधाएं एवं परिसर" : "Facilities", href: "/campus-life" },
+          { label: isHindi ? "गैलरी" : "Gallery", href: "/gallery" },
           { label: isHindi ? "गैलरी" : "Gallery" },
         ]}
         sidebarTitle={sidebarConfig.title}
@@ -232,13 +244,17 @@ export default function GalleryPage() {
                     </div>
 
                     <div className="p-3.5 bg-white">
-                      <h4 className="font-serif font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#2E3A8C] line-clamp-1">
-                        {item.title || (isHindi ? "परिसर का छायाचित्र" : "Campus Photo")}
-                      </h4>
-                      <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400">
-                        <Calendar size={12} />
-                        <span>{formatDate(item.date)}</span>
-                      </div>
+                      {item.title && (
+                        <h4 className="font-serif font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#2E3A8C] line-clamp-1">
+                          {item.title}
+                        </h4>
+                      )}
+                      {item.date && (
+                        <div className={`${item.title ? "mt-2 " : ""}flex items-center gap-1.5 text-[11px] text-slate-400`}>
+                          <Calendar size={12} />
+                          <span>{formatDate(item.date)}</span>
+                        </div>
+                      )}
                     </div>
                   </button>
                 ))}
@@ -272,7 +288,7 @@ export default function GalleryPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={loadBackendImages}
+                  onClick={retryBackendLoad}
                   className="rounded bg-[#2E3A8C] px-3 py-1 font-bold text-white hover:bg-[#232d70] transition">
                   <RefreshCw size={13} className="inline mr-1" />
                   Retry
@@ -294,9 +310,15 @@ export default function GalleryPage() {
             onClick={(e) => e.stopPropagation()}
             className="relative flex max-h-[95vh] w-full max-w-4xl flex-col overflow-hidden rounded bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-              <h3 className="truncate font-serif font-bold text-sm text-slate-900">
-                {activeImage.title}
-              </h3>
+              {activeImage.title ? (
+                <h3 className="truncate font-serif font-bold text-sm text-slate-900">
+                  {activeImage.title}
+                </h3>
+              ) : (
+                <span className="text-xs text-slate-500">
+                  {isHindi ? "छायाचित्र" : "Photo"}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={closeLightbox}
